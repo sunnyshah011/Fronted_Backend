@@ -1,8 +1,11 @@
-import React from 'react'
+import {assets} from '../assets/admin_assets/assets'
 
 const Navbar = () => {
   return (
-    <div>Navbar</div>
+    <div>
+      <img src={assets.logo} alt="" />
+      <button> Logout </button>
+    </div>
   )
 }
 
