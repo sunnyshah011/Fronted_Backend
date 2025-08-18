@@ -5,24 +5,34 @@ import Add from "./pages/Add";
 import List from "./pages/List";
 import Order from "./pages/Order";
 import Login from "./components/Login";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+
+export const BackendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const App = () => {
+  const [token, settoken] = useState(
+    localStorage.getItem("token") ? localStorage.getItem("token") : ""
+  );
 
-  const [token,settoken] = useState("")
+  useEffect(() => {
+    localStorage.setItem("token", token);
+  }, [token]);
 
   return (
     <div className="bg-gray-50 min-h-screen p-2">
+      <ToastContainer />
       {token === "" ? (
-        <Login />
+        <Login settoken={settoken} />
       ) : (
         <>
-          <Navbar />
+          <Navbar settoken={settoken} />
           <hr />
           <div className="flex w-full">
             <Sidebar />
             <div className="w-[70%] mx-auto ml-[max(5vw,25px)] my-8 text-gray-600 text-base">
               <Routes>
+                <Route path="/" element={<Add />} />
                 <Route path="/add" element={<Add />} />
                 <Route path="/list" element={<List />} />
                 <Route path="/order" element={<Order />} />
