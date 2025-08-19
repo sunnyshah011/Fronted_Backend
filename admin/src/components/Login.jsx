@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { BackendUrl } from "../App";
+import { toast } from "react-toastify";
 
 const Login = ({ settoken }) => {
   const [email, setemail] = useState("");
@@ -16,7 +17,9 @@ const Login = ({ settoken }) => {
 
       if (response.data.success) {
         settoken(response.data.token);
+        toast.success("Login Successfully");
       } else {
+        console.log("please enter correct password and gmail");
         toast.error(response.data.message);
       }
     } catch (error) {
