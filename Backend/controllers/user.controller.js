@@ -25,7 +25,7 @@ const loginUser = async (req, res) => {
     } else {
       res.json({ success: false, message: "Invalid Credential" });
     }
-  } catch (error) {}
+} catch (error) { }
 };
 
 //Route for use register
