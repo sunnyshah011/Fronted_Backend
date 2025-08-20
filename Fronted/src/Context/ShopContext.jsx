@@ -1,15 +1,17 @@
 import { createContext, useState, useEffect } from "react";
-import { products } from "../assets/frontend_assets/assets";
-import { ToastContainer, toast } from 'react-toastify';
-import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const ShopContext = createContext();
 
 const ShopContextProvider = (props) => {
   const currency = "Rs.";
   const delivery_fee = 200;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [cartitem, setcartitem] = useState({});
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
 
   const addtocart = async (itemId, size) => {
     if (!size) {
@@ -65,8 +67,6 @@ const ShopContextProvider = (props) => {
     return totalcount;
   };
 
-
-
   const updateQuantity = (itemId, size, quantity) => {
     let cartdata = structuredClone(cartitem);
 
@@ -97,28 +97,28 @@ const ShopContextProvider = (props) => {
       cartdata[itemId][size] = quantity;
       setcartitem(cartdata);
 
-       // Show loading toast first
-    const toastId = toast.loading("...", {
-      position: "top-center",
-      className: "custom-toast-center",
-      bodyClassName: "text-sm",
-      closeOnClick: false,
-      draggable: false,
-      closeButton: false,
-    });
-
-    // After 1.5 seconds, update toast to success
-    setTimeout(() => {
-      toast.update(toastId, {
-        render: "",
-        type: "success",
-        isLoading: false,
-        autoClose: 500,
-        closeOnClick: true,
-        draggable: true,
-        closeButton: true,
+      // Show loading toast first
+      const toastId = toast.loading("...", {
+        position: "top-center",
+        className: "custom-toast-center",
+        bodyClassName: "text-sm",
+        closeOnClick: false,
+        draggable: false,
+        closeButton: false,
       });
-    }, 500);
+
+      // After 1.5 seconds, update toast to success
+      setTimeout(() => {
+        toast.update(toastId, {
+          render: "",
+          type: "success",
+          isLoading: false,
+          autoClose: 500,
+          closeOnClick: true,
+          draggable: true,
+          closeButton: true,
+        });
+      }, 500);
     }
   };
 
@@ -136,25 +136,41 @@ const ShopContextProvider = (props) => {
   //   });
   // }
 
-
-
-
   const calculatetotalamount = () => {
     let totalamount = 0;
     for (const items in cartitem) {
-      const cartinfo = products.find((product) => product._id === items)
+      const cartinfo = products.find((product) => product._id === items);
       for (const item in cartitem[items]) {
         try {
           if (cartitem[items][item] > 0) {
-            totalamount += cartinfo.price * cartitem[items][item]
+            totalamount += cartinfo.price * cartitem[items][item];
           }
         } catch (error) {
           console.log(error);
         }
       }
     }
-    return totalamount
-  }
+    return totalamount;
+  };
+
+  const getProductsData = async () => {
+    try {
+      const response = await axios.get(backendUrl + '/api/product/list');
+      if (response.data.success) {
+        setProducts(response.data.products)
+      }else{
+        toast.error(response.data.message)
+      }
+      
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message)
+    }
+  };
+
+  useEffect(() => {
+    getProductsData();
+  }, []);
 
   const value = {
     products,
@@ -165,7 +181,8 @@ const ShopContextProvider = (props) => {
     getcartcount,
     updateQuantity,
     calculatetotalamount,
-    navigate
+    navigate,
+    backendUrl,
   };
 
   return (
