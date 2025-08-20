@@ -31,6 +31,16 @@ const Navbar = () => {
     setcartitem({});
   };
 
+  const order = () =>{
+    navigate('/order')
+    setShow(false)
+  }
+
+  const myprofile = () =>{
+    navigate('/profile')
+    setShow(false)
+  }
+
   const openMenu = () => setIsOpen(true);
   const closeMenu = () => setIsOpen(false);
 
@@ -142,11 +152,11 @@ const Navbar = () => {
               <div className="flex flex-col gap-4 w-45 py-4 pl-6 bg-white border border-gray-300 rounded-[12px] text-gray-700">
                 {token ? (
                   <div className="flex flex-col gap-4">
-                    <p className="cursor-pointer hover:text-black flex gap-3">
+                    <p onClick={myprofile} className="cursor-pointer hover:text-black flex gap-3">
                       <UserIcon className="h-6 w-6 text-gray-700" />
                       <span className="text-[15px]">My Profile</span>
                     </p>
-                    <p className="cursor-pointer hover:text-black flex gap-3">
+                    <p onClick={order} className="cursor-pointer hover:text-black flex gap-3">
                       <ClipboardDocumentListIcon className="h-6 w-6 text-gray-700" />
                       <span className="text-[15px]">My Orders</span>
                     </p>

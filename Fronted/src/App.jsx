@@ -12,6 +12,7 @@ import Footer from './component/Footer'
 import { ToastContainer, toast } from 'react-toastify';
 import NotFound from "./component/NotFound";
 import Register from "./pages/Register";
+import Profile from "./pages/Profile";
 
 const App = () => {
   return (
@@ -37,6 +38,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/collection" element={<Collection />} />
           <Route path="/order" element={<Order />} />
