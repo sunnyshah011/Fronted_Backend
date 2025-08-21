@@ -21,7 +21,9 @@ const Login = () => {
       if (response.data.success) {
         setToken(response.data.token);
         localStorage.setItem("token", response.data.token);
+        console.log("Logged in user:", response.data); // ✅ Will work!
         toast.success("Login Successfully");
+        log
       } else {
         toast.error(response.data.message);
       }
@@ -30,12 +32,11 @@ const Login = () => {
     }
   };
 
-useEffect(() => {
-  if (token) {
-    navigate('/')
-  }
-}, [token])
-
+  useEffect(() => {
+    if (token) {
+      navigate("/");
+    }
+  }, [token]);
 
   return (
     <form

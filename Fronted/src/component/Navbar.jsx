@@ -23,23 +23,23 @@ const Navbar = () => {
 
   const logout = () => {
     navigate("/");
-    window.scrollTo(0, 0)
-    setShow(false)
-    toast.success("Logout Successfully!!")
+    window.scrollTo(0, 0);
+    setShow(false);
+    toast.success("Logout Successfully!!");
     localStorage.removeItem("token");
     setToken("");
     setcartitem({});
   };
 
-  const order = () =>{
-    navigate('/order')
-    setShow(false)
-  }
+  const order = () => {
+    navigate("/order");
+    setShow(false);
+  };
 
-  const myprofile = () =>{
-    navigate('/profile')
-    setShow(false)
-  }
+  const myprofile = () => {
+    navigate("/profile");
+    setShow(false);
+  };
 
   const openMenu = () => setIsOpen(true);
   const closeMenu = () => setIsOpen(false);
@@ -73,7 +73,7 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 w-full flex items-center justify-between border-gray-100 border-b-1 bg-white py-4 px-4 min-[500px]:px-5 sm:px-[4vw] md:px-[5vw] lg:px-[8vw] font-medium z-50 min-[200px]:gap-5">
       {/* home icon for navigation */}
-      <div>
+      <div className="flex gap-5 items-center"> 
         <Link to="/">
           <img
             src={assets.home}
@@ -81,9 +81,9 @@ const Navbar = () => {
             alt="H"
           />
         </Link>
-      </div>
-      {/* Mobile menu icon */}
-      <div>
+
+        {/* Mobile menu icon */}
+      <div className="justify-end">
         <img
           onClick={openMenu}
           src={assets.menu_icon}
@@ -91,9 +91,11 @@ const Navbar = () => {
           alt="Menu"
         />
       </div>
+      </div>
+      
 
       {/* Search bar */}
-      <div className="flex-1">
+      <div className="flex-1 hidden min-[850px]:block">
         <input
           type="text"
           value={search}
@@ -126,41 +128,54 @@ const Navbar = () => {
       </nav>
 
       {/* Cart and User icons */}
-      <div className="flex items-center gap-3 justify-center">
-        <div className="flex gap-5 min-[350px]:gap-8">
+      <div className="flex items-center justify-center">
+        <div className="flex items-center gap-2 min-[350px]:gap-2">
           <Link to="/cart" className="relative flex-shrink-0">
             <img
               src={assets.cart_icon}
               className=" w-6 flex-shrink-0"
               alt="Cart"
             />
-            <span className="absolute right-[-4px] bottom-[-1px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
+            <span className="absolute right-[-4px] bottom-[-6px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
               {getcartcount()}
             </span>
           </Link>
 
-          <div className="relative flex-shrink-0" ref={userRef}>
-            <button onClick={() => setShow((pre) => !pre)}>
+          <div className="relative flex-shrink-0 ml-5 sm:ml-8" ref={userRef}>
+            <button
+              className="flex gap-2"
+              onClick={() => setShow((pre) => !pre)}
+            >
               <img
                 src={assets.profile_icon}
                 className="w-6 cursor-pointer flex-shrink-0"
                 alt="Profile"
               />
             </button>
-
-            <div className={`absolute right-0 pt-4 ${show ? "block" : "hidden"}`}>
+            <div
+              className={`absolute left-[-110px] pt-4 ${show ? "block" : "hidden"}`}
+            >
               <div className="flex flex-col gap-4 w-45 py-4 pl-6 bg-white border border-gray-300 rounded-[12px] text-gray-700">
                 {token ? (
                   <div className="flex flex-col gap-4">
-                    <p onClick={myprofile} className="cursor-pointer hover:text-black flex gap-3">
+                    <p
+                      onClick={myprofile}
+                      className="cursor-pointer hover:text-black flex gap-3"
+                    >
                       <UserIcon className="h-6 w-6 text-gray-700" />
                       <span className="text-[15px]">My Profile</span>
                     </p>
-                    <p onClick={order} className="cursor-pointer hover:text-black flex gap-3">
+                    <p
+                      onClick={order}
+                      className="cursor-pointer hover:text-black flex gap-3"
+                    >
                       <ClipboardDocumentListIcon className="h-6 w-6 text-gray-700" />
                       <span className="text-[15px]">My Orders</span>
                     </p>
-                    <p onClick={logout} className="cursor-pointer hover:text-black flex gap-3">
+                    <p
+                      onClick={logout}
+                      className="cursor-pointer hover:text-black flex gap-3"
+                    >
                       <i className="ri-logout-box-r-line text-xl"></i>
                       <span className="text-[15px]">Logout</span>
                     </p>
@@ -183,8 +198,11 @@ const Navbar = () => {
                 )}
               </div>
             </div>
+          </div>
 
-
+          <div className="text-sm">
+            <p></p>
+            <p></p>
           </div>
         </div>
       </div>

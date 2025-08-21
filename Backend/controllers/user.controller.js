@@ -19,9 +19,23 @@ const loginUser = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
 
+    // res.status(200).json({
+    //   success: true,
+    //   token,
+    // });
+
     if (isMatch) {
       const token = createToken(user._id);
-      res.json({ success: true, token });
+
+      // ✅ Include user details in the response
+      res.status(200).json({
+        success: true,
+        token,
+        user: {
+          name: user.name,
+        },
+      });
+      
     } else {
       res.json({ success: false, message: "Invalid Credential" });
     }
@@ -67,7 +81,13 @@ const registerUser = async (req, res) => {
 
     const token = createToken(user._id);
 
-    res.json({ success: true, token });
+    res.json({
+      success: true,
+      token,
+      user: {
+        name: user.name,
+      },
+    });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });

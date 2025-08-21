@@ -12,7 +12,7 @@ const Register = () => {
   const [email, setEmail] = useState("");
 
   const onsubmithandler = async (e) => {
-    event.preventDefault();
+    e.preventDefault();
     try {
       const response = await axios.post(backendUrl + "/api/user/register", {
         name,
@@ -20,9 +20,11 @@ const Register = () => {
         password,
       });
       if (response.data.success) {
+        navigate('/')
         toast.success("Account Crated Successfully")
         setToken(response.data.token);
         localStorage.setItem("token", response.data.token);
+        console.log(response.data)
       } else {
         toast.error(response.data.message);
       }
@@ -77,8 +79,7 @@ const Register = () => {
       </div>
 
       <button className="bg-black px-8 py-2 mt-8 text-white font-light">
-        {" "}
-        Sign Up{" "}
+        Sign Up
       </button>
     </form>
   );
