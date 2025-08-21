@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 // import { faCoffee } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = () => {
-  const { setToken, token, getcartcount, setcartitem, navigate } =
+  const { user, setUser, setToken, token, getcartcount, setcartitem, navigate } =
     useContext(ShopContext);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -25,9 +25,19 @@ const Navbar = () => {
     navigate("/");
     window.scrollTo(0, 0);
     setShow(false);
-    toast.success("Logout Successfully!!");
+    // Toast for logout
+    toast.info("You are Logout", {
+      position: "top-center",
+      className: "custom-toast-center",
+      bodyClassName: "text-sm",
+      autoClose: 1000,
+      closeOnClick: true,
+      pauseOnHover: true,
+    });
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setToken("");
+    setUser("")
     setcartitem({});
   };
 
@@ -73,7 +83,7 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 w-full flex items-center justify-between border-gray-100 border-b-1 bg-white py-4 px-4 min-[500px]:px-5 sm:px-[4vw] md:px-[5vw] lg:px-[8vw] font-medium z-50 min-[200px]:gap-5">
       {/* home icon for navigation */}
-      <div className="flex gap-5 items-center"> 
+      <div className="flex gap-5 items-center">
         <Link to="/">
           <img
             src={assets.home}
@@ -83,16 +93,16 @@ const Navbar = () => {
         </Link>
 
         {/* Mobile menu icon */}
-      <div className="justify-end">
-        <img
-          onClick={openMenu}
-          src={assets.menu_icon}
-          className="w-5 cursor-pointer min-[850px]:hidden flex-shrink-0"
-          alt="Menu"
-        />
+        <div className="justify-end">
+          <img
+            onClick={openMenu}
+            src={assets.menu_icon}
+            className="w-5 cursor-pointer min-[850px]:hidden flex-shrink-0"
+            alt="Menu"
+          />
+        </div>
       </div>
-      </div>
-      
+
 
       {/* Search bar */}
       <div className="flex-1 hidden min-[850px]:block">
@@ -201,8 +211,8 @@ const Navbar = () => {
           </div>
 
           <div className="text-sm">
-            <p></p>
-            <p></p>
+            <div> {user ? <p>HI,</p> : ""}</div>
+            <p> {user} </p>
           </div>
         </div>
       </div>
@@ -217,9 +227,8 @@ const Navbar = () => {
 
       {/* Mobile sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white z-50 transform ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out`}
+        className={`fixed top-0 left-0 h-full w-64 bg-white z-50 transform ${isOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out`}
       >
         <button className="p-4 text-xl" onClick={closeMenu}>
           &larr; Back

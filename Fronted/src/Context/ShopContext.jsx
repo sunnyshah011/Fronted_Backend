@@ -13,7 +13,7 @@ const ShopContextProvider = (props) => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [token, setToken] = useState("");
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState("")
 
   const addtocart = async (itemId, size) => {
     if (!size) {
@@ -27,9 +27,7 @@ const ShopContextProvider = (props) => {
       });
       return;
     }
-    // if (itemId && size) {
-    //   toast.info("Product Added To Cart");
-    // }
+
     let cartdata = structuredClone(cartitem);
     if (cartdata[itemId]) {
       if (cartdata[itemId][size]) {
@@ -42,7 +40,7 @@ const ShopContextProvider = (props) => {
       cartdata[itemId][size] = 1;
     }
     setcartitem(cartdata);
-    // console.log(cartitem);
+
     toast.success("Product added to cart!", {
       position: "top-center",
       className: "custom-toast-center",
@@ -51,6 +49,18 @@ const ShopContextProvider = (props) => {
       closeOnClick: true,
       pauseOnHover: true,
     });
+
+    if (token) {
+      try {
+        await axios.post(backendUrl + '/api/cart/add',
+          { itemId, size },
+          { headers: { token } })
+          
+      } catch (error) {
+        console.log(error);
+        toast.error(error.message)
+      }
+    }
   };
 
   const getcartcount = () => {
@@ -124,20 +134,6 @@ const ShopContextProvider = (props) => {
     }
   };
 
-  // const updateQuantity = (itemId, size, quantity) => {
-  //   let cartdata = structuredClone(cartitem)
-  //   cartdata[itemId][size] = quantity;
-  //   setcartitem(cartdata)
-  //   toast.info("Item removed from cart", {
-  //     position: "top-center",
-  //     className: "custom-toast-center",
-  //     bodyClassName: "text-sm",
-  //     autoClose: 2000,
-  //     closeOnClick: true,
-  //     pauseOnHover: true,
-  //   });
-  // }
-
   const calculatetotalamount = () => {
     let totalamount = 0;
     for (const items in cartitem) {
@@ -179,11 +175,13 @@ const ShopContextProvider = (props) => {
     }
   }, []);
 
-  //   useEffect(() => {
-  //   if (!token && localStorage.getItem("token")) {
-  //     setToken(localStorage.getItem("user"));
-  //   }
-  // }, []);
+
+  useEffect(() => {
+    if (!user && localStorage.getItem("user")) {
+      setUser(localStorage.getItem("user"));
+    }
+  }, []);
+
 
   const value = {
     products,
@@ -199,6 +197,8 @@ const ShopContextProvider = (props) => {
     backendUrl,
     setToken,
     token,
+    user,
+    setUser
   };
 
   return (

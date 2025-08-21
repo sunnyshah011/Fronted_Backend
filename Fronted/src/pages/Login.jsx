@@ -5,7 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const Login = () => {
-  const { token, setToken, navigate, backendUrl } = useContext(ShopContext);
+  const { setUser, token, setToken, navigate, backendUrl } = useContext(ShopContext);
 
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -21,9 +21,18 @@ const Login = () => {
       if (response.data.success) {
         setToken(response.data.token);
         localStorage.setItem("token", response.data.token);
-        console.log("Logged in user:", response.data); // ✅ Will work!
-        toast.success("Login Successfully");
-        log
+        
+        setUser(response.data.user.name)
+        localStorage.setItem("user", response.data.user.name);
+        // console.log("Logged in user:", response.data); // ✅ Will work!
+        toast.info("You are Login", {
+          position: "top-center",
+          className: "custom-toast-center",
+          bodyClassName: "text-sm",
+          autoClose: 1000,
+          closeOnClick: true,
+          pauseOnHover: true,
+        });
       } else {
         toast.error(response.data.message);
       }

@@ -5,7 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const Register = () => {
-  const { token, setToken, navigate, backendUrl } = useContext(ShopContext);
+  const {setUser, setToken, navigate, backendUrl } = useContext(ShopContext);
 
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -20,17 +20,30 @@ const Register = () => {
         password,
       });
       if (response.data.success) {
+
         navigate('/')
-        toast.success("Account Crated Successfully")
+
+         toast.info("Account Crated Successfully", {
+          position: "top-center",
+          className: "custom-toast-center",
+          bodyClassName: "text-sm",
+          autoClose: 1000,
+          closeOnClick: true,
+          pauseOnHover: true,
+        });
+
         setToken(response.data.token);
         localStorage.setItem("token", response.data.token);
-        console.log(response.data)
+
+        setUser(response.data.user.name)
+        localStorage.setItem("user", response.data.user.name);
+
       } else {
         toast.error(response.data.message);
       }
     } catch (error) {
-        console.log(error);
-        toast.error(error.message)
+      console.log(error);
+      toast.error(error.message)
     }
   };
 
