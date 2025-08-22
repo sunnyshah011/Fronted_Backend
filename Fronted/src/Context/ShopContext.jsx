@@ -223,6 +223,12 @@ const ShopContextProvider = (props) => {
     }
   }, []);
 
+   useEffect(() => {
+    if (!user && localStorage.getItem("token")) {
+      
+    }
+  }, []);
+
   const value = {
     products,
     currency,

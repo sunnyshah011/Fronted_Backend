@@ -25,7 +25,7 @@ const Login = () => {
         setUser(response.data.user.name)
         localStorage.setItem("user", response.data.user.name);
         // console.log("Logged in user:", response.data); // ✅ Will work!
-        toast.info("You are Login", {
+        toast.success("You are Login", {
           position: "top-center",
           className: "custom-toast-center",
           bodyClassName: "text-sm",
