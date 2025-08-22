@@ -1,5 +1,5 @@
 import userprofile from "../models/userprofile.model.js";
-import user from "../models/user.model.js";
+import userModel from "../models/user.model.js";
 
 //adding new address
 const addProfile = async (req, res) => {
@@ -7,7 +7,7 @@ const addProfile = async (req, res) => {
     const { userId, name, phone, province, district, city, street } = req.body;
     console.log(userId);
 
-    let address = await userprofile.findOne({ user: userId });
+    let address = await userprofile.findOne({ userModel: userId });
 
     if (address) {
       //update existing address
@@ -31,7 +31,7 @@ const addProfile = async (req, res) => {
       });
 
       //link with user
-      await user.findByIdAndUpdate(userId, { address: address._id });
+      await userModel.findByIdAndUpdate(userId, { address: address._id });
     }
 
     res.json({ success: true, message: "Address added Successfully" });
@@ -45,17 +45,18 @@ const addProfile = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     const userId = req.body.userId; // from auth middleware
-    const user = await userModel.findById(userId).populate("address");
+    const userprofiledet = await userModel.findById(userId).populate("address");
+    console.log(userprofiledet);
+    
 
-    if (!user)
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+    if (!userprofiledet) {
+      res.status(404).json({ success: false, message: "User Profile not found" });
+    }
 
-    res.json({ success: true, profile: user });
+    res.json({ success: true, userprofiledet });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-export { addProfile,getProfile };
+export { addProfile, getProfile };

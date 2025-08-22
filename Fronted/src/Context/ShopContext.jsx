@@ -14,6 +14,7 @@ const ShopContextProvider = (props) => {
   const [products, setProducts] = useState([]);
   const [token, setToken] = useState("");
   const [user, setUser] = useState("");
+  const [address, setAddress] = useState({});
 
   const addtocart = async (itemId, size) => {
     if (!size) {
@@ -95,7 +96,7 @@ const ShopContextProvider = (props) => {
       }
 
       setcartitem(cartdata);
-        if (token) {
+      if (token) {
         try {
           await axios.post(
             backendUrl + "/api/cart/update",
@@ -206,6 +207,31 @@ const ShopContextProvider = (props) => {
     }
   };
 
+  const getprofiledata = async () => {
+    if (!token) return
+    try {
+      const response = await axios.post(
+        backendUrl + "/api/profile/getprofile",
+        {},
+        { headers: { token } }
+      );
+      if (response.data.success) {
+        // console.log(response.data.userprofiledet.address);
+        setAddress(response.data.userprofiledet.address)
+      } else {
+        console.log(response.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
+  // Fetch address automatically when app starts or token changes
+  useEffect(() => {
+    getprofiledata();
+  }, [token]);
+
   useEffect(() => {
     getProductsData();
   }, []);
@@ -223,9 +249,8 @@ const ShopContextProvider = (props) => {
     }
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     if (!user && localStorage.getItem("token")) {
-      
     }
   }, []);
 
@@ -245,6 +270,8 @@ const ShopContextProvider = (props) => {
     token,
     user,
     setUser,
+    address,
+    setAddress
   };
 
   return (

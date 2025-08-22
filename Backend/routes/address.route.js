@@ -1,6 +1,6 @@
 import express from "express";
 import authUser from "../middleware/auth.middleware.js";
-import { addProfile } from "../controllers/userprofile.controller.js";
+import { addProfile,getProfile } from "../controllers/userprofile.controller.js";
 
 const profileRouter = express.Router();
 

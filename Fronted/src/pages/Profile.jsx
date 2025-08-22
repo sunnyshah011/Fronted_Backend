@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { ShopContext } from "../Context/ShopContext";
+import { useEffect } from "react";
 
 const provinces = ["Bagmati", "Gandaki", "Lumbini"];
 const districts = ["Chitwan", "Kathmandu", "Pokhara"];
@@ -12,7 +13,7 @@ const cities = [
 ];
 
 const Profile = () => {
-  const { backendUrl, token } = useContext(ShopContext);
+  const { backendUrl, token, address } = useContext(ShopContext);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -52,7 +53,18 @@ const Profile = () => {
     }
   };
 
-
+  useEffect(() => {
+  if (address) {
+    setFormData({
+      fullName: address.name || "",
+      phone: address.phone || "",
+      province: address.province || "",
+      district: address.district || "",
+      city: address.city || "",
+      streetAddress: address.street || "",
+    });
+  }
+}, [address]);
 
   return (
     <div className="px-4 h-screen">
