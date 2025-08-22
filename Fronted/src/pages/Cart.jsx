@@ -5,31 +5,32 @@ import CartTotal from "../component/CartTotal";
 import { Link } from "react-router-dom";
 
 const Cart = () => {
-  const { products, currency, cartitem, updateQuantity,navigate } =
+  const { products, currency, cartitem, updateQuantity, navigate } =
     useContext(ShopContext);
 
   const [cartdata, setcartdata] = useState([]);
 
   useEffect(() => {
-    const tempdata = [];
-    for (const items in cartitem) {
-      for (const item in cartitem[items]) {
-        if (cartitem[items][item] > 0) {
-          tempdata.push({
-            _id: items,
-            size: item,
-            quantity: cartitem[items][item],
-          });
+    if (products.length > 0) {
+      const tempdata = [];
+      for (const items in cartitem) {
+        for (const item in cartitem[items]) {
+          if (cartitem[items][item] > 0) {
+            tempdata.push({
+              _id: items,
+              size: item,
+              quantity: cartitem[items][item],
+            });
+          }
         }
       }
+      setcartdata(tempdata);
     }
-    setcartdata(tempdata);
-  }, [cartitem]);
+  }, [cartitem, products]);
 
-    useEffect(() => {
-    window.scrollTo(0, 0)
-    console.log(cartitem);
-  }, [])
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="mt-20 px-4">
@@ -48,11 +49,11 @@ const Cart = () => {
             >
               <div className="flex items-start gap-6">
                 <Link to={`/product/${item._id}`}>
-                <img
-                  className="w-16 sm:w-20"
-                  src={productdata.image[0]}
-                  alt=""
-                />
+                  <img
+                    className="w-16 sm:w-20"
+                    src={productdata.image[0]}
+                    alt=""
+                  />
                 </Link>
                 <div>
                   <p className="text-[13px] sm:text-lg font-medium">
@@ -97,7 +98,12 @@ const Cart = () => {
         <div className="w-full sm:w-[450px]">
           <CartTotal />
           <div className="w-full text-end">
-            <button onClick={()=>navigate('./placeorder')} className="bg-black text-white text-sm my-8 px-8 py-3" >PROCEED TO CHECKOUT</button>
+            <button
+              onClick={() => navigate("./placeorder")}
+              className="bg-black text-white text-sm my-8 px-8 py-3"
+            >
+              PROCEED TO CHECKOUT
+            </button>
           </div>
         </div>
       </div>

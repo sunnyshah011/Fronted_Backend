@@ -80,7 +80,7 @@ const ShopContextProvider = (props) => {
     return totalcount;
   };
 
-  const updateQuantity = (itemId, size, quantity) => {
+  const updateQuantity = async (itemId, size, quantity) => {
     let cartdata = structuredClone(cartitem);
 
     if (quantity <= 0) {
@@ -95,7 +95,18 @@ const ShopContextProvider = (props) => {
       }
 
       setcartitem(cartdata);
-
+        if (token) {
+        try {
+          await axios.post(
+            backendUrl + "/api/cart/update",
+            { itemId, size, quantity },
+            { headers: { token } }
+          );
+        } catch (error) {
+          console.log(error);
+          toast.error(error.message);
+        }
+      }
       // Toast for remove
       toast.info("Item removed from cart", {
         position: "top-center",
@@ -132,6 +143,19 @@ const ShopContextProvider = (props) => {
           closeButton: true,
         });
       }, 500);
+
+      if (token) {
+        try {
+          await axios.post(
+            backendUrl + "/api/cart/update",
+            { itemId, size, quantity },
+            { headers: { token } }
+          );
+        } catch (error) {
+          console.log(error);
+          toast.error(error.message);
+        }
+      }
     }
   };
 
@@ -184,7 +208,6 @@ const ShopContextProvider = (props) => {
 
   useEffect(() => {
     getProductsData();
-    
   }, []);
 
   useEffect(() => {
