@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
 
-const userProfileSchema = new mongoose.Schema(
+const userAddressSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
       required: true,
+      unique: true, // <-- Enforce only one address per user
     }, // linked to login user
     name: { type: String, required: true },
     phone: { type: Number, required: true },
@@ -17,8 +18,8 @@ const userProfileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const userprofile =
-  mongoose.models.userProfileSchema ||
-  mongoose.model("userprofile", userProfileSchema);
+const userAddress =
+  mongoose.models.userAddressSchema ||
+  mongoose.model("useraddress", userAddressSchema);
 
-export default userprofile;
+export default userAddress;

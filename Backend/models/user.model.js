@@ -8,9 +8,9 @@ const userSchema = new mongoose.Schema(
     category: { type: Object, default: {} },
     address: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "userprofile",
+      ref: "useraddress", // this must match the model name used above
       required: false,
-      default:null
+      default: null
     },
   },
   { minimize: false }

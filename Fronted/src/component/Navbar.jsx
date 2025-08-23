@@ -210,9 +210,9 @@ const Navbar = () => {
             </div>
           </div>
 
-          <div className="text-sm">
-            <div> {user ? <p>HI,</p> : ""}</div>
-            <p> {user} </p>
+          <div className="text-sm flex flex-col">
+            <div className="text-[13px] "> {user ? <p>HI,</p> : ""}</div>
+            <p className="text-[13px] "> {user ? user.slice(0, 5) : ""} </p>
           </div>
         </div>
       </div>
