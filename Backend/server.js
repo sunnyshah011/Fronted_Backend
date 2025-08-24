@@ -8,6 +8,7 @@ import productRouter from "./routes/product.route.js";
 import bodyParser from 'body-parser'
 import cartRouter from "./routes/cart.route.js";
 import userAddress from './routes/address.route.js'
+import orderRouter from "./routes/order.route.js";
 
 //App Config
 const app = express();
@@ -26,6 +27,7 @@ app.use('/api/user', userRouter)
 app.use('/api/product', productRouter)
 app.use('/api/cart',cartRouter)
 app.use('/api/profile',userAddress)
+app.use('/api/order',orderRouter)
 
 app.get("/", (req, res) => {
   res.send("API");

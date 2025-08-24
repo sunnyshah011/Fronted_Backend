@@ -58,6 +58,7 @@ const ShopContextProvider = (props) => {
         cartdata[itemId] = { [size]: 1 };
       }
       setCartitem(cartdata);
+      localStorage.setItem("cartItems", JSON.stringify(cartdata));
 
       toast.success("Product added to cart!", {
         position: "top-center",
@@ -77,7 +78,6 @@ const ShopContextProvider = (props) => {
           );
         } catch (error) {
           handleApiError(error);
-          // Optional: revert cartitem state on failure
         }
       }
     },
@@ -107,17 +107,15 @@ const ShopContextProvider = (props) => {
       let cartdata = structuredClone(cartitem);
 
       if (quantity <= 0) {
-        // Remove the item size from cart if quantity is 0 or less
         if (cartdata[itemId] && cartdata[itemId][size]) {
           delete cartdata[itemId][size];
-
-          // If no sizes left for this item, remove the whole item entry
           if (Object.keys(cartdata[itemId]).length === 0) {
             delete cartdata[itemId];
           }
         }
-
         setCartitem(cartdata);
+        localStorage.setItem("cartItems", JSON.stringify(cartdata));
+
         if (token) {
           try {
             await axios.post(
@@ -129,6 +127,7 @@ const ShopContextProvider = (props) => {
             handleApiError(error);
           }
         }
+
         toast.info("Item removed from cart", {
           position: "top-center",
           className: "custom-toast-center",
@@ -138,11 +137,10 @@ const ShopContextProvider = (props) => {
           pauseOnHover: true,
         });
       } else {
-        // Update quantity
         cartdata[itemId][size] = quantity;
         setCartitem(cartdata);
+        localStorage.setItem("cartItems", JSON.stringify(cartdata));
 
-        // Show loading toast first
         const toastId = toast.loading("Updating...", {
           position: "top-center",
           className: "custom-toast-center",
@@ -159,8 +157,6 @@ const ShopContextProvider = (props) => {
               { itemId, size, quantity },
               { headers: { token } }
             );
-
-            // After success update toast to success
             toast.update(toastId, {
               render: "Quantity updated",
               type: "success",
@@ -171,11 +167,11 @@ const ShopContextProvider = (props) => {
               closeButton: true,
             });
           } catch (error) {
-            toast.dismiss(toastId); // Remove loading toast on error
+            toast.dismiss(toastId);
             handleApiError(error);
           }
         } else {
-          toast.dismiss(toastId); // Remove loading toast if no token
+          toast.dismiss(toastId);
         }
       }
     },
@@ -189,9 +185,7 @@ const ShopContextProvider = (props) => {
       const cartinfo = products.find((product) => product._id === items);
       for (const item in cartitem[items]) {
         try {
-          if (cartitem[items][item] > 0) {
-            totalamount += cartinfo.price * cartitem[items][item];
-          }
+          if (cartinfo) totalamount += cartinfo.price * cartitem[items][item];
         } catch (error) {
           console.error(error);
         }
@@ -228,7 +222,11 @@ const ShopContextProvider = (props) => {
           { headers: { token } }
         );
         if (response.data.success) {
-          setCartitem(response.data.cartData);
+          setCartitem(response.data.cartData || {});
+          localStorage.setItem(
+            "cartItems",
+            JSON.stringify(response.data.cartData || {})
+          );
         }
       } catch (error) {
         handleApiError(error);
@@ -239,7 +237,7 @@ const ShopContextProvider = (props) => {
     [backendUrl]
   );
 
-  // Fetch profile data (address etc)
+  // Fetch profile data
   const getProfileData = useCallback(async () => {
     if (!token) return;
     setIsLoadingProfile(true);
@@ -261,31 +259,47 @@ const ShopContextProvider = (props) => {
     }
   }, [token, backendUrl]);
 
-  // Load token & user from localStorage once on mount, fetch cart/user accordingly
+  // Load token & user from localStorage on mount
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
+    const savedCart = localStorage.getItem("cartItems");
 
-    if (savedToken) {
-      setToken(savedToken);
-      getUserCart(savedToken);
-    }
+    if (savedToken) setToken(savedToken);
     if (savedUser) {
-      setUser(savedUser);
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        // fallback if it’s a plain string
+        setUser(savedUser);
+      }
     }
-  }, [getUserCart]);
 
-  // Fetch products once on mount
+    if (savedCart) setCartitem(JSON.parse(savedCart));
+  }, []);
+
+  // Fetch products once
   useEffect(() => {
     getProductsData();
   }, [getProductsData]);
 
-  // Fetch profile data whenever token changes
+  // Fetch profile data
   useEffect(() => {
     getProfileData();
   }, [getProfileData]);
 
-  // Context value to be shared
+  // 🔹 Fix: Fetch cart immediately after login & clear on logout
+  useEffect(() => {
+    if (token) {
+      getUserCart(token);
+    } else {
+      // logout: clear cart
+      setCartitem({});
+      localStorage.setItem("cartItems", JSON.stringify({}));
+    }
+  }, [token, getUserCart]);
+
+  // Context value
   const value = {
     currency,
     delivery_fee,

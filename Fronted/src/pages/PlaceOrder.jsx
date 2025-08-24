@@ -14,8 +14,18 @@ const cities = [
 
 const Placeorder = () => {
   const [payment, setpayment] = useState(false);
-  const { navigate, address, backendUrl, token, updateAddress } =
-    useContext(ShopContext);
+  const {
+    navigate,
+    backendUrl,
+    token,
+    updateAddress,
+    address,
+    cartitem,
+    setCartitem,
+    calculatetotalamount,
+    delivery_fee,
+    products,
+  } = useContext(ShopContext);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -101,6 +111,59 @@ const Placeorder = () => {
     } catch (error) {
       console.error(error);
       toast.error("Failed to update address");
+    }
+  };
+
+  // 🔑 Place Order Function
+  const handlePlaceOrder = async () => {
+    if (!payment) {
+      toast.error("Please select a payment method", {
+        autoClose: 1000,
+        hideProgressBar: true,
+      });
+      return;
+    }
+
+    try {
+      let orderitems = [];
+      for (const items in cartitem) {
+        for (const item in cartitem[items]) {
+          if (cartitem[items][item] > 0) {
+            const itemInfo = structuredClone(
+              products.find((product) => product._id === items)
+            );
+            if (itemInfo) {
+              itemInfo.size = item;
+              itemInfo.quantity = cartitem[items][item];
+              orderitems.push(itemInfo);
+            }
+          }
+        }
+      }
+
+      const payload = {
+        items: orderitems,
+        amount: calculatetotalamount() + delivery_fee,
+        address: formData,
+      };
+
+      const response = await axios.post(
+        backendUrl + "/api/order/place",
+        payload,
+        { headers: { token } }
+      );
+      if (response.data.success) {
+        console.log(response.data);
+        localStorage.setItem("cartItems", JSON.stringify({}));
+        setCartitem({});
+        toast.success("Order placed successfully!", { autoClose: 1000 });
+        navigate("/order");
+      } else {
+        toast.error(response.data.message || "Failed to place order");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong");
     }
   };
 
@@ -248,14 +311,12 @@ const Placeorder = () => {
                 payment ? "bg-green-500 border-green-500" : "border-gray-400"
               }`}
             ></div>
-            <span className="text-gray-700 font-medium">
-              Cash on Delivery
-            </span>
+            <span className="text-gray-700 font-medium">Cash on Delivery</span>
           </div>
 
           <div className="w-full text-end mt-8">
             <button
-              onClick={() => navigate("./order")}
+              onClick={handlePlaceOrder}
               className="bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-lg font-medium"
             >
               Place Order

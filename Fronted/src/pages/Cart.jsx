@@ -5,8 +5,7 @@ import CartTotal from "../component/CartTotal";
 import { Link } from "react-router-dom";
 
 const Cart = () => {
-  const { products, currency, cartitem, updateQuantity, navigate } =
-    useContext(ShopContext);
+  const { products, currency, cartitem, updateQuantity, navigate } = useContext(ShopContext);
   const [cartdata, setCartData] = useState([]);
   const [selectedItems, setSelectedItems] = useState({});
 
@@ -79,7 +78,7 @@ const Cart = () => {
           return (
             <div
               key={key}
-              className="bg-white shadow-md rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-4"
+              className="bg-white shadow-sm rounded-xl px-3 py-2 sm:p-4 flex items-center gap-2 sm:gap-4"
             >
               {/* Checkbox */}
               <input
