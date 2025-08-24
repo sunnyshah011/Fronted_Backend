@@ -47,7 +47,9 @@ const getProfile = async (req, res) => {
     const userprofiledet = await userModel.findById(userId).populate("address");
 
     if (!userprofiledet) {
-      res.status(404).json({ success: false, message: "User Profile not found" });
+      res
+        .status(404)
+        .json({ success: false, message: "User Profile not found" });
     }
 
     res.json({ success: true, userprofiledet });
@@ -55,7 +57,6 @@ const getProfile = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 // update user address
 // const updateAddress = async (req, res) => {
@@ -86,6 +87,5 @@ const getProfile = async (req, res) => {
 //     res.status(500).json({ success: false, message: error.message });
 //   }
 // };
-
 
 export { addProfile, getProfile };
