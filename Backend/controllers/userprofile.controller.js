@@ -17,6 +17,7 @@ const addProfile = async (req, res) => {
       address.city = city;
       address.street = street;
       await address.save();
+      res.json({ success: true, message: "Address Updated Successfully" });
     } else {
       //create new address in db
       address = await userAddress.create({
@@ -31,9 +32,8 @@ const addProfile = async (req, res) => {
 
       //link with user
       await userModel.findByIdAndUpdate(userId, { address: address._id });
+      res.json({ success: true, message: "Address added Successfully" });
     }
-
-    res.json({ success: true, message: "Address added Successfully" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -47,7 +47,9 @@ const getProfile = async (req, res) => {
     const userprofiledet = await userModel.findById(userId).populate("address");
 
     if (!userprofiledet) {
-      res.status(404).json({ success: false, message: "User Profile not found" });
+      res
+        .status(404)
+        .json({ success: false, message: "User Profile not found" });
     }
 
     res.json({ success: true, userprofiledet });
@@ -55,7 +57,6 @@ const getProfile = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 // update user address
 // const updateAddress = async (req, res) => {
@@ -86,6 +87,5 @@ const getProfile = async (req, res) => {
 //     res.status(500).json({ success: false, message: error.message });
 //   }
 // };
-
 
 export { addProfile, getProfile };
