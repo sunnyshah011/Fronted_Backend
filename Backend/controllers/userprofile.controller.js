@@ -17,6 +17,7 @@ const addProfile = async (req, res) => {
       address.city = city;
       address.street = street;
       await address.save();
+      res.json({ success: true, message: "Address Updated Successfully" });
     } else {
       //create new address in db
       address = await userAddress.create({
@@ -31,9 +32,8 @@ const addProfile = async (req, res) => {
 
       //link with user
       await userModel.findByIdAndUpdate(userId, { address: address._id });
+      res.json({ success: true, message: "Address added Successfully" });
     }
-
-    res.json({ success: true, message: "Address added Successfully" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
