@@ -17,7 +17,7 @@ const Breadcrumbs = () => {
     const fetchProductName = async () => {
       if (paths[0] === "product" && paths[1]) {
         try {
-          const res = await axios.post(`${backendUrl}/api/product/single/${paths[1]}`);
+          const res = await axios.get(`${backendUrl}/api/product/single/${paths[1]}`);
           setProductName(res.data.product.name);
         } catch (err) {
           console.log(err);
@@ -30,7 +30,7 @@ const Breadcrumbs = () => {
   if (pathname === "/") return null;
 
   return (
-    <nav className="bg-gray-50 mt-20 border-b border-gray-200 py-2 px-4 text-sm text-gray-600">
+    <nav className="bg-gray-50 mt-17 border-b border-gray-200 py-2 px-4 text-sm text-gray-600">
       <ol className="flex items-center space-x-2">
         <li>
           <Link to="/" className="hover:text-blue-600 font-medium">

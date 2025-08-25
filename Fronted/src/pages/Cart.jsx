@@ -53,7 +53,7 @@ const Cart = () => {
   };
 
   return (
-    <div className="mt-20 px-4">
+    <div className="mt-5 px-4">
       <h2 className="text-2xl font-semibold mb-6">My Cart</h2>
 
       {cartdata.length > 0 && (
