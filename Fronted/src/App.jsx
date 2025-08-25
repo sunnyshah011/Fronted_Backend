@@ -13,6 +13,7 @@ import { ToastContainer } from 'react-toastify';
 import NotFound from "./component/NotFound";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
+import Breadcrumbs from "./component/Breadcrumb";
 
 const App = () => {
   return (
@@ -31,7 +32,9 @@ const App = () => {
 
       {/* Wrapper that limits width */}
       <div className="flex flex-col flex-grow mx-auto w-full max-w-[1250px] ">
+        
         <Navbar />
+        <Breadcrumbs />
 
         <main className="flex-grow">
           <Routes>
