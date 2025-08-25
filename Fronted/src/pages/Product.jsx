@@ -30,7 +30,7 @@ const Product = () => {
 
 
   return fproduct ? (
-    <div className="transition-opacity ease-in duration-500 opacity-100 mt-25 px-4">
+    <div className="transition-opacity ease-in duration-500 opacity-100 mt-5 px-4">
       {/* product data */}
       <div className="flex gap-4 sm:gap-12 flex-col sm:flex-row mb-[100px]">
         {/* product images */}

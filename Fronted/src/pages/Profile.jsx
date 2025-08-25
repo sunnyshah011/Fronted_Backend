@@ -131,8 +131,13 @@ const Profile = () => {
     }
   };
 
+   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+
   return (
-    <div className="px-4 mt-25 h-full pb-10">
+    <div className="px-4 mt-5 h-full pb-10">
       {/* ✅ Address Preview */}
       {address && Object.keys(address).length > 0 && (
         <div className="max-w-xl mx-auto mt-6 p-6 mb-5 bg-gradient-to-br from-gray-50 to-white shadow-sm rounded-2xl border border-gray-200">

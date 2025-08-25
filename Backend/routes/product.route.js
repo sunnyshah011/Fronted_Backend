@@ -1,5 +1,5 @@
 import express from 'express'
-import { addProduct, listProduct, removeProduct, singleProduct } from '../controllers/product.controller.js'
+import { addProduct, listProduct, removeProduct, singleProduct,getSingleProduct } from '../controllers/product.controller.js'
 import upload from '../middleware/multer.middleware.js'
 import adminAuth from '../middleware/adminAuth.middleware.js'
 
@@ -14,6 +14,9 @@ productRouter.post('/add',adminAuth,upload.fields([
 productRouter.post('/remove',adminAuth,removeProduct)
 productRouter.post('/single', singleProduct)
 productRouter.get('/list', listProduct)
+
+// Route to get a single product by ID
+productRouter.get("/single/:id", getSingleProduct);
 
 
 export default productRouter

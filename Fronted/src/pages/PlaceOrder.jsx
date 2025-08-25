@@ -153,7 +153,6 @@ const Placeorder = () => {
         { headers: { token } }
       );
       if (response.data.success) {
-        console.log(response.data);
         localStorage.setItem("cartItems", JSON.stringify({}));
         setCartitem({});
         toast.success("Order placed successfully!", { autoClose: 1000 });
@@ -168,7 +167,7 @@ const Placeorder = () => {
   };
 
   return (
-    <div className="p-4 mt-20 flex flex-col sm:flex-row gap-8 pt-5 sm:pt-14 min-h-[80vh] ">
+    <div className="p-4 mt-5 flex flex-col sm:flex-row gap-8 pt-5 sm:pt-14 min-h-[80vh] ">
       {/* left side */}
       <form
         onSubmit={handleUpdate}

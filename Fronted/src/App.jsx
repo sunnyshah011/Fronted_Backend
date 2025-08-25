@@ -9,14 +9,15 @@ import Order from "./pages/Order";
 import Placeorder from "./pages/PlaceOrder";
 import Product from "./pages/Product";
 import Footer from './component/Footer'
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import NotFound from "./component/NotFound";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
+import Breadcrumbs from "./component/Breadcrumb";
 
 const App = () => {
   return (
-    <div className="flex flex-col min-h-screen sm:px-[4vw] md:px-[5vw] lg:px-[7vw]">
+    <div className="min-h-screen flex flex-col">
       <ToastContainer
         position="top-center"
         autoClose={2000}
@@ -24,34 +25,36 @@ const App = () => {
         newestOnTop={false}
         closeOnClick
         rtl={false}
-        // pauseOnFocusLoss
         draggable
         toastClassName="text-sm px-3 py-2 rounded-md"
         bodyClassName="text-sm"
       />
 
-      <Navbar />
+      {/* Wrapper that limits width */}
+      <div className="flex flex-col flex-grow mx-auto w-full max-w-[1250px] ">
+        
+        <Navbar />
+        <Breadcrumbs />
 
-      {/* This makes main content grow and push footer down */}
-      <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/collection" element={<Collection />} />
-          <Route path="/order" element={<Order />} />
-          <Route path="/placeorder" element={<Placeorder />} />
-          <Route path="/product/:productId" element={<Product />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/collection" element={<Collection />} />
+            <Route path="/order" element={<Order />} />
+            <Route path="/placeorder" element={<Placeorder />} />
+            <Route path="/product/:productId" element={<Product />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
 
-      {/* Footer stays at bottom, no absolute positioning needed */}
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 };
 
-export default App
+export default App;
