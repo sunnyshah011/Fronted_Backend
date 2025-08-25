@@ -153,7 +153,6 @@ const Placeorder = () => {
         { headers: { token } }
       );
       if (response.data.success) {
-        console.log(response.data);
         localStorage.setItem("cartItems", JSON.stringify({}));
         setCartitem({});
         toast.success("Order placed successfully!", { autoClose: 1000 });
