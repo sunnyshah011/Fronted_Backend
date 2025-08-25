@@ -99,13 +99,13 @@ const Cart = () => {
               {/* Product info + quantity */}
               <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-wrap">
-                  <p className="text-sm sm:text-base font-medium text-gray-800">
+                  <p className="text-sm sm:text-base font-medium text-gray-800 truncate w-40">
                     {productData.name}
                   </p>
                   <span className="text-sm font-semibold text-gray-700">
                     {currency} {productData.price}
                   </span>
-                  <span className="px-2 py-0.5 text-xs border border-gray-300 bg-gray-50 rounded-md">
+                  <span className="px-2 py-0.5 w-30 text-xs border border-gray-300 bg-gray-50 rounded-md">
                     Size: {item.size}
                   </span>
                 </div>
