@@ -144,7 +144,7 @@ const registerUser = async (req, res) => {
       });
     }
 
-    if(password.length < 8){
+    if (password.length < 8) {
       return res.json({
         success: false,
         message: "Password should be 8 character",
@@ -219,19 +219,17 @@ const loginUser = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error, please try again later.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error, please try again later.",
+    });
   }
 };
 
 //Route for Admin Login
 const adminLogin = async (req, res) => {
   try {
-    const { email, password } = req.userId;
+    const { email, password } = req.body || {};
     if (
       email === process.env.ADMIN_EMAIL &&
       password === process.env.ADMIN_PASSWORD
@@ -252,7 +250,7 @@ const adminLogin = async (req, res) => {
 //send verification otp to the users email
 const sendVerifyOtp = async (req, res) => {
   try {
-    const userId = req.userId
+    const userId = req.userId;
     const user = await userModel.findById(userId);
 
     if (user.isAccountVerified) {
@@ -281,8 +279,8 @@ const sendVerifyOtp = async (req, res) => {
 
 //verify the account according to otp send by user
 const verifyEmail = async (req, res) => {
-  const userId = req.userId
-  const { otp } = req.body;
+  const userId = req.userId;
+  const { otp } = req.body || {};
   console.log(userId);
   console.log(otp);
 
@@ -325,9 +323,199 @@ const verifyEmail = async (req, res) => {
   }
 };
 
+//authenticating user
+const isAuthenticated = async (req, res) => {
+  try {
+    res.json({ success: true, message: "Authenticated user!!" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "You are not Login!!" });
+  }
+};
+
+//send password reset otp
+const sendResetOtp = async (req, res) => {
+  const { gmail } = req.body || {};
+
+  if (!gmail) {
+    return res.json({ success: false, message: "Email is Required" });
+  }
+
+  try {
+    const user = await userModel.findOne({ gmail });
+    if (!user) {
+      return res.json({ success: false, message: "User Not Found" });
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    user.resetOtp = otp;
+    user.resetOtpExpireAt = Date.now() + 15 * 60 * 1000;
+
+    await user.save();
+
+    const mailOption = {
+      from: process.env.SENDER_EMAIL,
+      to: user.gmail,
+      subject: "Password Reset OTP",
+      text: `Your OTP for Resetting Your Password - ${otp}.`,
+    };
+    await transporter.sendMail(mailOption);
+
+    return res.json({ success: true, message: "OTP Send To Your Email" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.massage });
+  }
+};
+
+//Reset User Password
+const resetPassword = async (req, res) => {
+  const { gmail, otp, newPassword } = req.body || {};
+
+  if (!gmail || !otp || !newPassword) {
+    return res.json({
+      success: false,
+      message: "Email, OTP, and New password is required",
+    });
+  }
+
+  try {
+    const user = await userModel.findOne({ gmail });
+    if (!user) {
+      return res.json({ success: false, message: "User Not Found" });
+    }
+
+    if (user.resetOtp === "" || user.resetOtp !== otp) {
+      return res.json({ success: false, message: "Invalid OTP" });
+    }
+
+    if (user.resetOtpExpireAt < Date.now()) {
+      return res.json({ success: false, message: "OTP Expired" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    user.resetOtp = "";
+    user.resetOtpExpireAt = 0;
+
+    await user.save();
+
+    res.json({ success: true, message: "Password Change Successfully" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export {
+  loginUser,
+  registerUser,
+  adminLogin,
+  sendVerifyOtp,
+  verifyEmail,
+  isAuthenticated,
+  sendResetOtp,
+  resetPassword,
+};
 
 
 
 
+// //send password reset otp
+// const sendResetOtp = async (req, res) => {
+//   const { gmail } = req.body || {};
 
-export { loginUser, registerUser, adminLogin, sendVerifyOtp, verifyEmail };
+//   if (!gmail) {
+//     return res.json({ success: false, message: "Email is Required" });
+//   }
+
+//   try {
+//     const user = await userModel.findOne({ gmail });
+//     if (!user) {
+//       return res.json({ success: false, message: "User Not Found" });
+//     }
+
+//     // 🚨 Check account verification
+//     if (!user.isAccountVerified) {
+//       return res.json({ success: false, message: "Please verify your account before resetting password" });
+//     }
+
+//     const otp = String(Math.floor(100000 + Math.random() * 900000));
+//     user.resetOtp = otp;
+//     user.resetOtpExpireAt = Date.now() + 15 * 60 * 1000; // 15 min expiry
+//     await user.save();
+
+//     // send OTP email
+//     const mailOption = {
+//       from: process.env.SENDER_EMAIL,
+//       to: user.gmail,
+//       subject: "Password Reset OTP",
+//       text: `Your OTP for resetting your password is ${otp}. It is valid for 15 minutes.`,
+//     };
+//     await transporter.sendMail(mailOption);
+
+//     // Create short-lived reset session token
+//     const resetSessionToken = jwt.sign(
+//       { userId: user._id },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "20m" }
+//     );
+
+//     return res.json({
+//       success: true,
+//       message: "OTP sent to your email",
+//       resetSessionToken, // frontend will store this temporarily
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.json({ success: false, message: error.message });
+//   }
+// };
+
+
+
+// //Reset User Password
+// const resetPassword = async (req, res) => {
+//   const { otp, newPassword, resetSessionToken } = req.body || {};
+
+//   if (!otp || !newPassword || !resetSessionToken) {
+//     return res.json({
+//       success: false,
+//       message: "OTP, new password & reset session token are required",
+//     });
+//   }
+
+//   try {
+//     // verify reset session token
+//     const decoded = jwt.verify(resetSessionToken, process.env.JWT_SECRET);
+//     const user = await userModel.findById(decoded.userId);
+
+//     if (!user) {
+//       return res.json({ success: false, message: "User not found" });
+//     }
+
+//     // Validate OTP
+//     if (user.resetOtp === "" || user.resetOtp !== otp) {
+//       return res.json({ success: false, message: "Invalid OTP" });
+//     }
+
+//     if (user.resetOtpExpireAt < Date.now()) {
+//       return res.json({ success: false, message: "OTP expired" });
+//     }
+
+//     // Hash new password
+//     const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+//     user.password = hashedPassword;
+//     user.resetOtp = "";
+//     user.resetOtpExpireAt = 0;
+
+//     await user.save();
+
+//     res.json({ success: true, message: "Password changed successfully" });
+//   } catch (error) {
+//     console.log(error);
+//     res.json({ success: false, message: "Invalid or expired reset session token" });
+//   }
+// };
