@@ -35,7 +35,7 @@
 //           name: user.name,
 //         },
 //       });
-      
+
 //     } else {
 //       res.json({ success: false, message: "Invalid Credential" });
 //     }
@@ -115,31 +115,6 @@
 
 // export { loginUser, registerUser, adminLogin };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import userModel from "../models/user.model.js";
 import validator from "validator";
 import bcrypt from "bcrypt";
@@ -169,6 +144,13 @@ const registerUser = async (req, res) => {
       });
     }
 
+    if(password.length < 8){
+      return res.json({
+        success: false,
+        message: "Password should be 8 character",
+      });
+    }
+
     //matching password
     if (password !== confirmPassword) {
       return res.json({
@@ -194,11 +176,11 @@ const registerUser = async (req, res) => {
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: gmail,
-      subject: 'WELCOME TO FISHING TACKLE STORE',
-      text: `welcome to fishing tackle store website. your account has been created email ${gmail} `
-    }
+      subject: "WELCOME TO FISHING TACKLE STORE",
+      text: `welcome to fishing tackle store website. your account has been created email ${gmail} `,
+    };
 
-    await transporter.sendMail(mailOptions)
+    await transporter.sendMail(mailOptions);
 
     res.json({
       success: true,
@@ -207,18 +189,17 @@ const registerUser = async (req, res) => {
         name: user.name,
       },
     });
-
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
   }
 };
 
-
-//Route for user login  
+//Route for user login
 const loginUser = async (req, res) => {
   try {
     const { gmail, password } = req.body;
+
     const user = await userModel.findOne({ gmail });
     if (!user) {
       return res.json({ success: false, message: "user doesn't exists" });
@@ -238,10 +219,14 @@ const loginUser = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Server error, please try again later." });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Server error, please try again later.",
+      });
   }
 };
-
 
 //Route for Admin Login
 const adminLogin = async (req, res) => {
@@ -251,11 +236,9 @@ const adminLogin = async (req, res) => {
       email === process.env.ADMIN_EMAIL &&
       password === process.env.ADMIN_PASSWORD
     ) {
-      const token = jwt.sign(
-        { role: "admin", email },
-        process.env.JWT_SECRET,
-        { expiresIn: "7d" }
-      );
+      const token = jwt.sign({ role: "admin", email }, process.env.JWT_SECRET, {
+        expiresIn: "7d",
+      });
       res.json({ success: true, token });
     } else {
       res.json({ success: false, message: "Invalid Credentials" });
@@ -269,76 +252,82 @@ const adminLogin = async (req, res) => {
 //send verification otp to the users email
 const sendVerifyOtp = async (req, res) => {
   try {
-
-    const { userId } = req.userId
-    const user = await userModel.findById(userId)
+    const userId = req.userId
+    const user = await userModel.findById(userId);
 
     if (user.isAccountVerified) {
-      return res.json({ success: false, message: "Account Already Veified" })
+      return res.json({ success: false, message: "Account Already Veified" });
     }
 
-    const otp = String(Math.floor(100000 + Math.random() * 900000))
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
 
-    user.verifyOtp = otp
-    user.verifyOtpExpireAt = Date.now() + 24 * 60 * 60 * 1000
+    user.verifyOtp = otp;
+    user.verifyOtpExpireAt = Date.now() + 24 * 60 * 60 * 1000;
 
-    await user.save()
+    await user.save();
 
     const mailOption = {
       from: process.env.SENDER_EMAIL,
       to: user.gmail,
-      subject: 'Account Verification Otp',
-      text: `Your OTP is ${otp}. Verify Your Account Using This OTP `
-    }
+      subject: "Account Verification Otp",
+      text: `Your OTP is ${otp}. Verify Your Account Using This OTP `,
+    };
 
-    await transporter.sendMail(mailOption)
+    await transporter.sendMail(mailOption);
 
-    res.json({ success: true, message: "Verificatin OTP Send on Email" })
-
-
-  } catch (error) {
-
-  }
-}
+    res.json({ success: true, message: "Verificatin OTP Send on Email" });
+  } catch (error) {}
+};
 
 //verify the account according to otp send by user
 const verifyEmail = async (req, res) => {
-
-  const { userId, otp } = req.body
+  const userId = req.userId
+  const { otp } = req.body;
   console.log(userId);
   console.log(otp);
-  
+
   if (!userId || !otp) {
-    return res.json({ success: false, message: "Missing Details" })
+    return res.json({ success: false, message: "Missing Details" });
   }
 
   try {
-
-    const user = await userModel.findById(userId)
+    const user = await userModel.findById(userId);
 
     if (!user) {
-      return res.json({ success: false, message: "user not found" })
+      return res.json({ success: false, message: "user not found" });
     }
 
-    if (user.verifyOtp === '' || user.verifyOtp !== otp) {
-      return res.json({ success: false, message: "Invalid OTP" })
+    if (user.verifyOtp === "" || user.verifyOtp !== otp) {
+      return res.json({ success: false, message: "Invalid OTP" });
     }
 
     if (user.verifyOtpExpireAt < Date.now()) {
-      return res.json({ success: false, message: "OTP Expired" })
+      return res.json({ success: false, message: "OTP Expired" });
     }
 
     user.isAccountVerified = true;
-    user.verifyOtp = ''
-    user.verifyOtpExpireAt = 0
+    user.verifyOtp = "";
+    user.verifyOtpExpireAt = 0;
 
-    await user.save()
-    return res.json({ success: true, message: 'Email Verified successfully' })
+    await user.save();
 
+    const mailOption = {
+      from: process.env.SENDER_EMAIL,
+      to: user.gmail,
+      subject: "Your Account Has Been Acivated",
+      text: `Welcome to fishing takcle store ::${user.name}.`,
+    };
+    await transporter.sendMail(mailOption);
+
+    return res.json({ success: true, message: "Email Verified successfully" });
   } catch (error) {
-    return res.json({ success: false, message: error.message })
+    return res.json({ success: false, message: error.message });
   }
-}
+};
 
 
-export { loginUser, registerUser, adminLogin, sendVerifyOtp,verifyEmail };
+
+
+
+
+export { loginUser, registerUser, adminLogin, sendVerifyOtp, verifyEmail };
