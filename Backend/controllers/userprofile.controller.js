@@ -43,7 +43,9 @@ const addProfile = async (req, res) => {
 // GET /api/profile
 const getProfile = async (req, res) => {
   try {
-    const userId = req.body.userId; // from auth middleware
+    const userId = req.userId; // from auth middleware
+    console.log("from getprofile : " +userId);
+    
     const userprofiledet = await userModel.findById(userId).populate("address");
 
     if (!userprofiledet) {
