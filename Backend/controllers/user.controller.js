@@ -237,9 +237,10 @@ const adminLogin = async (req, res) => {
       const token = jwt.sign({ role: "admin", email }, process.env.JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.json({ success: true, token });
+      console.log(token);
+      return res.json({ success: true, token });
     } else {
-      res.json({ success: false, message: "Invalid Credentials" });
+      return res.json({ success: false, message: "Invalid Credentials" });
     }
   } catch (error) {
     console.log(error);
@@ -274,7 +275,7 @@ const sendVerifyOtp = async (req, res) => {
     await transporter.sendMail(mailOption);
 
     res.json({ success: true, message: "Verificatin OTP Send on Email" });
-  } catch (error) {}
+  } catch (error) { }
 };
 
 //verify the account according to otp send by user
@@ -340,7 +341,7 @@ const getuserdata = async (req, res) => {
 
     const user = await userModel.findById(userId);
 
-     res.json({ success: true, message: user });
+    res.json({ success: true, message: user });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: "You are not Login!!" });

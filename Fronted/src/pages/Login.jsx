@@ -117,7 +117,7 @@ const Login = () => {
       if (response.data.success) {
         setToken(response.data.token);
         localStorage.setItem("token", response.data.token);
-
+        
        toast.success("You Are Logged In", {
           className: "custom-toast-center",
           autoClose: 1000,

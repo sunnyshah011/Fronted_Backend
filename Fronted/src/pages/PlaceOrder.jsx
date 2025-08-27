@@ -16,7 +16,7 @@ const Placeorder = () => {
   const [payment, setpayment] = useState(false);
   const {
     navigate,
-    backendUrl,
+   backendUrl, 
     token,
     updateAddress,
     address,

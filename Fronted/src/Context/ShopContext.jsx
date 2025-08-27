@@ -27,7 +27,7 @@ const ShopContextProvider = (props) => {
         { headers: { token } }
       );
       if (response.data.success) {
-        setUserDetails(response.data.message);
+        setUserDetails(response.data.message || {});
       } else {
         toast.error("error");
       }
@@ -37,7 +37,7 @@ const ShopContextProvider = (props) => {
   };
 
 
-  
+
   // Loading states
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [isLoadingCart, setIsLoadingCart] = useState(false);
@@ -315,6 +315,15 @@ const ShopContextProvider = (props) => {
       localStorage.setItem("cartItems", JSON.stringify({}));
     }
   }, [token, getUserCart]);
+
+
+  useEffect(() => {
+    if (token) {
+      getUserData(); // fetch user details
+    } else {
+      setUserDetails(null); // clear user details if no token
+    }
+  }, [token]);
 
   // Context value
   const value = {

@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 // import { faCoffee } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = () => {
-  const { setToken, userDetails, token, getcartcount, setcartitem, navigate } =
+  const { setToken, userDetails, setUserDetails, token, getcartcount, setCartitem, navigate } =
     useContext(ShopContext);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +35,11 @@ const Navbar = () => {
     });
     localStorage.removeItem("token");
     setToken("");
-    setcartitem({});
+    setCartitem({});
+    console.log("BEFORE logout userDetails:", userDetails);
+    setUserDetails({ name: null });
+    console.log("AFTER logout userDetails:", userDetails);
+
   };
 
   const order = () => {
@@ -165,9 +169,8 @@ const Navbar = () => {
                 />
               </button>
               <div
-                className={`absolute left-[-125px] pt-4 ${
-                  show ? "block" : "hidden"
-                }`}
+                className={`absolute left-[-125px] pt-4 ${show ? "block" : "hidden"
+                  }`}
               >
                 <div className="flex flex-col gap-4 w-50 py-4 px-4 bg-white border border-gray-300 rounded-[12px] text-gray-700">
                   {token ? (
@@ -223,14 +226,13 @@ const Navbar = () => {
 
             <div className="text-sm flex flex-col">
               <div className="text-[13px] ">
-                {" "}
-                {userDetails.name ? <p>HI,</p> : ""}
+                {userDetails?.name && <p>HI,</p>}
               </div>
               <p className="text-[13px] ">
-                {" "}
-                {userDetails.name ? userDetails.name.slice(0, 5) : ""}{" "}
+                {userDetails?.name ? userDetails.name.slice(0, 5) : ""}
               </p>
             </div>
+
           </div>
         </div>
 
@@ -244,9 +246,8 @@ const Navbar = () => {
 
         {/* Mobile sidebar */}
         <aside
-          className={`fixed top-0 left-0 h-full w-64 bg-white z-50 transform ${
-            isOpen ? "translate-x-0" : "-translate-x-full"
-          } transition-transform duration-300 ease-in-out`}
+          className={`fixed top-0 left-0 h-full w-64 bg-white z-50 transform ${isOpen ? "translate-x-0" : "-translate-x-full"
+            } transition-transform duration-300 ease-in-out`}
         >
           <button className="p-4 text-xl" onClick={closeMenu}>
             &larr; Back
