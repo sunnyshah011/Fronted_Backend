@@ -8,7 +8,7 @@ import {
   isAuthenticated,
   sendResetOtp,
   resetPassword,
-  getuserdata
+  getuserdata,
 } from "../controllers/user.controller.js";
 import authUser from "../middleware/auth.middleware.js";
 
@@ -30,6 +30,6 @@ userRouter.post("/send-reset-otp", sendResetOtp);
 userRouter.post("/reset-password", resetPassword);
 
 //get user data for fronted
-userRouter.post("/user-data",authUser,getuserdata)
+userRouter.post("/user-data", authUser, getuserdata);
 
 export default userRouter;
