@@ -4,7 +4,9 @@ import userModel from "../models/user.model.js";
 //adding new address
 const addProfile = async (req, res) => {
   try {
-    const { userId, name, phone, province, district, city, street } = req.body;
+    const { name, phone, province, district, city, street } = req.body;
+    const userId = req.userId;
+
 
     let address = await userAddress.findOne({ userId });
 
@@ -44,7 +46,6 @@ const addProfile = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     const userId = req.userId; // from auth middleware
-    console.log("from getprofile : " +userId);
     
     const userprofiledet = await userModel.findById(userId).populate("address");
 

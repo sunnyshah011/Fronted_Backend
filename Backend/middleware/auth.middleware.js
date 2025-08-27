@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 
 const authUser = async (req, res, next) => {
   const { token } = req.headers;
-  console.log(token);
 
   if (!token) {
     console.log("Your are not Login");

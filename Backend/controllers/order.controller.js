@@ -4,7 +4,8 @@ import userModel from "../models/user.model.js";
 //placing order using COD Method
 const placeOrder = async (req, res) => {
   try {
-    const { userId, items, amount, address } = req.body;
+    const { items, amount, address } = req.body;
+    const userId = req.userId;
 
     const orderData = {
       userId,
@@ -31,7 +32,7 @@ const placeOrder = async (req, res) => {
 //user order data for fronted for my order page
 const userOrders = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const userId = req.userId;
 
     const orders = await orderModel.find({ userId });
 
@@ -40,7 +41,6 @@ const userOrders = async (req, res) => {
     }
 
     res.json({ success: true, orders });
-    
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
