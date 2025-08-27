@@ -100,7 +100,7 @@ import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
-  const { setUser, token, setToken, navigate, backendUrl } = useContext(ShopContext);
+  const { token, setToken, navigate, backendUrl } = useContext(ShopContext);
 
   const [password, setPassword] = useState("");
   const [gmail, setGmail] = useState("");
@@ -118,12 +118,12 @@ const Login = () => {
         setToken(response.data.token);
         localStorage.setItem("token", response.data.token);
 
-        setUser(response.data.user.name);
-        localStorage.setItem("user", response.data.user.name);
-
-        toast.success("You are logged in", {
-          position: "top-center",
+       toast.success("You Are Logged In", {
+          className: "custom-toast-center",
           autoClose: 1000,
+          pauseOnHover: false,
+          closeOnClick: true,
+          hideProgressBar: true,
         });
       } else {
         toast.error(response.data.message);

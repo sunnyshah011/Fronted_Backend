@@ -13,6 +13,7 @@ import { ToastContainer } from 'react-toastify';
 import NotFound from "./component/NotFound";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
+import Account from "./pages/Account";
 import Breadcrumbs from "./component/Breadcrumb";
 
 const App = () => {
@@ -41,12 +42,19 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+
+            <Route path="/email-verify" element={<Register />} />
+            <Route path="/reset-password" element={<Register />} />
+
             <Route path="/profile" element={<Profile />} />
-            <Route path="/cart" element={<Cart />} />
+            <Route path="/manage-account" element={<Account />} />
+            <Route path="/product/:productId" element={<Product />} />
             <Route path="/collection" element={<Collection />} />
+            <Route path="/cart" element={<Cart />} />
+
             <Route path="/order" element={<Order />} />
             <Route path="/placeorder" element={<Placeorder />} />
-            <Route path="/product/:productId" element={<Product />} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

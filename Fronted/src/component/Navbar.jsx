@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useContext } from "react";
 import { assets } from "../assets/frontend_assets/assets";
 import { NavLink, Link } from "react-router-dom";
 import { ShopContext } from "../Context/ShopContext";
-import { UserIcon } from "@heroicons/react/24/outline"; // or /outline
+import { UserIcon, Cog6ToothIcon } from "@heroicons/react/24/outline"; // or /outline
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline"; // or /outline
 import { toast } from "react-toastify";
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,15 +12,8 @@ import { toast } from "react-toastify";
 // import { faCoffee } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = () => {
-  const {
-    user,
-    setUser,
-    setToken,
-    token,
-    getcartcount,
-    setcartitem,
-    navigate,
-  } = useContext(ShopContext);
+  const { setToken, userDetails, token, getcartcount, setcartitem, navigate } =
+    useContext(ShopContext);
 
   const [isOpen, setIsOpen] = useState(false);
   const [show, setShow] = useState(false);
@@ -33,18 +26,15 @@ const Navbar = () => {
     window.scrollTo(0, 0);
     setShow(false);
     // Toast for logout
-    toast.info("You are Logout", {
-      position: "top-center",
+    toast.success("Your Are Logout!", {
       className: "custom-toast-center",
-      bodyClassName: "text-sm",
       autoClose: 1000,
+      pauseOnHover: false,
       closeOnClick: true,
-      pauseOnHover: true,
+      hideProgressBar: true,
     });
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
     setToken("");
-    setUser("");
     setcartitem({});
   };
 
@@ -55,6 +45,11 @@ const Navbar = () => {
 
   const myprofile = () => {
     navigate("/profile");
+    setShow(false);
+  };
+
+  const account = () => {
+    navigate("/manage-account");
     setShow(false);
   };
 
@@ -170,11 +165,11 @@ const Navbar = () => {
                 />
               </button>
               <div
-                className={`absolute left-[-110px] pt-4 ${
+                className={`absolute left-[-125px] pt-4 ${
                   show ? "block" : "hidden"
                 }`}
               >
-                <div className="flex flex-col gap-4 w-45 py-4 pl-6 bg-white border border-gray-300 rounded-[12px] text-gray-700">
+                <div className="flex flex-col gap-4 w-50 py-4 px-4 bg-white border border-gray-300 rounded-[12px] text-gray-700">
                   {token ? (
                     <div className="flex flex-col gap-4">
                       <p
@@ -190,6 +185,13 @@ const Navbar = () => {
                       >
                         <ClipboardDocumentListIcon className="h-6 w-6 text-gray-700" />
                         <span className="text-[15px]">My Orders</span>
+                      </p>
+                      <p
+                        onClick={account}
+                        className="cursor-pointer hover:text-black flex gap-3"
+                      >
+                        <Cog6ToothIcon className="h-6 w-6 text-gray-700" />
+                        <span className="text-[15px]">Manage Account</span>
                       </p>
                       <p
                         onClick={logout}
@@ -220,8 +222,14 @@ const Navbar = () => {
             </div>
 
             <div className="text-sm flex flex-col">
-              <div className="text-[13px] "> {user ? <p>HI,</p> : ""}</div>
-              <p className="text-[13px] "> {user ? user.slice(0, 5) : ""} </p>
+              <div className="text-[13px] ">
+                {" "}
+                {userDetails.name ? <p>HI,</p> : ""}
+              </div>
+              <p className="text-[13px] ">
+                {" "}
+                {userDetails.name ? userDetails.name.slice(0, 5) : ""}{" "}
+              </p>
             </div>
           </div>
         </div>

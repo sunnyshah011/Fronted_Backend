@@ -100,10 +100,6 @@
 
 // export default Register;
 
-
-
-
-
 // import { useContext, useState } from "react";
 // import { Link } from "react-router-dom";
 // import { ShopContext } from "../Context/ShopContext";
@@ -252,11 +248,6 @@
 
 // export default Register;
 
-
-
-
-
-
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShopContext } from "../Context/ShopContext";
@@ -296,16 +287,16 @@ const Register = () => {
 
       if (response.data.success) {
         navigate("/");
-        toast.info("Account Created Successfully", {
-          position: "top-center",
+        toast.success("Account Created Successfully", {
+          className: "custom-toast-center",
           autoClose: 1000,
+          pauseOnHover: false,
+          closeOnClick: true,
+          hideProgressBar: true,
         });
 
         setToken(response.data.token);
         localStorage.setItem("token", response.data.token);
-
-        setUser(response.data.user.name);
-        localStorage.setItem("user", response.data.user.name);
       } else {
         toast.error(response.data.message);
       }
@@ -399,16 +390,10 @@ const Register = () => {
               />
               <button
                 type="button"
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute inset-y-0 right-3 flex items-center text-gray-500"
               >
-                {showConfirmPassword ? (
-                  <EyeOff size={20} />
-                ) : (
-                  <Eye size={20} />
-                )}
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
           </div>
@@ -456,5 +441,3 @@ const Register = () => {
 };
 
 export default Register;
-
-

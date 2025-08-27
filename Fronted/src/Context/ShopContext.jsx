@@ -15,9 +15,29 @@ const ShopContextProvider = (props) => {
   const [cartitem, setCartitem] = useState({});
   const [products, setProducts] = useState([]);
   const [token, setToken] = useState(null);
-  const [user, setUser] = useState(null);
   const [address, setAddress] = useState(null);
+  const [userDetails, setUserDetails] = useState({});
 
+  // to fetch user data from backend
+  const getUserData = async () => {
+    try {
+      const response = await axios.post(
+        backendUrl + "/api/user/user-data",
+        {},
+        { headers: { token } }
+      );
+      if (response.data.success) {
+        setUserDetails(response.data.message);
+      } else {
+        toast.error("error");
+      }
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
+
+
+  
   // Loading states
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [isLoadingCart, setIsLoadingCart] = useState(false);
@@ -27,7 +47,14 @@ const ShopContextProvider = (props) => {
   const handleApiError = (error) => {
     const message =
       error?.response?.data?.message || error.message || "Something went wrong";
-    toast.error(message);
+    toast.error(message, {
+      position: "top-center",
+      className: "custom-toast-center",
+      bodyClassName: "text-sm",
+      closeOnClick: true,
+      pauseOnHover: true,
+      autoClose: 2000,
+    });
     console.error(error);
   };
 
@@ -259,22 +286,11 @@ const ShopContextProvider = (props) => {
     }
   }, [token, backendUrl]);
 
-  // Load token & user from localStorage on mount
+  // Load token on mount
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
-    const savedUser = localStorage.getItem("user");
     const savedCart = localStorage.getItem("cartItems");
-
     if (savedToken) setToken(savedToken);
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        // fallback if it’s a plain string
-        setUser(savedUser);
-      }
-    }
-
     if (savedCart) setCartitem(JSON.parse(savedCart));
   }, []);
 
@@ -292,6 +308,7 @@ const ShopContextProvider = (props) => {
   useEffect(() => {
     if (token) {
       getUserCart(token);
+      getUserData();
     } else {
       // logout: clear cart
       setCartitem({});
@@ -316,12 +333,13 @@ const ShopContextProvider = (props) => {
     backendUrl,
     setToken,
     token,
-    user,
-    setUser,
     address,
     setAddress,
     updateAddress,
     isLoadingProfile,
+    getUserData,
+    userDetails,
+    setUserDetails
   };
 
   return (

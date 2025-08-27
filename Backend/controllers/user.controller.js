@@ -333,6 +333,20 @@ const isAuthenticated = async (req, res) => {
   }
 };
 
+//get user data for fronted
+const getuserdata = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const user = await userModel.findById(userId);
+
+     res.json({ success: true, message: user });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "You are not Login!!" });
+  }
+};
+
 //send password reset otp
 const sendResetOtp = async (req, res) => {
   const { gmail } = req.body || {};
@@ -417,10 +431,8 @@ export {
   isAuthenticated,
   sendResetOtp,
   resetPassword,
+  getuserdata,
 };
-
-
-
 
 // //send password reset otp
 // const sendResetOtp = async (req, res) => {
@@ -472,8 +484,6 @@ export {
 //     res.json({ success: false, message: error.message });
 //   }
 // };
-
-
 
 // //Reset User Password
 // const resetPassword = async (req, res) => {
