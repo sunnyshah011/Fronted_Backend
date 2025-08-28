@@ -2,9 +2,11 @@ import { useContext } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 function Account() {
   const { token, userDetails, navigate, backendUrl } = useContext(ShopContext);
+  const queryClient = useQueryClient(); // works now
 
   const sendVerificationOtp = async () => {
     try {
@@ -22,9 +24,10 @@ function Account() {
           closeOnClick: true,
           hideProgressBar: true,
         });
+        queryClient.invalidateQueries(["userDetails", token]);
         navigate("/email-verify");
       } else {
-        toast.error(response.data.error);
+        toast.error(response.data.message);
       }
     } catch (error) {
       toast.error(error.message, {
@@ -73,8 +76,7 @@ function Account() {
             </div>
             <div onClick={sendVerificationOtp}>
               <span className="border border-gray-300 p-1 px-2 rounded-sm cursor-pointer">
-                {" "}
-                Verify Now{" "}
+                Verify Now
               </span>
             </div>
           </div>

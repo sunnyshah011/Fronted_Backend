@@ -306,7 +306,6 @@ const ShopContextProvider = (props) => {
   useEffect(() => {
     if (token) {
       getUserCart(token);
-      getUserData();
     } else {
       // logout: clear cart
       setCartitem({});

@@ -69,7 +69,7 @@ function EmailVerify() {
       );
       if (res.data.success) {
         toast.success(res.data.message);
-        navigate('/')
+        navigate('/manage-account')
       } else {
         toast.error(res.data.message);
       }
@@ -79,10 +79,6 @@ function EmailVerify() {
       setLoading(false);
     }
   };
-
-  useEffect(()=>{
-    navigate('/')
-  },[!userDetails?.phone === true])
 
   return (
     <div className="max-w-md mx-auto mt-6 p-4 bg-white rounded shadow">
