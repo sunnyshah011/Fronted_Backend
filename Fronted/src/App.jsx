@@ -8,12 +8,14 @@ import Login from "./pages/Login";
 import Order from "./pages/Order";
 import Placeorder from "./pages/PlaceOrder";
 import Product from "./pages/Product";
-import Footer from './component/Footer'
-import { ToastContainer } from 'react-toastify';
+import Footer from "./component/Footer";
+import { ToastContainer } from "react-toastify";
 import NotFound from "./component/NotFound";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Account from "./pages/Account";
+import EmailVerify from "./pages/EmailVerify";
+import ResetPassword from "./pages/ResetPassword";
 import Breadcrumbs from "./component/Breadcrumb";
 
 const App = () => {
@@ -33,7 +35,6 @@ const App = () => {
 
       {/* Wrapper that limits width */}
       <div className="flex flex-col flex-grow mx-auto w-full max-w-[1250px] ">
-        
         <Navbar />
         <Breadcrumbs />
 
@@ -43,8 +44,8 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            <Route path="/email-verify" element={<Register />} />
-            <Route path="/reset-password" element={<Register />} />
+            <Route path="/email-verify" element={<EmailVerify />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             <Route path="/profile" element={<Profile />} />
             <Route path="/manage-account" element={<Account />} />

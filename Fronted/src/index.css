@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 @import "tailwindcss";
 
@@ -6,20 +6,20 @@
     font-family: poppins;
 } */
 
-a.active hr{
-    display: block;
+a.active hr {
+  display: block;
 }
 
-::-webkit-scrollbar{
-    display: none;
+::-webkit-scrollbar {
+  display: none;
 }
 
 .custom-toast-center {
-    margin-top: 100px;
-  position: fixed !important;     /* ✅ use fixed to position on the screen */
-  top: 50% !important;            /* ✅ vertical center */
-  left: 50% !important;           /* ✅ horizontal center */
-  transform: translate(-50%, -50%) !important;  /* ✅ offset by half */
+  margin-top: 100px;
+  position: fixed !important; /* ✅ use fixed to position on the screen */
+  top: 50% !important; /* ✅ vertical center */
+  left: 50% !important; /* ✅ horizontal center */
+  transform: translate(-50%, -50%) !important; /* ✅ offset by half */
   z-index: 9999 !important;
 
   /* Optional styling */
@@ -29,5 +29,4 @@ a.active hr{
   font-size: 14px !important;
   text-align: center;
   border-radius: 8px;
-  
 }

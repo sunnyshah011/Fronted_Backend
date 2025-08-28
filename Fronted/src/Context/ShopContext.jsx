@@ -36,8 +36,6 @@ const ShopContextProvider = (props) => {
     }
   };
 
-
-
   // Loading states
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [isLoadingCart, setIsLoadingCart] = useState(false);
@@ -316,7 +314,6 @@ const ShopContextProvider = (props) => {
     }
   }, [token, getUserCart]);
 
-
   useEffect(() => {
     if (token) {
       getUserData(); // fetch user details
@@ -348,7 +345,7 @@ const ShopContextProvider = (props) => {
     isLoadingProfile,
     getUserData,
     userDetails,
-    setUserDetails
+    setUserDetails,
   };
 
   return (

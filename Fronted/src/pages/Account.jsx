@@ -1,110 +1,87 @@
-import { useState } from "react";
-
-// Dummy data (replace with API fetched user)
-const user = {
-  name: "John Doe",
-  phone: 9876543210,
-  gmail: "john@example.com",
-  isAccountVerified: false,
-};
+import { useContext } from "react";
+import { ShopContext } from "../Context/ShopContext";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 function Account() {
-  const [step, setStep] = useState("profile"); // profile | otp | reset
-  const [otp, setOtp] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+  const { token, userDetails, navigate, backendUrl } = useContext(ShopContext);
 
-  // 👉 Request OTP (API call)
-  const handleRequestOtp = () => {
-    console.log("Sending OTP to", user.gmail);
-    setStep("otp");
-  };
+  const sendVerificationOtp = async () => {
+    try {
+      const response = await axios.post(
+        backendUrl + "/api/user/sendverifyotp",
+        {},
+        { headers: { token } }
+      );
 
-  // 👉 Verify OTP (API call)
-  const handleVerifyOtp = () => {
-    if (otp === "1234") {
-      console.log("OTP verified ✅");
-      setStep("reset");
-    } else {
-      alert("Invalid OTP ❌");
+      if (response.data.success) {
+        toast.success(response.data.message, {
+          className: "custom-toast-center",
+          autoClose: 1000,
+          pauseOnHover: false,
+          closeOnClick: true,
+          hideProgressBar: true,
+        });
+        navigate("/email-verify");
+      } else {
+        toast.error(response.data.error);
+      }
+    } catch (error) {
+      toast.error(error.message, {
+        className: "custom-toast-center",
+        autoClose: 1000,
+        pauseOnHover: false,
+        closeOnClick: true,
+        hideProgressBar: true,
+      });
     }
   };
 
-  // 👉 Reset Password (API call)
-  const handleResetPassword = () => {
-    console.log("Password changed to:", newPassword);
-    alert("Password reset successful ✅ Redirecting to Home...");
-    window.location.href = "/"; // redirect
-  };
+  if (!userDetails) {
+    return (
+      <div className="max-w-md mx-auto mt-3 p-4">
+        <div className="p-4 bg-white rounded-sm shadow-sm">
+          <h2 className="text-xl font-bold mb-4">User Profile</h2>
+          <p className="text-gray-500">Loading user details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-md">
-      {step === "profile" && (
-        <>
-          <h2 className="text-xl font-bold mb-4">User Profile</h2>
-          <div className="space-y-2">
-            <p><span className="font-semibold">Name:</span> {user.name}</p>
-            <p><span className="font-semibold">Phone:</span> {user.phone}</p>
-            <p><span className="font-semibold">Email:</span> {user.gmail}</p>
-            <p>
+    <div className="max-w-md mx-auto mt-3 p-4">
+      <div className="p-4 bg-white rounded-sm shadow-sm">
+        <h2 className="text-xl font-bold mb-4">Manage Your Account</h2>
+        <div className="flex flex-col gap-6">
+          <p>
+            <span className="font-semibold">Name:</span> {userDetails.name}
+          </p>
+          <p>
+            <span className="font-semibold">Phone:</span> {userDetails.phone}
+          </p>
+          <p>
+            <span className="font-semibold">Email:</span> {userDetails.gmail}
+          </p>
+          <div className="flex justify-between max-[300px]:flex-col max-[300px]:gap-5">
+            <div>
               <span className="font-semibold">Status:</span>{" "}
-              {user.isAccountVerified ? (
+              {userDetails.isAccountVerified ? (
                 <span className="text-green-600">Verified</span>
               ) : (
                 <span className="text-red-600">Not Verified</span>
               )}
-            </p>
+            </div>
+            <div onClick={sendVerificationOtp}>
+              <span className="border border-gray-300 p-1 px-2 rounded-sm cursor-pointer">
+                {" "}
+                Verify Now{" "}
+              </span>
+            </div>
           </div>
-
-          <button
-            onClick={() =>
-              user.isAccountVerified ? setStep("reset") : handleRequestOtp()
-            }
-            className="mt-6 w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700"
-          >
-            Change Password
-          </button>
-        </>
-      )}
-
-      {step === "otp" && (
-        <>
-          <h2 className="text-xl font-bold mb-4">Verify OTP</h2>
-          <input
-            type="text"
-            placeholder="Enter OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            className="w-full border p-2 rounded-lg mb-4"
-          />
-          <button
-            onClick={handleVerifyOtp}
-            className="w-full bg-green-600 text-white py-2 rounded-xl hover:bg-green-700"
-          >
-            Verify OTP
-          </button>
-        </>
-      )}
-
-      {step === "reset" && (
-        <>
-          <h2 className="text-xl font-bold mb-4">Reset Password</h2>
-          <input
-            type="password"
-            placeholder="New Password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full border p-2 rounded-lg mb-4"
-          />
-          <button
-            onClick={handleResetPassword}
-            className="w-full bg-purple-600 text-white py-2 rounded-xl hover:bg-purple-700"
-          >
-            Reset Password
-          </button>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
 
-export default Account
+export default Account;

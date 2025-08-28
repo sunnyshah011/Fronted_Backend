@@ -248,7 +248,7 @@
 
 // export default Register;
 
-import { useContext, useState } from "react";
+import { useContext, useState,useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
@@ -256,7 +256,7 @@ import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
 
 const Register = () => {
-  const { setUser, setToken, navigate, backendUrl } = useContext(ShopContext);
+  const { token, setToken, navigate, backendUrl } = useContext(ShopContext);
 
   const [name, setName] = useState("");
   const [gmail, setGmail] = useState("");
@@ -305,6 +305,12 @@ const Register = () => {
       toast.error(error.message, { position: "top-center", autoClose: 1000 });
     }
   };
+
+    useEffect(() => {
+      if (token) {
+        navigate("/");
+      }
+    }, [token]);
 
   return (
     <div className="mt-5 flex items-center justify-center bg-gray-100 px-4">

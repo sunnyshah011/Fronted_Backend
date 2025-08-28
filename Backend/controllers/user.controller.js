@@ -274,16 +274,16 @@ const sendVerifyOtp = async (req, res) => {
 
     await transporter.sendMail(mailOption);
 
-    res.json({ success: true, message: "Verificatin OTP Send on Email" });
-  } catch (error) { }
+    return res.json({ success: true, message: "Verificatin OTP Send on Email" });
+  } catch (error) {
+    return res.json({ success: false, message: error.message });
+   }
 };
 
 //verify the account according to otp send by user
 const verifyEmail = async (req, res) => {
   const userId = req.userId;
   const { otp } = req.body || {};
-  console.log(userId);
-  console.log(otp);
 
   if (!userId || !otp) {
     return res.json({ success: false, message: "Missing Details" });
