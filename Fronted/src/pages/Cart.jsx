@@ -99,7 +99,7 @@ const Cart = () => {
               {/* Product info + quantity */}
               <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-wrap">
-                  <p className="text-sm sm:text-base font-medium text-gray-800 truncate w-40">
+                  <p className="text-sm sm:text-base font-medium text-gray-800 truncate max-w-[110px] min-[340px]:max-w-[170px] min-[360px]:max-w-[190px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-[700px]">
                     {productData.name}
                   </p>
                   <span className="text-sm font-semibold text-gray-700">

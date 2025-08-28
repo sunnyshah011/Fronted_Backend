@@ -17,7 +17,9 @@ const Breadcrumbs = () => {
     const fetchProductName = async () => {
       if (paths[0] === "product" && paths[1]) {
         try {
-          const res = await axios.get(`${backendUrl}/api/product/single/${paths[1]}`);
+          const res = await axios.get(
+            `${backendUrl}/api/product/single/${paths[1]}`
+          );
           setProductName(res.data.product.name);
         } catch (err) {
           console.log(err);
@@ -47,7 +49,9 @@ const Breadcrumbs = () => {
             return (
               <li key={index} className="flex items-center space-x-2">
                 <span className="text-gray-400">/</span>
-                <span className="text-gray-500">{productName || "Loading..."}</span>
+                <span className="text-gray-500 truncate max-w-[110px] min-[320px]:max-w-[170px] min-[350px]:max-w-[190px] sm:max-w-[400px] md:max-w-[400px] lg:max-w-[700px]">
+                  {productName || "Loading..."}
+                </span>
               </li>
             );
           }

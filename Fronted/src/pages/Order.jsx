@@ -52,11 +52,11 @@ const Order = () => {
             You don’t have any orders yet.
           </p>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-3">
             {orderData.map((item, index) => (
               <div
                 key={index}
-                className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 rounded-lg shadow-sm hover:shadow-sm transition bg-white"
+                className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 p-4 rounded-lg shadow-sm hover:shadow-sm transition bg-white"
               >
                 {/* LEFT: Product Info */}
                 <div className="flex items-start gap-4">
@@ -66,7 +66,7 @@ const Order = () => {
                     alt={item.name}
                   />
                   <div>
-                    <p className="font-semibold text-gray-800 text-sm sm:text-base">
+                    <p className="font-semibold text-gray-800 text-sm sm:text-base truncate max-w-[110px] min-[340px]:max-w-[170px] min-[360px]:max-w-[190px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-[700px]">
                       {item.name}
                     </p>
 
