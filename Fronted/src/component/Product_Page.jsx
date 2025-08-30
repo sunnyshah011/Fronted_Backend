@@ -8,7 +8,7 @@ const Product_Page = ({ id, name, price, image }) => {
 
   return (
     <Link
-      className="text-gray-700 cursor-pointer rounded-b-[6px]  bg-white block" to={`/product/${id}`}>
+      className="text-gray-700 cursor-pointer rounded-b-[6px]  bg-white block" to={`/${id}`}>
       <div className="aspect-square overflow-hidden rounded-t-[6px]">
         <img
           src={image[0]}

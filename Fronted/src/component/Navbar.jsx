@@ -36,11 +36,7 @@ const Navbar = () => {
     localStorage.removeItem("token");
     setToken("");
     setCartitem({});
-    console.log("BEFORE logout userDetails:", userDetails);
-    setUserDetails({ name: null });
-    console.log("AFTER logout userDetails:", userDetails);
-
-  };
+    };
 
   const order = () => {
     navigate("/order");

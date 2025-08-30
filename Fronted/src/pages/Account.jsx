@@ -2,11 +2,9 @@ import { useContext } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 function Account() {
   const { token, userDetails, navigate, backendUrl } = useContext(ShopContext);
-  const queryClient = useQueryClient(); // works now
 
   const sendVerificationOtp = async () => {
     try {
@@ -24,7 +22,6 @@ function Account() {
           closeOnClick: true,
           hideProgressBar: true,
         });
-        queryClient.invalidateQueries(["userDetails", token]);
         navigate("/email-verify");
       } else {
         toast.error(response.data.message);

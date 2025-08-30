@@ -10,12 +10,12 @@ const R_D = () => {
 
   useEffect(() => {
     if (products.length > 0) {
-      setproduct(products.slice(0, 5));
+      setproduct(products.slice(0, 4));
     }
   }, [products]); // <- Watch for products update
 
   return (
-    <div className="w-full p-3 mt-5">
+    <div className="w-full p-3">
       <Title Category="R_D" More="View" />
 
       <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-y-3 gap-x-2">

@@ -19,7 +19,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Breadcrumbs from "./component/Breadcrumb";
 
 const App = () => {
-  return (
+  return (    
     <div className="min-h-screen flex flex-col">
       <ToastContainer
         position="top-center"
@@ -49,7 +49,7 @@ const App = () => {
 
             <Route path="/profile" element={<Profile />} />
             <Route path="/manage-account" element={<Account />} />
-            <Route path="/product/:productId" element={<Product />} />
+            <Route path="/:productId" element={<Product />} />
             <Route path="/collection" element={<Collection />} />
             <Route path="/cart" element={<Cart />} />
 

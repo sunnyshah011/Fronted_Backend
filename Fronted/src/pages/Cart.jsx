@@ -88,7 +88,7 @@ const Cart = () => {
               />
 
               {/* Image */}
-              <Link to={`/product/${item._id}`} className="flex-shrink-0">
+              <Link to={`/${item._id}`} className="flex-shrink-0">
                 <img
                   className="w-14 sm:w-20 h-14 sm:h-20 rounded-lg object-cover"
                   src={productData.image[0]}
