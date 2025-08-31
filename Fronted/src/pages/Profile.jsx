@@ -13,6 +13,38 @@ const cities = [
 
 const Profile = () => {
   const { backendUrl, token, address, updateAddress } = useContext(ShopContext);
+  const [view, setView] = useState("provinces"); // provinces | districts | cities
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  const [newName, setNewName] = useState("");
+  const [editingItem, setEditingItem] = useState(null); // { type: "province"|"district"|"city", name: string }
+  
+
+  // ✅ Fetch provinces
+    const fetchProvinces = async () => {
+      const res = await axios.get(`${BackendUrl}/api/location/province`);
+      setProvinces(res.data.provinces); // array of objects
+    };
+  
+    // ✅ Fetch districts
+    const fetchDistricts = async (provinceName) => {
+      const res = await axios.get(
+        `${BackendUrl}/api/location/${provinceName}/districts`
+      );
+      setDistricts(res.data.districts); // array of objects
+    };
+  
+    // ✅ Fetch cities
+    const fetchCities = async (provinceName, districtName) => {
+      const res = await axios.get(
+        `${BackendUrl}/api/location/${provinceName}/${districtName}/cities`
+      );
+      setCities(res.data.cities); // array of objects
+    };
+
+
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -131,10 +163,9 @@ const Profile = () => {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
 
   return (
     <div className="px-4 mt-5 h-full pb-10">
