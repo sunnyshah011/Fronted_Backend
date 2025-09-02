@@ -11,7 +11,7 @@ const R_L = () => {
 
 useEffect(() => {
   if (products.length > 0) {
-    setproduct(products.slice(0, 4))
+    setproduct(products.slice(0, 6))
   }
 }, [products])  // <- Watch for products update
 

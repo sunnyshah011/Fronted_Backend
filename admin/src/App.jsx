@@ -8,6 +8,7 @@ import Login from "./components/Login";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import Location from "./pages/Location";
+import CategoryManager from "./pages/Category";
 
 export const BackendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -38,6 +39,7 @@ const App = () => {
                 <Route path="/list" element={<List token={token} />} />
                 <Route path="/order" element={<Order token={token} />} />
                 <Route path="/location" element={<Location token={token} />} />
+                <Route path="/category-manager" element={<CategoryManager token={token} />} />
               </Routes>
             </div>
           </div>
