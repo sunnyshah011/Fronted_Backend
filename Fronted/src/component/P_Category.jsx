@@ -11,7 +11,7 @@ const P_Category = () => {
 
   useEffect(() => {
     if (products.length > 0) {
-      setimage(products.slice(0, 4))
+      setimage(products.slice(0, 6))
     }
   }, [products])  // <- Watch for products update
 
@@ -23,7 +23,7 @@ const P_Category = () => {
       </Link>
 
       {p_image.length >= 4 ? (
-        <div className="mt-5 grid gap-3 px-1 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-5 grid gap-3 px-1 grid-cols-2 sm:grid-cols-2 lg:grid-cols-6">
           {p_image.map((item, index) => (
             <div
               key={index}

@@ -4,19 +4,11 @@ import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const provinces = ["Bagmati", "Gandaki", "Lumbini"];
-const districts = ["Chitwan", "Kathmandu", "Pokhara"];
-const cities = [
-  "Bharatpur Metropolitan City ward no. - 01",
-  "Lalitpur Sub-Metropolitan",
-  "Pokhara Lekhnath Metropolitan",
-];
-
 const Placeorder = () => {
-  const [payment, setpayment] = useState(false);
+  const [payment, setPayment] = useState(false);
   const {
     navigate,
-   backendUrl, 
+    backendUrl,
     token,
     updateAddress,
     address,
@@ -26,6 +18,10 @@ const Placeorder = () => {
     delivery_fee,
     products,
   } = useContext(ShopContext);
+
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [cities, setCities] = useState([]);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -40,8 +36,47 @@ const Placeorder = () => {
   const [isModified, setIsModified] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
+  // ✅ Fetch provinces
+  const fetchProvinces = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/location/province`);
+      setProvinces(res.data.provinces || []);
+    } catch (err) {
+      console.error("Error fetching provinces:", err);
+    }
+  };
+
+  // ✅ Fetch districts
+  const fetchDistricts = async (provinceName) => {
+    if (!provinceName) return;
+    try {
+      const res = await axios.get(
+        `${backendUrl}/api/location/${provinceName}/districts`
+      );
+      setDistricts(res.data.districts || []);
+    } catch (err) {
+      console.error("Error fetching districts:", err);
+    }
+  };
+
+  // ✅ Fetch cities
+  const fetchCities = async (provinceName, districtName) => {
+    if (!provinceName || !districtName) return;
+    try {
+      const res = await axios.get(
+        `${backendUrl}/api/location/${provinceName}/${districtName}/cities`
+      );
+      setCities(res.data.cities || []);
+    } catch (err) {
+      console.error("Error fetching cities:", err);
+    }
+  };
+
+  // ✅ Load address from context
   useEffect(() => {
     window.scrollTo(0, 0);
+    fetchProvinces();
+
     if (address && Object.keys(address).length > 0) {
       const data = {
         fullName: address.name || "",
@@ -54,9 +89,15 @@ const Placeorder = () => {
       setFormData(data);
       setOriginalData(data);
       setIsModified(false);
+
+      // preload dependent dropdowns
+      if (address.province) fetchDistricts(address.province);
+      if (address.province && address.district)
+        fetchCities(address.province, address.district);
     }
   }, [address]);
 
+  // ✅ Compare changes
   const checkIfModified = (newData) =>
     newData.fullName !== originalData.fullName ||
     newData.phone !== originalData.phone ||
@@ -65,8 +106,25 @@ const Placeorder = () => {
     newData.city !== originalData.city ||
     newData.streetAddress !== originalData.streetAddress;
 
+  // ✅ Handle input changes
   const handleChange = (e) => {
-    const updatedForm = { ...formData, [e.target.name]: e.target.value };
+    const { name, value } = e.target;
+    let updatedForm = { ...formData, [name]: value };
+
+    if (name === "province") {
+      updatedForm.district = "";
+      updatedForm.city = "";
+      setDistricts([]);
+      setCities([]);
+      fetchDistricts(value);
+    }
+
+    if (name === "district") {
+      updatedForm.city = "";
+      setCities([]);
+      fetchCities(updatedForm.province, value);
+    }
+
     setFormData(updatedForm);
     setIsModified(checkIfModified(updatedForm));
   };
@@ -92,7 +150,7 @@ const Placeorder = () => {
 
     try {
       const response = await axios.post(
-        backendUrl + "/api/profile/setaddress",
+        `${backendUrl}/api/profile/setaddress`,
         payload,
         { headers: { token } }
       );
@@ -114,7 +172,7 @@ const Placeorder = () => {
     }
   };
 
-  // 🔑 Place Order Function
+  // ✅ Place Order
   const handlePlaceOrder = async () => {
     if (!payment) {
       toast.error("Please select a payment method", {
@@ -148,10 +206,11 @@ const Placeorder = () => {
       };
 
       const response = await axios.post(
-        backendUrl + "/api/order/place",
+        `${backendUrl}/api/order/place`,
         payload,
         { headers: { token } }
       );
+
       if (response.data.success) {
         localStorage.setItem("cartItems", JSON.stringify({}));
         setCartitem({});
@@ -167,8 +226,8 @@ const Placeorder = () => {
   };
 
   return (
-    <div className="p-4 mt-5 flex flex-col sm:flex-row gap-8 pt-5 sm:pt-14 min-h-[80vh] ">
-      {/* left side */}
+    <div className="p-4 mt-5 flex flex-col sm:flex-row gap-8 pt-5 sm:pt-14 min-h-[80vh]">
+      {/* Left: Address Form */}
       <form
         onSubmit={handleUpdate}
         className="flex-1 bg-white shadow-sm rounded-xl p-6"
@@ -200,7 +259,7 @@ const Placeorder = () => {
             <input
               type={type}
               name={name}
-              value={formData[name]}
+              value={formData[name] || ""}
               onChange={handleChange}
               disabled={!isEditing}
               className={`w-full p-3 rounded-lg border ${
@@ -225,7 +284,7 @@ const Placeorder = () => {
             </label>
             <select
               name={name}
-              value={formData[name]}
+              value={formData[name] || ""}
               onChange={handleChange}
               disabled={!isEditing}
               className={`w-full p-3 rounded-lg border ${
@@ -237,15 +296,15 @@ const Placeorder = () => {
             >
               <option value="">Select {label}</option>
               {options.map((val) => (
-                <option key={val} value={val}>
-                  {val}
+                <option key={val._id || val.name} value={val.name}>
+                  {val.name}
                 </option>
               ))}
             </select>
           </div>
         ))}
 
-        {/* Street Address Field */}
+        {/* Street Address */}
         <div className="mb-6">
           <label className="block mb-1 font-medium text-gray-700">
             Street Address *
@@ -253,7 +312,7 @@ const Placeorder = () => {
           <input
             type="text"
             name="streetAddress"
-            value={formData.streetAddress}
+            value={formData.streetAddress || ""}
             onChange={handleChange}
             disabled={!isEditing}
             placeholder="Enter street address"
@@ -266,7 +325,7 @@ const Placeorder = () => {
           />
         </div>
 
-        {/* Update / Cancel Buttons */}
+        {/* Update / Cancel */}
         {isEditing && (
           <div className="flex gap-4 mt-8">
             <button
@@ -286,19 +345,19 @@ const Placeorder = () => {
         )}
       </form>
 
-      {/* right side */}
+      {/* Right: Cart + Payment */}
       <div className="flex-1 space-y-6">
-        <div className="bg-white shadow-sm rounded-xl p-6 ">
+        <div className="bg-white shadow-sm rounded-xl p-6">
           <CartTotal />
         </div>
 
-        <div className="bg-white shadow-sm rounded-xl p-6 ">
+        <div className="bg-white shadow-sm rounded-xl p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">
             Payment Method
           </h2>
 
           <div
-            onClick={() => setpayment(!payment)}
+            onClick={() => setPayment(!payment)}
             className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer transition ${
               payment
                 ? "border-green-500 bg-green-50"
