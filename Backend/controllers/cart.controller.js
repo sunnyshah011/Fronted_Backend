@@ -72,11 +72,11 @@ import userModel from "../models/user.model.js";
 // Add to cart
 const addToCart = async (req, res) => {
   try {
-    const { itemId, size } = req.body;
+    const { itemId, size, color, quantity = 1 } = req.body;
     const userId = req.userId;
 
-    if (!itemId || !size) {
-      return res.status(400).json({ success: false, message: "Missing itemId or size" });
+    if (!itemId || !size || !color) {
+      return res.status(400).json({ success: false, message: "Missing itemId, size or color" });
     }
 
     const userData = await userModel.findById(userId);
@@ -86,15 +86,22 @@ const addToCart = async (req, res) => {
 
     let cartData = userData.category || {}; // fallback if null
 
+    // Ensure itemId exists
     if (!cartData[itemId]) {
       cartData[itemId] = {};
     }
 
-    cartData[itemId][size] = (cartData[itemId][size] || 0) + 1;
+    // Ensure size exists
+    if (!cartData[itemId][size]) {
+      cartData[itemId][size] = {};
+    }
+
+    // Ensure color exists and add quantity
+    cartData[itemId][size][color] = (Number(cartData[itemId][size][color]) || 0) + Number(quantity);
 
     await userModel.findByIdAndUpdate(userId, { category: cartData });
 
-    return res.status(200).json({ success: true, message: "Added To Cart" });
+    return res.status(200).json({ success: true, message: "Added To Cart", cartData });
 
   } catch (error) {
     console.error(error);
@@ -107,10 +114,10 @@ const addToCart = async (req, res) => {
 // Update cart
 const updateCart = async (req, res) => {
   try {
-    const { itemId, size, quantity } = req.body;
+    const { itemId, size, color, quantity } = req.body;
     const userId = req.userId;
 
-    if (!itemId || !size || typeof quantity !== "number") {
+    if (!itemId || !size || !color || typeof quantity !== "number") {
       return res.status(400).json({ success: false, message: "Invalid input" });
     }
 
@@ -122,20 +129,26 @@ const updateCart = async (req, res) => {
     let cartData = userData.category || {};
 
     if (quantity <= 0) {
-      if (cartData[itemId] && cartData[itemId][size]) {
-        delete cartData[itemId][size];
+      if (cartData[itemId] && cartData[itemId][size] && cartData[itemId][size][color]) {
+        delete cartData[itemId][size][color];
+
+        // clean empty objects
+        if (Object.keys(cartData[itemId][size]).length === 0) {
+          delete cartData[itemId][size];
+        }
         if (Object.keys(cartData[itemId]).length === 0) {
           delete cartData[itemId];
         }
       }
     } else {
       if (!cartData[itemId]) cartData[itemId] = {};
-      cartData[itemId][size] = quantity;
+      if (!cartData[itemId][size]) cartData[itemId][size] = {};
+      cartData[itemId][size][color] = Number(quantity);
     }
 
     await userModel.findByIdAndUpdate(userId, { category: cartData });
 
-    return res.status(200).json({ success: true, message: "Cart Updated" });
+    return res.status(200).json({ success: true, message: "Cart Updated", cartData });
 
   } catch (error) {
     console.error(error);
