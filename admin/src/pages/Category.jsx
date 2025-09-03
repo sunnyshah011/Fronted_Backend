@@ -18,7 +18,7 @@ export default function CategoryManager({token}) {
   const loadCategories = async () => {
     const res = await axios.get(BackendUrl + "/api/categories");
     setCategories(res.data.categories || []); // <-- pick categories array
-    console.log(res.data.categories);
+    // console.log(res.data.categories);
   };
 
  const loadSubcategories = async (categoryId) => {
