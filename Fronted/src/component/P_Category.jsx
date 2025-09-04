@@ -12,7 +12,6 @@ const P_Category = () => {
   useEffect(() => {
     if (products.length > 0) {
       setimage(products.slice(0, 6))
-      console.log(products);
     }
   }, [products])  // <- Watch for products update
 

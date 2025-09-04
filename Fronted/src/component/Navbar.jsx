@@ -149,7 +149,7 @@ const Navbar = () => {
                 alt="Cart"
               />
               <span className="absolute right-[-4px] bottom-[-6px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
-                {getcartcount()}
+                 {Number(getcartcount()) || 0}
               </span>
             </Link>
 

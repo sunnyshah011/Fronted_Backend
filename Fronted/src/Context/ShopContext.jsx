@@ -537,116 +537,231 @@ const ShopContextProvider = (props) => {
   // }, [cartitem, products]);
 
   // ✅ Add to Cart
-  const addtocart = useCallback(
-    async (itemId, size, color, quantity = 1) => {
-      if (!size && !color) {
-        toast.error("Please select size and/or color!");
-        return;
-      }
+  // const addtocart = useCallback(
+  //   async (itemId, size, color, quantity = 1) => {
+  //     if (!size && !color) {
+  //       toast.error("Please select size and/or color!");
+  //       return;
+  //     }
 
-      const key = `${size || ""}|${color || ""}`; // unique key for size+color
-      let cartdata = structuredClone(cartitem);
+  //     const key = `${size || ""}|${color || ""}`; // unique key for size+color
+  //     let cartdata = structuredClone(cartitem);
 
-      if (cartdata[itemId]) {
-        cartdata[itemId][key] = (cartdata[itemId][key] || 0) + quantity;
-      } else {
-        cartdata[itemId] = { [key]: quantity };
-      }
+  //     if (cartdata[itemId]) {
+  //       cartdata[itemId][key] = (cartdata[itemId][key] || 0) + quantity;
+  //     } else {
+  //       cartdata[itemId] = { [key]: quantity };
+  //     }
 
-      setCartitem(cartdata);
-      localStorage.setItem("cartItems", JSON.stringify(cartdata));
-      toast.success("Product added to cart!");
+  //     setCartitem(cartdata);
+  //     localStorage.setItem("cartItems", JSON.stringify(cartdata));
+  //     toast.success("Product added to cart!");
 
-      if (token) {
-        try {
-          await axios.post(
-            backendUrl + "/api/cart/add",
-            { itemId, size, color, quantity },
-            { headers: { token } }
-          );
-        } catch (error) {
-          handleApiError(error);
-        }
-      }
-    },
-    [cartitem, token, backendUrl]
-  );
+  //     if (token) {
+  //       try {
+  //         await axios.post(
+  //           backendUrl + "/api/cart/add",
+  //           { itemId, size, color, quantity },
+  //           { headers: { token } }
+  //         );
+  //       } catch (error) {
+  //         handleApiError(error);
+  //       }
+  //     }
+  //   },
+  //   [cartitem, token, backendUrl]
+  // );
 
-  // ✅ Get Cart Count
-  const getcartcount = useCallback(() => {
-    let totalcount = 0;
-    for (const items in cartitem) {
-      for (const key in cartitem[items]) {
-        totalcount += cartitem[items][key];
+  // // ✅ Get Cart Count
+  // const getcartcount = useCallback(() => {
+  //   let totalcount = 0;
+  //   for (const items in cartitem) {
+  //     for (const key in cartitem[items]) {
+  //       totalcount += cartitem[items][key];
+  //     }
+  //   }
+  //   return totalcount;
+  // }, [cartitem]);
+
+  // // ✅ Update Quantity
+  // const updateQuantity = useCallback(
+  //   async (itemId, size, color, quantity) => {
+  //     const key = `${size || ""}|${color || ""}`;
+  //     let cartdata = structuredClone(cartitem);
+
+  //     if (quantity <= 0) {
+  //       if (cartdata[itemId] && cartdata[itemId][key]) {
+  //         delete cartdata[itemId][key];
+  //         if (Object.keys(cartdata[itemId]).length === 0) {
+  //           delete cartdata[itemId];
+  //         }
+  //       }
+  //       setCartitem(cartdata);
+  //       localStorage.setItem("cartItems", JSON.stringify(cartdata));
+
+  //       if (token) {
+  //         try {
+  //           await axios.post(
+  //             backendUrl + "/api/cart/update",
+  //             { itemId, size, color, quantity },
+  //             { headers: { token } }
+  //           );
+  //         } catch (error) {
+  //           handleApiError(error);
+  //         }
+  //       }
+  //       toast.info("Item removed from cart", { autoClose: 1000 });
+  //     } else {
+  //       if (!cartdata[itemId]) cartdata[itemId] = {};
+  //       cartdata[itemId][key] = quantity;
+  //       setCartitem(cartdata);
+  //       localStorage.setItem("cartItems", JSON.stringify(cartdata));
+
+  //       if (token) {
+  //         try {
+  //           await axios.post(
+  //             backendUrl + "/api/cart/update",
+  //             { itemId, size, color, quantity },
+  //             { headers: { token } }
+  //           );
+  //         } catch (error) {
+  //           handleApiError(error);
+  //         }
+  //       }
+  //     }
+  //   },
+  //   [cartitem, token, backendUrl]
+  // );
+
+  // // ✅ Calculate Total Amount
+  // const calculatetotalamount = useCallback(() => {
+  //   let totalamount = 0;
+  //   for (const items in cartitem) {
+  //     const cartinfo = products.find((product) => product._id === items);
+  //     for (const key in cartitem[items]) {
+  //       if (cartinfo) {
+  //         totalamount += cartinfo.price * cartitem[items][key];
+  //       }
+  //     }
+  //   }
+  //   return totalamount;
+  // }, [cartitem, products]);
+
+
+
+
+
+  //---------------------------------------------
+  // ✅ Add to Cart
+const addtocart = useCallback(
+  async (itemId, size, color, quantity = 1) => {
+    if (!size && !color) return toast.error("Select size/color");
+
+    const cartdata = structuredClone(cartitem);
+
+    if (!cartdata[itemId]) cartdata[itemId] = {};
+    if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
+
+    cartdata[itemId][size][color] = (cartdata[itemId][size][color] || 0) + quantity;
+
+    setCartitem(cartdata);
+    localStorage.setItem("cartItems", JSON.stringify(cartdata));
+    toast.success("Product added to cart!");
+
+    // ✅ Call backend if user is logged in
+    if (token) {
+      try {
+        await axios.post(
+          backendUrl + "/api/cart/add",
+          { itemId, size, color, quantity },
+          { headers: { token } }
+        );
+      } catch (error) {
+        handleApiError(error);
       }
     }
-    return totalcount;
-  }, [cartitem]);
+  },
+  [cartitem, token, backendUrl]
+);
 
-  // ✅ Update Quantity
-  const updateQuantity = useCallback(
-    async (itemId, size, color, quantity) => {
-      const key = `${size || ""}|${color || ""}`;
-      let cartdata = structuredClone(cartitem);
-
-      if (quantity <= 0) {
-        if (cartdata[itemId] && cartdata[itemId][key]) {
-          delete cartdata[itemId][key];
-          if (Object.keys(cartdata[itemId]).length === 0) {
-            delete cartdata[itemId];
-          }
-        }
-        setCartitem(cartdata);
-        localStorage.setItem("cartItems", JSON.stringify(cartdata));
-
-        if (token) {
-          try {
-            await axios.post(
-              backendUrl + "/api/cart/update",
-              { itemId, size, color, quantity },
-              { headers: { token } }
-            );
-          } catch (error) {
-            handleApiError(error);
-          }
-        }
-        toast.info("Item removed from cart", { autoClose: 1000 });
-      } else {
-        if (!cartdata[itemId]) cartdata[itemId] = {};
-        cartdata[itemId][key] = quantity;
-        setCartitem(cartdata);
-        localStorage.setItem("cartItems", JSON.stringify(cartdata));
-
-        if (token) {
-          try {
-            await axios.post(
-              backendUrl + "/api/cart/update",
-              { itemId, size, color, quantity },
-              { headers: { token } }
-            );
-          } catch (error) {
-            handleApiError(error);
-          }
-        }
-      }
-    },
-    [cartitem, token, backendUrl]
-  );
-
-  // ✅ Calculate Total Amount
-  const calculatetotalamount = useCallback(() => {
-    let totalamount = 0;
-    for (const items in cartitem) {
-      const cartinfo = products.find((product) => product._id === items);
-      for (const key in cartitem[items]) {
-        if (cartinfo) {
-          totalamount += cartinfo.price * cartitem[items][key];
-        }
+// ✅ Get Cart Count
+const getcartcount = useCallback(() => {
+  let totalcount = 0;
+  for (const productId in cartitem) {
+    for (const size in cartitem[productId]) {
+      for (const color in cartitem[productId][size]) {
+        totalcount += cartitem[productId][size][color];
       }
     }
-    return totalamount;
-  }, [cartitem, products]);
+  }
+  return totalcount;
+}, [cartitem]);
 
+// ✅ Update Quantity
+const updateQuantity = useCallback(
+  async (itemId, size, color, quantity) => {
+    const cartdata = structuredClone(cartitem);
+    if (!cartdata[itemId]) return;
+
+    if (quantity <= 0) {
+      delete cartdata[itemId][size][color];
+      if (Object.keys(cartdata[itemId][size]).length === 0) {
+        delete cartdata[itemId][size];
+      }
+      if (Object.keys(cartdata[itemId]).length === 0) {
+        delete cartdata[itemId];
+      }
+
+      toast.info("Item removed from cart", { autoClose: 1000 });
+    } else {
+      if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
+      cartdata[itemId][size][color] = quantity;
+    }
+
+    setCartitem(cartdata);
+    localStorage.setItem("cartItems", JSON.stringify(cartdata));
+
+    // ✅ Update backend if user is logged in
+    if (token) {
+      try {
+        await axios.post(
+          backendUrl + "/api/cart/update",
+          { itemId, size, color, quantity },
+          { headers: { token } }
+        );
+      } catch (error) {
+        handleApiError(error);
+      }
+    }
+  },
+  [cartitem, token, backendUrl]
+);
+
+// ✅ Calculate total amount
+const calculatetotalamount = useCallback(() => {
+  let total = 0;
+  for (const productId in cartitem) {
+    const product = products.find((p) => p._id === productId);
+    if (!product) continue;
+
+    for (const size in cartitem[productId]) {
+      for (const color in cartitem[productId][size]) {
+        const qty = cartitem[productId][size][color];
+        const variant = product.variants.find(
+          (v) => v.size === size && v.color === color
+        );
+        if (variant) total += variant.price * qty;
+      }
+    }
+  }
+  return total;
+}, [cartitem, products]);
+
+//-----------------------------------------------
+
+
+  
+  // Fetching Products
   const getProductsData = useCallback(async () => {
     setIsLoadingProducts(true);
     try {
