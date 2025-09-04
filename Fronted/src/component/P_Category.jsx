@@ -12,6 +12,7 @@ const P_Category = () => {
   useEffect(() => {
     if (products.length > 0) {
       setimage(products.slice(0, 6))
+      console.log(products);
     }
   }, [products])  // <- Watch for products update
 
@@ -30,7 +31,7 @@ const P_Category = () => {
               className="relative group aspect-square rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
             >
               <img
-                src={item.image[0]}
+                src={item.images[0]}
                 alt={item.name || "Product"}
                 className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-110"
               />

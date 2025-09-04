@@ -19,9 +19,9 @@ const Home = () => {
       <Hero />
       <P_Category />
       <R_L />
-      <R_D />
+      {/* <R_D />
       <R_A />
-      <R_C />
+      <R_C /> */}
     </div>
   )
 }

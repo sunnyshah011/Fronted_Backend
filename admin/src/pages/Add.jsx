@@ -20,15 +20,16 @@ const AddProduct = ({ token }) => {
   const [isBestSelling, setIsBestSelling] = useState(false);
   const [isFlashSale, setIsFlashSale] = useState(false);
 
-  // Variants: color + size + stock + price
-  const [variants, setVariants] = useState([
-    { color: "", size: "", stock: 0, price: 0 },
-  ]);
+  // Variants
+  const [variants, setVariants] = useState([{ color: "", size: "", stock: 0, price: 0 }]);
+
+  // Loading state
+  const [loading, setLoading] = useState(false);
 
   // Fetch categories
   const loadCategories = async () => {
     try {
-      const res = await axios.get(BackendUrl + "/api/categories");
+      const res = await axios.get(`${BackendUrl}/api/categories`);
       setCategories(res.data.categories || []);
     } catch (err) {
       console.error(err);
@@ -38,9 +39,7 @@ const AddProduct = ({ token }) => {
   // Fetch subcategories
   const loadSubcategories = async (categoryId) => {
     try {
-      const res = await axios.get(
-        `${BackendUrl}/api/subcategories/category/${categoryId}`
-      );
+      const res = await axios.get(`${BackendUrl}/api/subcategories/category/${categoryId}`);
       setSubcategories(res.data.subcategories || []);
     } catch (err) {
       console.error(err);
@@ -57,72 +56,97 @@ const AddProduct = ({ token }) => {
     loadSubcategories(categoryId);
   };
 
+  // Compress image and convert to WebP
+  const compressAndConvertToWebP = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(
+            (blob) => {
+              resolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".webp"), { type: "image/webp" }));
+            },
+            "image/webp",
+            0.8
+          );
+        };
+      };
+    });
+  };
+
   // Handle image upload + preview
-  const handleImageChange = (e, field) => {
+  const handleImageChange = async (e, field) => {
     const file = e.target.files[0];
     if (file) {
-      setImages({ ...images, [field]: file });
+      const webpFile = await compressAndConvertToWebP(file);
+      setImages((prev) => ({ ...prev, [field]: webpFile }));
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreviews((prev) => ({ ...prev, [field]: reader.result }));
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(webpFile);
     }
   };
 
   // Variants handlers
-  const addVariant = () =>
-    setVariants([...variants, { color: "", size: "", stock: 0, price: 0 }]);
-
-  const removeVariant = (index) =>
-    setVariants(variants.filter((_, i) => i !== index));
-
+  const addVariant = () => setVariants([...variants, { color: "", size: "", stock: 0, price: 0 }]);
+  const removeVariant = (index) => setVariants(variants.filter((_, i) => i !== index));
   const handleVariantChange = (index, key, value) => {
     const newVariants = [...variants];
-    newVariants[index][key] =
-      key === "stock" || key === "price" ? Number(value) : value;
+    newVariants[index][key] = key === "stock" || key === "price" ? Number(value) : value;
     setVariants(newVariants);
   };
 
   // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return; // prevent double submit
     if (!selectedSubcategory) return toast.error("Select a subcategory");
+
+    setLoading(true);
 
     const formData = new FormData();
     formData.append("name", name);
     formData.append("description", description);
     formData.append("subcategory", selectedSubcategory);
     formData.append("variants", JSON.stringify(variants));
-
     formData.append("isTopProduct", isTopProduct);
     formData.append("isBestSelling", isBestSelling);
     formData.append("isFlashSale", isFlashSale);
 
-    ["image1", "image2", "image3", "image4"].forEach(
-      (f) => images[f] && formData.append(f, images[f])
-    );
+    ["image1", "image2", "image3", "image4"].forEach((f) => images[f] && formData.append(f, images[f]));
+
+    // Optimistic UI toast
+    toast.success("Product added! Uploading images...");
 
     try {
-      const res = await axios.post(`${BackendUrl}/api/product/add`, formData, {
-        headers: { token },
-      });
-      if (res.data.success) {
-        toast.success(res.data.message);
-        setName("");
-        setDescription("");
-        setVariants([{ color: "", size: "", stock: 0, price: 0 }]);
-        setImages({});
-        setImagePreviews({});
-        setSelectedCategory("");
-        setSelectedSubcategory("");
-        setIsTopProduct(false);
-        setIsBestSelling(false);
-        setIsFlashSale(false);
-      } else toast.error(res.data.message);
+      await axios.post(`${BackendUrl}/api/product/add`, formData, { headers: { token } });
+
+      // Reset form after upload
+      setName("");
+      setDescription("");
+      setVariants([{ color: "", size: "", stock: 0, price: 0 }]);
+      setImages({});
+      setImagePreviews({});
+      setSelectedCategory("");
+      setSelectedSubcategory("");
+      setIsTopProduct(false);
+      setIsBestSelling(false);
+      setIsFlashSale(false);
     } catch (err) {
       console.error(err);
       toast.error("Failed to add product");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -133,7 +157,6 @@ const AddProduct = ({ token }) => {
     >
       {/* Left Column */}
       <div className="space-y-6">
-        {/* General Information */}
         <div className="bg-white rounded-2xl shadow p-6">
           <h2 className="text-lg font-semibold mb-4">General Information</h2>
 
@@ -155,20 +178,15 @@ const AddProduct = ({ token }) => {
             onChange={(e) => setDescription(e.target.value)}
           />
 
-          {/* Variants */}
           <div>
-            <p className="font-medium mb-2">
-              Variants (Color / Size / Stock / Price)
-            </p>
+            <p className="font-medium mb-2">Variants (Color / Size / Stock / Price)</p>
             {variants.map((v, i) => (
-              <div key={i} className=" gap-2 mb-2 items-center">
+              <div key={i} className="gap-2 mb-2 items-center">
                 <input
                   type="text"
                   placeholder="Color"
                   value={v.color}
-                  onChange={(e) =>
-                    handleVariantChange(i, "color", e.target.value)
-                  }
+                  onChange={(e) => handleVariantChange(i, "color", e.target.value)}
                   className="border rounded-lg p-2 flex-1"
                   required
                 />
@@ -176,9 +194,7 @@ const AddProduct = ({ token }) => {
                   type="text"
                   placeholder="Size"
                   value={v.size}
-                  onChange={(e) =>
-                    handleVariantChange(i, "size", e.target.value)
-                  }
+                  onChange={(e) => handleVariantChange(i, "size", e.target.value)}
                   className="border rounded-lg p-2 flex-1"
                   required
                 />
@@ -186,9 +202,7 @@ const AddProduct = ({ token }) => {
                   type="number"
                   placeholder="Stock"
                   value={v.stock}
-                  onChange={(e) =>
-                    handleVariantChange(i, "stock", e.target.value)
-                  }
+                  onChange={(e) => handleVariantChange(i, "stock", e.target.value)}
                   className="border rounded-lg p-2 flex-1"
                   required
                 />
@@ -196,31 +210,16 @@ const AddProduct = ({ token }) => {
                   type="number"
                   placeholder="Price"
                   value={v.price}
-                  onChange={(e) =>
-                    handleVariantChange(i, "price", e.target.value)
-                  }
+                  onChange={(e) => handleVariantChange(i, "price", e.target.value)}
                   className="border rounded-lg p-2 flex-1"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => removeVariant(i)}
-                  className="text-red-500"
-                >
-                  ❌
-                </button>
+                <button type="button" onClick={() => removeVariant(i)} className="text-red-500">❌</button>
               </div>
             ))}
-            <button
-              type="button"
-              onClick={addVariant}
-              className="text-green-600 mt-2"
-            >
-              ➕ Add Variant
-            </button>
+            <button type="button" onClick={addVariant} className="text-green-600 mt-2">➕ Add Variant</button>
           </div>
 
-          {/* Category */}
           <div className="mt-4">
             <label className="block text-sm font-medium">Category</label>
             <select
@@ -230,9 +229,7 @@ const AddProduct = ({ token }) => {
             >
               <option value="">Select Category</option>
               {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
+                <option key={c._id} value={c._id}>{c.name}</option>
               ))}
             </select>
 
@@ -244,9 +241,7 @@ const AddProduct = ({ token }) => {
             >
               <option value="">Select Subcategory</option>
               {subcategories.map((sub) => (
-                <option key={sub._id} value={sub._id}>
-                  {sub.name}
-                </option>
+                <option key={sub._id} value={sub._id}>{sub.name}</option>
               ))}
             </select>
           </div>
@@ -255,65 +250,43 @@ const AddProduct = ({ token }) => {
 
       {/* Right Column */}
       <div className="space-y-6">
-        {/* Upload Images */}
         <div className="bg-white rounded-2xl shadow p-6">
           <h2 className="text-lg font-semibold mb-4">Upload Images</h2>
           {["image1", "image2", "image3", "image4"].map((f) => (
             <div key={f} className="mb-4">
-              <input
-                type="file"
-                onChange={(e) => handleImageChange(e, f)}
-                className="w-full"
-              />
+              <input type="file" onChange={(e) => handleImageChange(e, f)} className="w-full" />
               {imagePreviews[f] && (
-                <img
-                  src={imagePreviews[f]}
-                  alt="preview"
-                  className="mt-2 w-28 h-28 object-cover rounded-lg border"
-                />
+                <img src={imagePreviews[f]} alt="preview" className="mt-2 w-28 h-28 object-cover rounded-lg border" />
               )}
             </div>
           ))}
         </div>
 
-        {/* Flags */}
         <div className="bg-white rounded-2xl shadow p-6">
           <h2 className="text-lg font-semibold mb-4">Product Flags</h2>
           <div className="flex flex-col gap-2">
             <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={isTopProduct}
-                onChange={(e) => setIsTopProduct(e.target.checked)}
-              />
+              <input type="checkbox" checked={isTopProduct} onChange={(e) => setIsTopProduct(e.target.checked)} />
               Top Product
             </label>
             <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={isBestSelling}
-                onChange={(e) => setIsBestSelling(e.target.checked)}
-              />
+              <input type="checkbox" checked={isBestSelling} onChange={(e) => setIsBestSelling(e.target.checked)} />
               Best Selling
             </label>
             <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={isFlashSale}
-                onChange={(e) => setIsFlashSale(e.target.checked)}
-              />
+              <input type="checkbox" checked={isFlashSale} onChange={(e) => setIsFlashSale(e.target.checked)} />
               Flash Sale
             </label>
           </div>
         </div>
 
-        {/* Submit */}
         <div className="flex justify-end">
           <button
             type="submit"
-            className="bg-green-600 text-white px-6 py-2 rounded-xl shadow hover:bg-green-700"
+            disabled={loading}
+            className={`bg-green-600 text-white px-6 py-2 rounded-xl shadow hover:bg-green-700 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
-            Add Product
+            {loading ? "Adding..." : "Add Product"}
           </button>
         </div>
       </div>

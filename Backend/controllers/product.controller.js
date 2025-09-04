@@ -9,7 +9,7 @@ export const addProduct = async (req, res) => {
       name,
       description,
       subcategory,
-      variants, // array of { color, size, stock, price }
+      variants,
       isTopProduct,
       isBestSelling,
       isFlashSale,
@@ -21,31 +21,38 @@ export const addProduct = async (req, res) => {
         .json({ success: false, message: "Name and subcategory required" });
     }
 
-    // Upload images
+    // Prevent duplicate product by slug
+    const slug = slugify(name, { lower: true });
+    const existing = await ProductModel.findOne({ slug });
+    if (existing)
+      return res
+        .status(400)
+        .json({ success: false, message: "Product already exists" });
+
+    // Upload images to Cloudinary (convert to WebP)
     const imagesFiles = [];
     ["image1", "image2", "image3", "image4"].forEach((field) => {
-      if (req.files[field] && req.files[field][0])
-        imagesFiles.push(req.files[field][0]);
+      if (req.files[field] && req.files[field][0]) imagesFiles.push(req.files[field][0]);
     });
 
     const imagesUrl = await Promise.all(
       imagesFiles.map(async (file) => {
         const result = await cloudinary.uploader.upload(file.path, {
           resource_type: "image",
+          format: "webp",           // Convert to WebP
+          quality: "auto",          // Compress image
+          fetch_format: "auto",
         });
         return result.secure_url;
       })
     );
 
     const parsedVariants = variants ? JSON.parse(variants) : [];
-    const totalStock = parsedVariants.reduce(
-      (acc, v) => acc + (v.stock || 0),
-      0
-    );
+    const totalStock = parsedVariants.reduce((acc, v) => acc + (v.stock || 0), 0);
 
     const productData = {
       name,
-      slug: slugify(name, { lower: true }),
+      slug,
       description,
       variants: parsedVariants,
       stock: totalStock,
@@ -66,6 +73,7 @@ export const addProduct = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
 
 // Update Product
 export const updateProduct = async (req, res) => {

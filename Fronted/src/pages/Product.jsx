@@ -86,11 +86,6 @@ const Product = () => {
             {currency} {fproduct.price}
           </p>
 
-          {/* description */}
-          <p className="text-gray-600 leading-relaxed">
-            {fproduct.description}
-          </p>
-
           {/* stock info */}
           <p
             className={`text-sm font-medium ${
@@ -180,6 +175,11 @@ const Product = () => {
           >
             {fproduct.stock > 0 ? "ADD TO CART" : "OUT OF STOCK"}
           </button>
+
+            {/* description */}
+          <p className="text-gray-600 leading-relaxed">
+            {fproduct.description}
+          </p>
         </div>
       </div>
     </div>
