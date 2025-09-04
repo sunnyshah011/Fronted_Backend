@@ -17,7 +17,7 @@ import {
   deleteProvince,
   deleteDistrict,
   deleteCity,
-} from "../controllers/locationController.js";
+} from "../controllers/location.Controller.js";
 
 import adminAuth from "../middleware/adminAuth.middleware.js";
 
