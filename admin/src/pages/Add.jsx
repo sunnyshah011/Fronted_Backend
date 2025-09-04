@@ -120,7 +120,6 @@ const AddProduct = ({ token }) => {
         setIsBestSelling(false);
         setIsFlashSale(false);
       } else toast.error(res.data.message);
-      
     } catch (err) {
       console.error(err);
       toast.error("Failed to add product");
@@ -158,14 +157,18 @@ const AddProduct = ({ token }) => {
 
           {/* Variants */}
           <div>
-            <p className="font-medium mb-2">Variants (Color / Size / Stock / Price)</p>
+            <p className="font-medium mb-2">
+              Variants (Color / Size / Stock / Price)
+            </p>
             {variants.map((v, i) => (
               <div key={i} className=" gap-2 mb-2 items-center">
                 <input
                   type="text"
                   placeholder="Color"
                   value={v.color}
-                  onChange={(e) => handleVariantChange(i, "color", e.target.value)}
+                  onChange={(e) =>
+                    handleVariantChange(i, "color", e.target.value)
+                  }
                   className="border rounded-lg p-2 flex-1"
                   required
                 />
@@ -173,7 +176,9 @@ const AddProduct = ({ token }) => {
                   type="text"
                   placeholder="Size"
                   value={v.size}
-                  onChange={(e) => handleVariantChange(i, "size", e.target.value)}
+                  onChange={(e) =>
+                    handleVariantChange(i, "size", e.target.value)
+                  }
                   className="border rounded-lg p-2 flex-1"
                   required
                 />
@@ -181,7 +186,9 @@ const AddProduct = ({ token }) => {
                   type="number"
                   placeholder="Stock"
                   value={v.stock}
-                  onChange={(e) => handleVariantChange(i, "stock", e.target.value)}
+                  onChange={(e) =>
+                    handleVariantChange(i, "stock", e.target.value)
+                  }
                   className="border rounded-lg p-2 flex-1"
                   required
                 />
@@ -189,7 +196,9 @@ const AddProduct = ({ token }) => {
                   type="number"
                   placeholder="Price"
                   value={v.price}
-                  onChange={(e) => handleVariantChange(i, "price", e.target.value)}
+                  onChange={(e) =>
+                    handleVariantChange(i, "price", e.target.value)
+                  }
                   className="border rounded-lg p-2 flex-1"
                   required
                 />

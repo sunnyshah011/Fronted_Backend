@@ -30,7 +30,8 @@ const List = ({ token }) => {
 
   // Delete product
   const removeProduct = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    if (!window.confirm("Are you sure you want to delete this product?"))
+      return;
 
     try {
       const response = await axios.post(
@@ -194,8 +195,6 @@ const List = ({ token }) => {
               />
             </label>
 
-            
-
             <div className="flex gap-4 my-3">
               <label>
                 <input
@@ -212,7 +211,10 @@ const List = ({ token }) => {
                   type="checkbox"
                   checked={selected.isBestSelling}
                   onChange={(e) =>
-                    setSelected({ ...selected, isBestSelling: e.target.checked })
+                    setSelected({
+                      ...selected,
+                      isBestSelling: e.target.checked,
+                    })
                   }
                 />{" "}
                 Best Selling
@@ -231,7 +233,9 @@ const List = ({ token }) => {
 
             {/* Variants */}
             <div className="mt-4">
-              <p className="font-medium mb-2">Variants (Color / Size / Stock / Price)</p>
+              <p className="font-medium mb-2">
+                Variants (Color / Size / Stock / Price)
+              </p>
               {selected.variants?.map((v, i) => (
                 <div key={i} className="gap-2 mb-2 items-center">
                   <input
@@ -282,7 +286,9 @@ const List = ({ token }) => {
                     type="button"
                     className="text-red-500"
                     onClick={() => {
-                      const newVariants = selected.variants.filter((_, idx) => idx !== i);
+                      const newVariants = selected.variants.filter(
+                        (_, idx) => idx !== i
+                      );
                       setSelected({ ...selected, variants: newVariants });
                     }}
                   >

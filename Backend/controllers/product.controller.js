@@ -16,24 +16,32 @@ export const addProduct = async (req, res) => {
     } = req.body;
 
     if (!name || !subcategory) {
-      return res.status(400).json({ success: false, message: "Name and subcategory required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Name and subcategory required" });
     }
 
     // Upload images
     const imagesFiles = [];
     ["image1", "image2", "image3", "image4"].forEach((field) => {
-      if (req.files[field] && req.files[field][0]) imagesFiles.push(req.files[field][0]);
+      if (req.files[field] && req.files[field][0])
+        imagesFiles.push(req.files[field][0]);
     });
 
     const imagesUrl = await Promise.all(
       imagesFiles.map(async (file) => {
-        const result = await cloudinary.uploader.upload(file.path, { resource_type: "image" });
+        const result = await cloudinary.uploader.upload(file.path, {
+          resource_type: "image",
+        });
         return result.secure_url;
       })
     );
 
     const parsedVariants = variants ? JSON.parse(variants) : [];
-    const totalStock = parsedVariants.reduce((acc, v) => acc + (v.stock || 0), 0);
+    const totalStock = parsedVariants.reduce(
+      (acc, v) => acc + (v.stock || 0),
+      0
+    );
 
     const productData = {
       name,
@@ -75,14 +83,19 @@ export const updateProduct = async (req, res) => {
 
     const product = await ProductModel.findById(id);
     if (!product)
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
 
     // Handle images: preserve old, replace selectively
     const finalImages = [];
     for (let i = 0; i < 4; i++) {
       const field = `image${i + 1}`;
       if (req.files && req.files[field] && req.files[field][0]) {
-        const result = await cloudinary.uploader.upload(req.files[field][0].path, { resource_type: "image" });
+        const result = await cloudinary.uploader.upload(
+          req.files[field][0].path,
+          { resource_type: "image" }
+        );
         finalImages.push(result.secure_url);
       } else if (req.body[`existing_${field}`]) {
         finalImages.push(req.body[`existing_${field}`]);
@@ -92,7 +105,10 @@ export const updateProduct = async (req, res) => {
     }
 
     const parsedVariants = variants ? JSON.parse(variants) : product.variants;
-    const totalStock = parsedVariants.reduce((acc, v) => acc + (v.stock || 0), 0);
+    const totalStock = parsedVariants.reduce(
+      (acc, v) => acc + (v.stock || 0),
+      0
+    );
 
     // Update fields
     product.name = name || product.name;
@@ -102,9 +118,18 @@ export const updateProduct = async (req, res) => {
     product.variants = parsedVariants;
     product.stock = totalStock;
     product.images = finalImages;
-    product.isTopProduct = typeof isTopProduct !== "undefined" ? isTopProduct === "true" || isTopProduct === true : product.isTopProduct;
-    product.isBestSelling = typeof isBestSelling !== "undefined" ? isBestSelling === "true" || isBestSelling === true : product.isBestSelling;
-    product.isFlashSale = typeof isFlashSale !== "undefined" ? isFlashSale === "true" || isFlashSale === true : product.isFlashSale;
+    product.isTopProduct =
+      typeof isTopProduct !== "undefined"
+        ? isTopProduct === "true" || isTopProduct === true
+        : product.isTopProduct;
+    product.isBestSelling =
+      typeof isBestSelling !== "undefined"
+        ? isBestSelling === "true" || isBestSelling === true
+        : product.isBestSelling;
+    product.isFlashSale =
+      typeof isFlashSale !== "undefined"
+        ? isFlashSale === "true" || isFlashSale === true
+        : product.isFlashSale;
 
     await product.save();
     res.json({ success: true, message: "Product Updated", product });
@@ -136,7 +161,9 @@ export const getSingleProduct = async (req, res) => {
       .populate({ path: "subcategory", populate: { path: "category" } });
 
     if (!product)
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
 
     res.json({ success: true, product });
   } catch (err) {
