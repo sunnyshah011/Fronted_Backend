@@ -3,48 +3,12 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { ShopContext } from "../Context/ShopContext";
 
-const provinces = ["Bagmati", "Gandaki", "Lumbini"];
-const districts = ["Chitwan", "Kathmandu", "Pokhara"];
-const cities = [
-  "Bharatpur Metropolitan City ward no. - 01",
-  "Lalitpur Sub-Metropolitan",
-  "Pokhara Lekhnath Metropolitan",
-];
-
 const Profile = () => {
   const { backendUrl, token, address, updateAddress } = useContext(ShopContext);
-  const [view, setView] = useState("provinces"); // provinces | districts | cities
+
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [cities, setCities] = useState([]);
-
-  const [newName, setNewName] = useState("");
-  const [editingItem, setEditingItem] = useState(null); // { type: "province"|"district"|"city", name: string }
-  
-
-  // ✅ Fetch provinces
-    const fetchProvinces = async () => {
-      const res = await axios.get(`${BackendUrl}/api/location/province`);
-      setProvinces(res.data.provinces); // array of objects
-    };
-  
-    // ✅ Fetch districts
-    const fetchDistricts = async (provinceName) => {
-      const res = await axios.get(
-        `${BackendUrl}/api/location/${provinceName}/districts`
-      );
-      setDistricts(res.data.districts); // array of objects
-    };
-  
-    // ✅ Fetch cities
-    const fetchCities = async (provinceName, districtName) => {
-      const res = await axios.get(
-        `${BackendUrl}/api/location/${provinceName}/${districtName}/cities`
-      );
-      setCities(res.data.cities); // array of objects
-    };
-
-
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -56,13 +20,48 @@ const Profile = () => {
   });
 
   const [isModified, setIsModified] = useState(false);
-  const [originalData, setOriginalData] = useState({}); // prevent null crash
-
-  // ✅ Check if it's the user's first address
+  const [originalData, setOriginalData] = useState({});
   const isFirstTime = !address || Object.keys(address).length === 0;
 
+  // ✅ Fetch provinces
+  const fetchProvinces = async () => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/location/province`);
+      setProvinces(res.data.provinces || []);
+    } catch (err) {
+      console.error("Error fetching provinces:", err);
+    }
+  };
+
+  // ✅ Fetch districts
+  const fetchDistricts = async (provinceName) => {
+    if (!provinceName) return;
+    try {
+      const res = await axios.get(
+        `${backendUrl}/api/location/${provinceName}/districts`
+      );
+      setDistricts(res.data.districts || []);
+    } catch (err) {
+      console.error("Error fetching districts:", err);
+    }
+  };
+
+  // ✅ Fetch cities
+  const fetchCities = async (provinceName, districtName) => {
+    if (!provinceName || !districtName) return;
+    try {
+      const res = await axios.get(
+        `${backendUrl}/api/location/${provinceName}/${districtName}/cities`
+      );
+      setCities(res.data.cities || []);
+    } catch (err) {
+      console.error("Error fetching cities:", err);
+    }
+  };
+
+  // ✅ Load existing address into form
   useEffect(() => {
-    if (address && Object.keys(address).length > 0) {
+    if (!isFirstTime) {
       const updatedForm = {
         fullName: address.name || "",
         phone: address.phone || "",
@@ -74,9 +73,15 @@ const Profile = () => {
       setFormData(updatedForm);
       setOriginalData(updatedForm);
       setIsModified(false);
+
+      // preload dependent dropdowns
+      if (address.province) fetchDistricts(address.province);
+      if (address.province && address.district)
+        fetchCities(address.province, address.district);
     }
   }, [address]);
 
+  // ✅ Check modified status
   const checkIfModified = (newData) => {
     if (!originalData || Object.keys(originalData).length === 0) return true;
     return (
@@ -89,12 +94,30 @@ const Profile = () => {
     );
   };
 
+  // ✅ Handle input change
   const handleChange = (e) => {
-    const updatedForm = { ...formData, [e.target.name]: e.target.value };
+    const { name, value } = e.target;
+    let updatedForm = { ...formData, [name]: value };
+
+    if (name === "province") {
+      updatedForm.district = "";
+      updatedForm.city = "";
+      setDistricts([]);
+      setCities([]);
+      fetchDistricts(value);
+    }
+
+    if (name === "district") {
+      updatedForm.city = "";
+      setCities([]);
+      fetchCities(updatedForm.province, value);
+    }
+
     setFormData(updatedForm);
     setIsModified(checkIfModified(updatedForm));
   };
 
+  // ✅ Reset to original
   const handleReset = () => {
     if (originalData && Object.keys(originalData).length > 0) {
       setFormData(originalData);
@@ -102,6 +125,7 @@ const Profile = () => {
     }
   };
 
+  // ✅ Save address
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -127,7 +151,7 @@ const Profile = () => {
 
     try {
       const response = await axios.post(
-        backendUrl + "/api/profile/setaddress",
+        `${backendUrl}/api/profile/setaddress`,
         payload,
         { headers: { token } }
       );
@@ -144,33 +168,25 @@ const Profile = () => {
         setOriginalData(formData);
         setIsModified(false);
 
-        // Update context with new address
         if (typeof updateAddress === "function") {
-          const newAddress = {
-            name: payload.name,
-            phone: payload.phone,
-            province: payload.province,
-            district: payload.district,
-            city: payload.city,
-            street: payload.street,
-          };
-          updateAddress(newAddress);
+          updateAddress(payload);
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Failed to save address");
     }
   };
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    fetchProvinces();
   }, []);
 
   return (
     <div className="px-4 mt-5 h-full pb-10">
-      {/* ✅ Address Preview */}
-      {address && Object.keys(address).length > 0 && (
+      {/* ✅ Saved Address Preview */}
+      {!isFirstTime && (
         <div className="max-w-xl mx-auto mt-6 p-6 mb-5 bg-gradient-to-br from-gray-50 to-white shadow-sm rounded-2xl border border-gray-200">
           <h3 className="text-xl font-semibold mb-5 text-gray-800 flex items-center gap-2">
             📍 Saved Delivery Address
@@ -222,7 +238,7 @@ const Profile = () => {
             <input
               type={type}
               name={name}
-              value={formData[name]}
+              value={formData[name] || ""}
               onChange={handleChange}
               className="w-full bg-white border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
@@ -242,15 +258,15 @@ const Profile = () => {
             </label>
             <select
               name={name}
-              value={formData[name]}
+              value={formData[name] || ""}
               onChange={handleChange}
               className="w-full bg-white border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
             >
-              <option value="">Select {label}</option>
+              <option value="">{`Select ${label}`}</option>
               {options.map((val) => (
-                <option key={val} value={val}>
-                  {val}
+                <option key={val._id || val.name} value={val.name}>
+                  {val.name}
                 </option>
               ))}
             </select>
@@ -265,7 +281,7 @@ const Profile = () => {
           <input
             type="text"
             name="streetAddress"
-            value={formData.streetAddress}
+            value={formData.streetAddress || ""}
             onChange={handleChange}
             placeholder="Enter street address"
             className="w-full bg-white border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
