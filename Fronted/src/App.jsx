@@ -19,7 +19,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Breadcrumbs from "./component/Breadcrumb";
 
 const App = () => {
-  return (    
+  return (
     <div className="min-h-screen flex flex-col">
       <ToastContainer
         position="top-center"

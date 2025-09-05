@@ -37,6 +37,6 @@ productRouter.post(
 
 productRouter.post("/remove", adminAuth, removeProduct);
 productRouter.get("/list", listProducts);
-productRouter.get("/single/:slug", getSingleProduct);
+productRouter.get("/single/:id", getSingleProduct);
 
 export default productRouter;

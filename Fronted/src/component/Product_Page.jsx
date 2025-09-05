@@ -1,14 +1,15 @@
-import { useContext } from "react"
-import { ShopContext } from "../Context/ShopContext"
-import { Link } from "react-router-dom"
+import { useContext } from "react";
+import { ShopContext } from "../Context/ShopContext";
+import { Link } from "react-router-dom";
 
 const Product_Page = ({ id, name, price, images }) => {
-
-  const { currency } = useContext(ShopContext)
+  const { currency } = useContext(ShopContext);
 
   return (
     <Link
-      className="text-gray-700 cursor-pointer rounded-b-[6px]  bg-white block" to={`/${id}`}>
+      className="text-gray-700 cursor-pointer rounded-b-[6px]  bg-white block"
+      to={`/${id}`}
+    >
       <div className="aspect-square overflow-hidden rounded-t-[6px]">
         <img
           src={images[0]}
@@ -21,6 +22,6 @@ const Product_Page = ({ id, name, price, images }) => {
         {currency} {price} /-
       </p>
     </Link>
-  )
-}
-export default Product_Page
+  );
+};
+export default Product_Page;

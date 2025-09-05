@@ -167,11 +167,11 @@ export const getSingleProduct = async (req, res) => {
       .populate("subcategory")
       .populate({ path: "subcategory", populate: { path: "category" } });
 
-    if (!product){
+    if (!product)
       return res.status(404).json({ success: false, message: "Product not found" });
-    }
 
-    return res.json({ success: true, product });
+     res.json({ success: true, product });
+     
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Failed to fetch product" });
