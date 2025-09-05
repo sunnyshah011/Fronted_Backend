@@ -1,7 +1,7 @@
 import CategoryModel from "../models/category.model.js";
 import SubCategoryModel from "../models/subcategory.model.js";
 import slugify from "slugify";
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 // Create category
 export const createCategory = async (req, res) => {
@@ -19,11 +19,12 @@ export const createCategory = async (req, res) => {
 export const getCategories = async (req, res) => {
   try {
     const categories = await CategoryModel.find();
-    res.json({categories});
+    res.json({ success: true, categories });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 };
+
 // Update category
 export const updateCategory = async (req, res) => {
   try {
@@ -71,7 +72,7 @@ export const getSubcategories = async (req, res) => {
       "category",
       "name"
     );
-    res.json({subcategories});
+    res.json({ subcategories });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -93,7 +94,6 @@ export const getSubcategoriesByCategory = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 // Update subcategory
 export const updateSubcategory = async (req, res) => {
@@ -118,5 +118,27 @@ export const deleteSubcategory = async (req, res) => {
     res.json({ message: "Subcategory deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+export const getproductandsubcategory = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const category = await CategoryModel.findOne({ slug });
+    if (!category) return res.json({ success: false, message: "Not found" });
+
+    const subcategories = await SubCategoryModel.find({
+      category: category._id,
+    });
+    const products = await ProductModel.find({ category: category._id });
+
+    res.json({
+      success: true,
+      category,
+      subcategories,
+      products,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };

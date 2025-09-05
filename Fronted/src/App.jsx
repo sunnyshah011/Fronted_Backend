@@ -17,6 +17,7 @@ import Account from "./pages/Account";
 import EmailVerify from "./pages/EmailVerify";
 import ResetPassword from "./pages/ResetPassword";
 import Breadcrumbs from "./component/Breadcrumb";
+import CategoryPage from "./pages/CategoryPage";
 
 const App = () => {
   return (
@@ -52,6 +53,10 @@ const App = () => {
             <Route path="/:productId" element={<Product />} />
             <Route path="/collection" element={<Collection />} />
             <Route path="/cart" element={<Cart />} />
+
+            {/* ✅ New routes for category system */}
+            <Route path="/category/:slug" element={<CategoryPage />} />
+            {/* <Route path="/subcategory/:subSlug" element={<SubCategoryPage />} /> */}
 
             <Route path="/order" element={<Order />} />
             <Route path="/placeorder" element={<Placeorder />} />

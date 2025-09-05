@@ -5,6 +5,7 @@ import {
   updateCategory,
   deleteCategory,
   getSubcategoriesByCategory,
+  getproductandsubcategory
 } from "../controllers/category.controller.js";
 import adminAuth from "../middleware/adminAuth.middleware.js";
 
@@ -12,6 +13,7 @@ const categoryRouter = express.Router();
 
 //category routs
 categoryRouter.get("/", getCategories);
+categoryRouter.get("/api/categories/:slug", getproductandsubcategory);
 categoryRouter.post("/", adminAuth, createCategory);
 categoryRouter.put("/:id", adminAuth, updateCategory);
 categoryRouter.delete("/:id", adminAuth, deleteCategory);
