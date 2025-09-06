@@ -1,5 +1,6 @@
 import CategoryModel from "../models/category.model.js";
 import SubCategoryModel from "../models/subcategory.model.js";
+import ProductModel from "../models/product.model.js";
 import slugify from "slugify";
 import mongoose from "mongoose";
 
@@ -78,22 +79,6 @@ export const getSubcategories = async (req, res) => {
   }
 };
 
-// Get subcategories of a category
-export const getSubcategoriesByCategory = async (req, res) => {
-  try {
-    const { categoryId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-      return res.status(400).json({ error: "Invalid category ID" });
-    }
-
-    const subcategories = await SubCategoryModel.find({ category: categoryId });
-    res.json({ subcategories }); // return as object to match frontend
-  } catch (err) {
-    console.error(err); // log error
-    res.status(500).json({ error: err.message });
-  }
-};
 
 // Update subcategory
 export const updateSubcategory = async (req, res) => {
@@ -121,24 +106,93 @@ export const deleteSubcategory = async (req, res) => {
   }
 };
 
-export const getproductandsubcategory = async (req, res) => {
+
+export const getSubcategoriesByCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+      return res.status(400).json({ error: "Invalid category ID" });
+    }
+    const subcategories = await SubCategoryModel.find({ category: categoryId });
+    res.json({ subcategories });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+// ---------------------- NEW ROUTES ----------------------
+
+// Get category details + subcategories + products
+export const getCategoryDetails = async (req, res) => {
   try {
     const { slug } = req.params;
     const category = await CategoryModel.findOne({ slug });
-    if (!category) return res.json({ success: false, message: "Not found" });
+    if (!category) return res.json({ success: false, message: "Category not found" });
 
-    const subcategories = await SubCategoryModel.find({
-      category: category._id,
-    });
+    const subcategories = await SubCategoryModel.find({ category: category._id });
     const products = await ProductModel.find({ category: category._id });
 
-    res.json({
-      success: true,
-      category,
-      subcategories,
-      products,
-    });
+    res.json({ success: true, category, subcategories, products });
   } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Get subcategory details + products
+export const getSubcategoryDetails = async (req, res) => {
+  try {
+    const { categorySlug, subSlug } = req.params;
+
+    const category = await CategoryModel.findOne({ slug: categorySlug });
+    if (!category) return res.json({ success: false, message: "Category not found" });
+
+    const subcategory = await SubCategoryModel.findOne({
+      slug: subSlug,
+      category: category._id,
+    });
+    if (!subcategory) return res.json({ success: false, message: "Subcategory not found" });
+
+    const products = await ProductModel.find({
+      category: category._id,
+      subcategory: subcategory._id,
+    });
+
+    res.json({ success: true, category, subcategory, products });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Get single product details
+export const getProductDetails = async (req, res) => {
+  try {
+    const { categorySlug, subSlug, productSlug } = req.params;
+    console.log({ categorySlug, subSlug, productSlug });
+
+    const category = await CategoryModel.findOne({ slug: categorySlug });
+    console.log("category",category);
+    if (!category) return res.json({ success: false, message: "Category not found" });
+
+    const subcategory = await SubCategoryModel.findOne({
+      slug: subSlug,
+      category: category._id,
+    });
+    console.log("subcategory",subcategory);
+    if (!subcategory) return res.json({ success: false, message: "Subcategory not found" });
+
+    const product = await ProductModel.findOne({
+      slug: productSlug,
+      category: category._id,
+      subcategory: subcategory._id,
+    });
+    console.log("product",product);
+    if (!product) return res.json({ success: false, message: "Product not found" });
+
+    res.json({ success: true, product });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: err.message });
   }
 };

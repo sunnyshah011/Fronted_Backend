@@ -4,21 +4,28 @@ import {
   getCategories,
   updateCategory,
   deleteCategory,
-  getSubcategoriesByCategory,
-  getproductandsubcategory
+  getCategoryDetails,
+  getSubcategoryDetails,
+  getProductDetails,
 } from "../controllers/category.controller.js";
 import adminAuth from "../middleware/adminAuth.middleware.js";
 
 const categoryRouter = express.Router();
 
-//category routs
-categoryRouter.get("/", getCategories);
-categoryRouter.get("/api/categories/:slug", getproductandsubcategory);
 categoryRouter.post("/", adminAuth, createCategory);
 categoryRouter.put("/:id", adminAuth, updateCategory);
 categoryRouter.delete("/:id", adminAuth, deleteCategory);
 
-// Get subcategories of a category
-categoryRouter.get("/:categoryId/subcategories", getSubcategoriesByCategory);
+//category routs
+categoryRouter.get("/", getCategories);
+
+// Category details + subcategories
+categoryRouter.get("/:slug", getCategoryDetails);
+
+// Subcategory details + products
+categoryRouter.get("/:categorySlug/:subSlug", getSubcategoryDetails);
+
+// Product details inside subcategory
+categoryRouter.get("/:categorySlug/:subSlug/:productSlug", getProductDetails);
 
 export default categoryRouter;

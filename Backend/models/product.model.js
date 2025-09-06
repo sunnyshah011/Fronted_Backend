@@ -17,6 +17,12 @@ const productSchema = new mongoose.Schema(
       },
     ],
 
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "category",
+      required: true,
+    },
+
     subcategory: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "subcategory",
@@ -32,6 +38,13 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+productSchema.pre("validate", function (next) {
+  if (this.name) {
+    this.slug = slugify(this.name, { lower: true });
+  }
+  next();
+});
 
 const ProductModel =
   mongoose.models.product || mongoose.model("product", productSchema);

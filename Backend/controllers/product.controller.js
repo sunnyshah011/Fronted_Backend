@@ -147,19 +147,22 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-// List Products
+// controllers/product.controller.js
 export const listProducts = async (req, res) => {
   try {
-    const products = await ProductModel.find().populate({
-      path: "subcategory",
-      populate: { path: "category" },
-    });
+    const products = await ProductModel.find()
+      .populate("subcategory", "slug category")
+      .populate({
+        path: "subcategory",
+        populate: { path: "category", select: "slug" },
+      });
+
     res.json({ success: true, products });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
 
 export const getSingleProduct = async (req, res) => {
   try {
@@ -177,6 +180,7 @@ export const getSingleProduct = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch product" });
   }
 };
+
 
 
 // Delete Product

@@ -1,29 +1,40 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { ShopContext } from "../Context/ShopContext";
-import Title from './Title'
+import Title from "./Title";
 import Product_Page from "./Product_Page";
-import { useEffect } from "react";
 
 const R_L = () => {
+  const { products } = useContext(ShopContext);
+  const [recentProducts, setRecentProducts] = useState([]);
 
-  const { products } = useContext(ShopContext)
-  const [R_L_Product, setproduct] = useState([])
-
-useEffect(() => {
-  if (products.length > 0) {
-    setproduct(products.slice(0, 6))
-  }
-}, [products])  // <- Watch for products update
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setRecentProducts(products.slice(0, 6));
+    }
+  }, [products]);
 
   return (
-    <div className="w-full p-3 mt-5 ">
-
+    <div className="w-full p-3 mt-5">
       <Title Category="R_L" More="View" />
 
       <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-3 gap-x-2">
-        {R_L_Product.map((product, index) => (
-          <Product_Page id={product._id} key={index} name={product.name} price={product.price} images={product.images} />
-        ))}
+        {recentProducts.length > 0 ? (
+          recentProducts.map((product) => (
+            <Product_Page
+              key={product._id}
+              categorySlug={product.subcategory?.category?.slug}
+              subSlug={product.subcategory?.slug}
+              productSlug={product.slug}
+              name={product.name}
+              price={product.price}
+              images={product.images}
+            />
+          ))
+        ) : (
+          <p className="col-span-full text-center text-gray-500">
+            No products found
+          </p>
+        )}
       </div>
     </div>
   );

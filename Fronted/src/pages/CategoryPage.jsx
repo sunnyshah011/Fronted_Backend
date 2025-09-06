@@ -4,7 +4,7 @@ import axios from "axios";
 import { ShopContext } from "../Context/ShopContext";
 
 const CategoryPage = () => {
-  const { slug } = useParams(); // /category/:slug
+  const { categorySlug } = useParams(); 
   const { backendUrl } = useContext(ShopContext);
 
   const [category, setCategory] = useState(null);
@@ -14,13 +14,15 @@ const CategoryPage = () => {
 
   const fetchCategoryData = async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/api/categories/${slug}`);
+      const { data } = await axios.get(
+        `${backendUrl}/api/categories/${categorySlug}`
+      );
       if (data.success) {
         setCategory(data.category);
         setSubcategories(data.subcategories || []);
         setProducts(data.products || []);
         if (data.subcategories.length > 0) {
-          setActiveSub(data.subcategories[0]._id); // default first subcategory
+          setActiveSub(data.subcategories[0]._id);
         }
       }
     } catch (error) {
@@ -30,7 +32,7 @@ const CategoryPage = () => {
 
   useEffect(() => {
     fetchCategoryData();
-  }, [slug]);
+  }, [categorySlug]);
 
   const filteredProducts = activeSub
     ? products.filter((p) => p.subcategory === activeSub)
@@ -40,7 +42,6 @@ const CategoryPage = () => {
     <div className="p-4">
       {category && <h2 className="text-2xl font-bold mb-4">{category.name}</h2>}
 
-      {/* Subcategory filter tabs */}
       <div className="flex gap-3 mb-5">
         {subcategories.map((sub) => (
           <button
@@ -55,7 +56,6 @@ const CategoryPage = () => {
         ))}
       </div>
 
-      {/* Products */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((prod) => (
