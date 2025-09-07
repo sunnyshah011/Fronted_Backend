@@ -15,9 +15,10 @@ const CategoryPage = () => {
   const fetchCategoryData = async () => {
     try {
       const { data } = await axios.get(
-        `${backendUrl}/api/categories/${categorySlug}`
+        `${backendUrl}/api/categories`
       );
       if (data.success) {
+        console.log(data);
         setCategory(data.category);
         setSubcategories(data.subcategories || []);
         setProducts(data.products || []);

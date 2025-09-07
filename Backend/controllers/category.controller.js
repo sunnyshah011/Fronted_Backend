@@ -20,6 +20,7 @@ export const createCategory = async (req, res) => {
 export const getCategories = async (req, res) => {
   try {
     const categories = await CategoryModel.find();
+    console.log(categories);
     res.json({ success: true, categories });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
