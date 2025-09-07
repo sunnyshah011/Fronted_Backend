@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import ProductModel from "../models/product.model.js";
 import slugify from "slugify";
+import SubCategoryModel from "../models/subcategory.model.js";
 
 // Add Product
 export const addProduct = async (req, res) => {
@@ -29,18 +30,31 @@ export const addProduct = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Product already exists" });
 
+    // 🔹 Get category from subcategory
+    const subcat = await SubCategoryModel.findById(subcategory).populate(
+      "category"
+    );
+    if (!subcat) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid subcategory" });
+    }
+
+    const category = subcat.category; // category id from subcategory
+
     // Upload images to Cloudinary (convert to WebP)
     const imagesFiles = [];
     ["image1", "image2", "image3", "image4"].forEach((field) => {
-      if (req.files[field] && req.files[field][0]) imagesFiles.push(req.files[field][0]);
+      if (req.files[field] && req.files[field][0])
+        imagesFiles.push(req.files[field][0]);
     });
 
     const imagesUrl = await Promise.all(
       imagesFiles.map(async (file) => {
         const result = await cloudinary.uploader.upload(file.path, {
           resource_type: "image",
-          format: "webp",           // Convert to WebP
-          quality: "auto",          // Compress image
+          format: "webp", // Convert to WebP
+          quality: "auto", // Compress image
           fetch_format: "auto",
         });
         return result.secure_url;
@@ -48,7 +62,10 @@ export const addProduct = async (req, res) => {
     );
 
     const parsedVariants = variants ? JSON.parse(variants) : [];
-    const totalStock = parsedVariants.reduce((acc, v) => acc + (v.stock || 0), 0);
+    const totalStock = parsedVariants.reduce(
+      (acc, v) => acc + (v.stock || 0),
+      0
+    );
 
     const productData = {
       name,
@@ -57,6 +74,7 @@ export const addProduct = async (req, res) => {
       variants: parsedVariants,
       stock: totalStock,
       images: imagesUrl,
+      category, // ✅ now category is set
       subcategory,
       isActive: true,
       isTopProduct: isTopProduct === "true" || isTopProduct === true,
@@ -73,7 +91,6 @@ export const addProduct = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-
 
 // Update Product
 export const updateProduct = async (req, res) => {
@@ -163,7 +180,6 @@ export const listProducts = async (req, res) => {
   }
 };
 
-
 export const getSingleProduct = async (req, res) => {
   try {
     const product = await ProductModel.findById(req.params.id)
@@ -171,17 +187,18 @@ export const getSingleProduct = async (req, res) => {
       .populate({ path: "subcategory", populate: { path: "category" } });
 
     if (!product)
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
 
-     res.json({ success: true, product });
-     
+    res.json({ success: true, product });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Failed to fetch product" });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch product" });
   }
 };
-
-
 
 // Delete Product
 export const removeProduct = async (req, res) => {
