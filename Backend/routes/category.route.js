@@ -5,7 +5,7 @@ import {
   updateCategory,
   deleteCategory,
   getCategoryDetails,
-  getSubcategoryDetails,
+  // getSubcategoryDetails,
   getProductDetails,
 } from "../controllers/category.controller.js";
 import adminAuth from "../middleware/adminAuth.middleware.js";
@@ -17,15 +17,15 @@ categoryRouter.put("/:id", adminAuth, updateCategory);
 categoryRouter.delete("/:id", adminAuth, deleteCategory);
 
 //category routs
-categoryRouter.get("/", getCategories);
+categoryRouter.get("/", getCategories); // gives all category
 
 // Category details + subcategories
-categoryRouter.get("/:slug", getCategoryDetails);
+categoryRouter.get("/:slug", getCategoryDetails); // subcategory with its product rod -> lucana -> lucana force 6ft 
 
 // Subcategory details + products
-categoryRouter.get("/:categorySlug/:subSlug", getSubcategoryDetails);
+// categoryRouter.get("/:categorySlug/:subSlug", getSubcategoryDetails);
 
 // Product details inside subcategory
-categoryRouter.get("/:categorySlug/:subSlug/:productSlug", getProductDetails);
+categoryRouter.get("/:categorySlug/:productSlug", getProductDetails);
 
 export default categoryRouter;

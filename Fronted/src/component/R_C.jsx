@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { ShopContext } from "../Context/ShopContext";
 // import Title from './Title'
-import Product_Page from "./Product_Page";
+import Product_Page from "./P_Page_Component";
 import { useEffect } from "react";
 
 const R_C = () => {

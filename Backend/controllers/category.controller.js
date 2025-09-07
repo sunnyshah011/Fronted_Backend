@@ -140,54 +140,47 @@ export const getCategoryDetails = async (req, res) => {
   }
 };
 
-// Get subcategory details + products
-export const getSubcategoryDetails = async (req, res) => {
-  try {
-    const { categorySlug, subSlug } = req.params;
+// // Get subcategory details + products
+// export const getSubcategoryDetails = async (req, res) => {
+//   try {
+//     const { categorySlug, subSlug } = req.params;
 
-    const category = await CategoryModel.findOne({ slug: categorySlug });
-    if (!category) return res.json({ success: false, message: "Category not found" });
+//     const category = await CategoryModel.findOne({ slug: categorySlug });
+//     if (!category) return res.json({ success: false, message: "Category not found" });
 
-    const subcategory = await SubCategoryModel.findOne({
-      slug: subSlug,
-      category: category._id,
-    });
-    if (!subcategory) return res.json({ success: false, message: "Subcategory not found" });
+//     const subcategory = await SubCategoryModel.findOne({
+//       slug: subSlug,
+//       category: category._id,
+//     });
+//     if (!subcategory) return res.json({ success: false, message: "Subcategory not found" });
 
-    const products = await ProductModel.find({
-      category: category._id,
-      subcategory: subcategory._id,
-    });
+//     const products = await ProductModel.find({
+//       category: category._id,
+//       subcategory: subcategory._id,
+//     });
 
-    res.json({ success: true, category, subcategory, products });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
+//     res.json({ success: true, category, subcategory, products });
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// };
 
 // Get single product details
 export const getProductDetails = async (req, res) => {
   try {
-    const { categorySlug, subSlug, productSlug } = req.params;
-    console.log({ categorySlug, subSlug, productSlug });
-
+    const { categorySlug, productSlug } = req.params;
+    console.log(categorySlug, productSlug);
+    
     const category = await CategoryModel.findOne({ slug: categorySlug });
-    console.log("category",category);
+    console.log(category);
     if (!category) return res.json({ success: false, message: "Category not found" });
-
-    const subcategory = await SubCategoryModel.findOne({
-      slug: subSlug,
-      category: category._id,
-    });
-    console.log("subcategory",subcategory);
-    if (!subcategory) return res.json({ success: false, message: "Subcategory not found" });
 
     const product = await ProductModel.findOne({
       slug: productSlug,
       category: category._id,
-      subcategory: subcategory._id,
     });
-    console.log("product",product);
+    console.log(product);
+
     if (!product) return res.json({ success: false, message: "Product not found" });
 
     res.json({ success: true, product });

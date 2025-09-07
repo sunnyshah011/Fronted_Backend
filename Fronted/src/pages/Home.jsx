@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import Hero from '../component/Hero'
-import P_Category from '../component/P_Category'
+import P_Category from '../component/MainCategory'
 import R_L from '../component/R_L'
 import R_D from '../component/R_D'
 import R_A from '../component/R_A'

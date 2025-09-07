@@ -224,7 +224,7 @@
 import { useContext, useState, useEffect } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
-import Product_Page from "../component/Product_Page";
+import Product_Page from "../component/P_Page_Component";
 
 const Collection = () => {
   const { backendUrl } = useContext(ShopContext);

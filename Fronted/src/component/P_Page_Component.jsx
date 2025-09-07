@@ -32,12 +32,12 @@ import { useContext } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import { Link } from "react-router-dom";
 
-const Product_Page = ({ categorySlug, subSlug, productSlug, name, price, images }) => {
+const Product_Page = ({ categorySlug, productSlug, name, price, images }) => {
   const { currency } = useContext(ShopContext);
   return (
     <Link
       className="text-gray-700 cursor-pointer rounded-b-[6px]  bg-white block"
-      to={`/categories/${categorySlug}/${subSlug}/${productSlug}`}
+      to={`/categories/${categorySlug}/${productSlug}`}
     >
       <div className="aspect-square overflow-hidden rounded-t-[6px]">
         <img

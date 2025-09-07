@@ -85,7 +85,12 @@ const P_Category = () => {
 
   return (
     <div className="p-3 bg-white rounded-lg shadow">
-      <h3 onClick={() => navigate(`/categories`)}  className=" cursor-pointer font-bold mb-2 text-lg">VIEW ALL CATEGORY</h3>
+      <h3
+        onClick={() => navigate(`/categories`)}
+        className=" cursor-pointer font-bold mb-2 text-lg"
+      >
+        VIEW ALL CATEGORY
+      </h3>
 
       {categories.length > 0 ? (
         <ul className="space-y-1">
@@ -93,7 +98,7 @@ const P_Category = () => {
             <li
               key={cat._id}
               className="text-gray-700 hover:text-black cursor-pointer"
-              onClick={() => navigate(`/category/${cat.slug}`)} // navigate on click
+              onClick={() => navigate(`/categories/${cat.slug}`)} // navigate on click
             >
               {cat.name}
             </li>

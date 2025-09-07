@@ -1,7 +1,7 @@
 import { useContext, useState, useEffect } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import Title from "./Title";
-import Product_Page from "./Product_Page";
+import Product_Page from "./P_Page_Component";
 
 const R_L = () => {
   const { products } = useContext(ShopContext);
@@ -23,7 +23,6 @@ const R_L = () => {
             <Product_Page
               key={product._id}
               categorySlug={product.subcategory?.category?.slug}
-              subSlug={product.subcategory?.slug}
               productSlug={product.slug}
               name={product.name}
               price={product.price}

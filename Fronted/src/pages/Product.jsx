@@ -293,7 +293,7 @@ import "react-medium-image-zoom/dist/styles.css";
 
 const Product = () => {
   const { backendUrl, currency, addtocart } = useContext(ShopContext);
-  const { categorySlug, subSlug, productSlug } = useParams(); // updated
+  const { categorySlug, productSlug } = useParams(); // updated
 
   const [fproduct, setFProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -308,7 +308,7 @@ const Product = () => {
       try {
         setLoading(true);
         const { data } = await axios.get(
-          `${backendUrl}/api/categories/${categorySlug}/${subSlug}/${productSlug}`
+          `${backendUrl}/api/categories/${categorySlug}/${productSlug}`
         );
         if (data.success) {
           setFProduct(data.product);
@@ -332,7 +332,7 @@ const Product = () => {
       }
     };
     fetchProduct();
-  }, [backendUrl, categorySlug, subSlug, productSlug]);
+  }, [backendUrl, categorySlug, productSlug]);
 
   // ✅ Keep all your logic/styles as is (no changes below)
   const allSizes = fproduct

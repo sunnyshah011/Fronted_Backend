@@ -56,10 +56,10 @@ const App = () => {
             <Route path="/cart" element={<Cart />} />
 
             {/* category -> subcategory -> product */}
-            <Route path="/categories" element={<CategoryPageGroup />} />
+            {/* <Route path="/categories" element={<CategoryPageGroup />} />
             <Route path="/categories/:categorySlug" element={<CategoryPage />} />
             <Route path="/categories/:categorySlug/:subSlug" element={<SubCategoryPage />} />
-            <Route path="/categories/:categorySlug/:subSlug/:productSlug" element={<Product />} />
+            <Route path="/categories/:categorySlug/:subSlug/:productSlug" element={<Product />} /> */}
 
             {/* category -> subcategory -> product */}
             <Route path="/categories" element={<CategoryPageGroup />} />
