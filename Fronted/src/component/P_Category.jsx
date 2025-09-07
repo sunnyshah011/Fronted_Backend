@@ -68,7 +68,6 @@ const P_Category = () => {
   const fetchCategory = async () => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/categories`);
-      console.log("API response:", data);
 
       if (data.success) {
         setCategories(data.categories);
@@ -86,7 +85,7 @@ const P_Category = () => {
 
   return (
     <div className="p-3 bg-white rounded-lg shadow">
-      <h3 className="font-bold mb-2 text-lg">Categories</h3>
+      <h3 onClick={() => navigate(`/categories`)}  className=" cursor-pointer font-bold mb-2 text-lg">VIEW ALL CATEGORY</h3>
 
       {categories.length > 0 ? (
         <ul className="space-y-1">

@@ -27,7 +27,7 @@ const CategoryPage = () => {
         }
       }
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
   };
 
