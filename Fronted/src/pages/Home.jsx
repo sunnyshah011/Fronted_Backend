@@ -17,6 +17,7 @@ const Home = () => {
   return (
     <div>
       <Hero />
+      <R_L />
       <P_Category />
       <R_L />
       {/* <R_D />

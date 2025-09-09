@@ -93,17 +93,19 @@ const P_Category = () => {
       </h3>
 
       {categories.length > 0 ? (
-        <ul className="space-y-1">
-          {categories.map((cat) => (
-            <li
-              key={cat._id}
-              className="text-gray-700 hover:text-black cursor-pointer"
-              onClick={() => navigate(`/categories/${cat.slug}`)} // navigate on click
-            >
-              {cat.name}
-            </li>
-          ))}
-        </ul>
+        <div className="space-y-1">
+          <ul className=" grid grid-cols-6 items-center max-[400px]:grid-cols-3 ">
+            {categories.map((cat) => (
+              <li
+                key={cat._id}
+                className="text-gray-700 hover:text-black cursor-pointer flex justify-center"
+                onClick={() => navigate(`/categories/${cat.slug}`)} // navigate on click
+              >
+                {cat.name}
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : (
         <p className="text-gray-500 text-sm">No categories found.</p>
       )}
