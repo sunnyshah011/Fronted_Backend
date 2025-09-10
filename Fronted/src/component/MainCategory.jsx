@@ -59,6 +59,7 @@ import { useEffect, useState, useContext } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { assets } from "../assets/frontend_assets/assets";
 
 const P_Category = () => {
   const { backendUrl } = useContext(ShopContext);
@@ -84,27 +85,30 @@ const P_Category = () => {
   }, []);
 
   return (
-    <div className="p-3 bg-white rounded-lg shadow">
+    <div className="bg-white py-2">
       <h3
         onClick={() => navigate(`/categories`)}
-        className=" cursor-pointer font-bold mb-2 text-lg"
+        className=" cursor-pointer font-medium mb-2 text-sm pl-3"
       >
         VIEW ALL CATEGORY
       </h3>
 
       {categories.length > 0 ? (
-        <div className="space-y-1">
-          <ul className=" grid grid-cols-6 items-center max-[400px]:grid-cols-3 ">
-            {categories.map((cat) => (
-              <li
-                key={cat._id}
-                className="text-gray-700 hover:text-black cursor-pointer flex justify-center"
-                onClick={() => navigate(`/categories/${cat.slug}`)} // navigate on click
-              >
-                {cat.name}
-              </li>
-            ))}
-          </ul>
+        <div className="container mx-auto px-3 my-1 grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-3">
+          {categories.map((cat) => (
+            <div
+              key={cat._id}
+              className="w-full h-full bg-blue-500 scale-90 rounded"
+              onClick={() => navigate(`/categories/${cat.slug}`)} // navigate on click
+            >
+              <div>
+                <img
+                  src={assets.fishing}
+                  className="w-full h-full object-scale-down"
+                />
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         <p className="text-gray-500 text-sm">No categories found.</p>

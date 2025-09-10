@@ -40,12 +40,12 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-productSchema.pre("validate", function (next) {
-  if (this.name) {
-    this.slug = slugify(this.name, { lower: true });
-  }
-  next();
-});
+// productSchema.pre("validate", function (next) {
+//   if (this.name) {
+//     this.slug = slugify(this.name, { lower: true });
+//   }
+//   next();
+// });
 
 const ProductModel =
   mongoose.models.product || mongoose.model("product", productSchema);

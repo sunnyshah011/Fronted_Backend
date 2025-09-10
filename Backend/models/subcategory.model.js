@@ -10,12 +10,12 @@
   );
 
 
-subcategorySchema.pre("validate", function (next) {
-  if (this.name) {
-    this.slug = slugify(this.name, { lower: true });
-  }
-  next();
-});
+// subcategorySchema.pre("validate", function (next) {
+//   if (this.name) {
+//     this.slug = slugify(this.name, { lower: true });
+//   }
+//   next();
+// });
 
   const SubCategoryModel = mongoose.models.subcategory || mongoose.model("subcategory", subcategorySchema);
 

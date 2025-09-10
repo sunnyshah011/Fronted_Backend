@@ -10,12 +10,12 @@ const categorySchema = new mongoose.Schema(
 
 
 // auto-generate slug
-categorySchema.pre("validate", function (next) {
-  if (this.name) {
-    this.slug = slugify(this.name, { lower: true });
-  }
-  next();
-});
+// categorySchema.pre("validate", function (next) {
+//   if (this.name) {
+//     this.slug = slugify(this.name, { lower: true });
+//   }
+//   next();
+// });
 
 const CategoryModel = mongoose.models.category || mongoose.model("category", categorySchema);
 

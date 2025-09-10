@@ -14,7 +14,7 @@ const R_L = () => {
   }, [products]);
 
   return (
-    <div className="w-full p-3 mt-5">
+    <div className="w-full p-3">
       <Title Category="R_L" More="View" />
 
       <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-3 gap-x-2">

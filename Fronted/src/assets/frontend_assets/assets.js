@@ -76,8 +76,18 @@ import cross_icon from './cross_icon.png'
 import nightmare from './nightmare.jpg'
 import fts from './FTS LOGO_png.png'
 import home from './home.png'
+import banner from './banner.jpg'
+import banner_mobile from './banner-mobile.jpg'
+import banner1 from './banner1.jpg'
+import fishing from './fishing.png'
+
+
 
 export const assets = {
+    fishing,
+    banner,
+    banner1,
+    banner_mobile,
     fts,
     home,
     logo,
