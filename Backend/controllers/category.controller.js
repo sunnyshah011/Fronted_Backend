@@ -1,21 +1,80 @@
 import CategoryModel from "../models/category.model.js";
 import SubCategoryModel from "../models/subcategory.model.js";
 import ProductModel from "../models/product.model.js";
+import { v2 as cloudinary } from "cloudinary";
 import slugify from "slugify";
 import mongoose from "mongoose";
 
 // Create category
+// export const createCategory = async (req, res) => {
+//   try {
+//     const { name } = req.body;
+//     const slug = slugify(name, { lower: true });
+//     const category = new CategoryModel({ name, slug });
+//     await category.save();
+//     res.status(201).json(category);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+
 export const createCategory = async (req, res) => {
   try {
     const { name } = req.body;
+
+    if (!name) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Name is required" });
+    }
+
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Image is required" });
+    }
+
+    // Check duplicate slug
     const slug = slugify(name, { lower: true });
-    const category = new CategoryModel({ name, slug });
+    const existing = await CategoryModel.findOne({ slug });
+    if (existing) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Category already exists" });
+    }
+
+    // Upload category image to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+      resource_type: "image",
+      folder: "categories",
+      format: "webp",   // ✅ convert to WebP like in products
+      quality: "auto",
+      fetch_format: "auto",
+    });
+
+    const category = new CategoryModel({
+      name,
+      slug,
+      image: uploadResult.secure_url,
+      imageId: uploadResult.public_id, // save for later deletion
+    });
+
     await category.save();
-    res.status(201).json(category);
+
+    res.status(201).json({
+      success: true,
+      message: "Category created successfully",
+      category,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error creating category:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };
+
+
+
+
 // Get all categories
 export const getCategories = async (req, res) => {
   try {
@@ -26,21 +85,66 @@ export const getCategories = async (req, res) => {
   }
 };
 
+
+// // Update category
+// export const updateCategory = async (req, res) => {
+//   try {
+//     const { name } = req.body;
+//     const slug = slugify(name, { lower: true });
+//     const updated = await CategoryModel.findByIdAndUpdate(
+//       req.params.id,
+//       { name, slug },
+//       { new: true }
+//     );
+//     res.json(updated);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// };
 // Update category
+
 export const updateCategory = async (req, res) => {
   try {
     const { name } = req.body;
-    const slug = slugify(name, { lower: true });
+
+    const updateData = {};
+    if (name) {
+      updateData.name = name;
+      updateData.slug = slugify(name, { lower: true });
+    }
+
+    // If image uploaded → send to Cloudinary
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        resource_type: "image",
+        format: "webp",
+        quality: "auto",
+        fetch_format: "auto",
+      });
+      updateData.image = result.secure_url;
+    }
+
     const updated = await CategoryModel.findByIdAndUpdate(
       req.params.id,
-      { name, slug },
+      updateData,
       { new: true }
     );
-    res.json(updated);
+
+    if (!updated) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+
+    res.json({ success: true, category: updated });
   } catch (err) {
+    console.error("Update category error:", err);
     res.status(500).json({ error: err.message });
   }
 };
+
+
+
+
+
 // Delete category
 export const deleteCategory = async (req, res) => {
   try {
@@ -169,17 +273,14 @@ export const getCategoryDetails = async (req, res) => {
 export const getProductDetails = async (req, res) => {
   try {
     const { categorySlug, productSlug } = req.params;
-    console.log(categorySlug, productSlug);
     
     const category = await CategoryModel.findOne({ slug: categorySlug });
-    console.log(category);
     if (!category) return res.json({ success: false, message: "Category not found" });
 
     const product = await ProductModel.findOne({
       slug: productSlug,
       category: category._id,
     });
-    console.log(product);
 
     if (!product) return res.json({ success: false, message: "Product not found" });
 

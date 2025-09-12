@@ -8,11 +8,12 @@ import {
   // getSubcategoryDetails,
   getProductDetails,
 } from "../controllers/category.controller.js";
+import upload from "../middleware/multer.middleware.js";
 import adminAuth from "../middleware/adminAuth.middleware.js";
 
 const categoryRouter = express.Router();
 
-categoryRouter.post("/", adminAuth, createCategory);
+categoryRouter.post("/", adminAuth, upload.single("image"), createCategory);
 categoryRouter.put("/:id", adminAuth, updateCategory);
 categoryRouter.delete("/:id", adminAuth, deleteCategory);
 

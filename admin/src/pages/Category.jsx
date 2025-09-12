@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { BackendUrl } from '../App.jsx'
+import { BackendUrl } from "../App.jsx";
 
-export default function CategoryManager({token}) {
-
+export default function CategoryManager({ token }) {
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const [newCategory, setNewCategory] = useState("");
+  const [newCategoryImage, setNewCategoryImage] = useState(null);
   const [editCategoryId, setEditCategoryId] = useState(null);
+  const [editCategoryName, setEditCategoryName] = useState("");
+  const [editCategoryImage, setEditCategoryImage] = useState(null);
 
   const [newSubcategory, setNewSubcategory] = useState("");
   const [editSubcategoryId, setEditSubcategoryId] = useState(null);
@@ -17,18 +19,19 @@ export default function CategoryManager({token}) {
   // Fetch categories
   const loadCategories = async () => {
     const res = await axios.get(BackendUrl + "/api/categories");
-    setCategories(res.data.categories || []); // <-- pick categories array
-    // console.log(res.data.categories);
+    setCategories(res.data.categories || []);
   };
 
- const loadSubcategories = async (categoryId) => {
-  try {
-    const res = await axios.get(`${BackendUrl}/api/subcategories/category/${categoryId}`);
-    setSubcategories(res.data.subcategories || []);
-  } catch (err) {
-    console.error(err);
-  }
-};
+  const loadSubcategories = async (categoryId) => {
+    try {
+      const res = await axios.get(
+        `${BackendUrl}/api/subcategories/category/${categoryId}`
+      );
+      setSubcategories(res.data.subcategories || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     loadCategories();
@@ -36,20 +39,50 @@ export default function CategoryManager({token}) {
 
   // ---------------- CATEGORY ACTIONS ----------------
   const handleAddCategory = async () => {
-    if (!newCategory.trim()) return;
-    await axios.post(BackendUrl + "/api/categories", { name: newCategory }, {headers:{token}});
+    if (!newCategory.trim() || !newCategoryImage) return;
+
+    const formData = new FormData();
+    formData.append("name", newCategory);
+    formData.append("image", newCategoryImage);
+
+    await axios.post(BackendUrl + "/api/categories", formData, {
+      headers: {
+        token,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
     setNewCategory("");
+    setNewCategoryImage(null);
     loadCategories();
   };
 
-  const handleEditCategory = async (id, name) => {
-    await axios.put(BackendUrl + `/api/categories/${id}`, { name }, {headers:{token}});
+  const handleEditCategory = async () => {
+    if (!editCategoryId || !editCategoryName.trim()) return;
+
+    const formData = new FormData();
+    formData.append("name", editCategoryName);
+    if (editCategoryImage) {
+      formData.append("image", editCategoryImage);
+    }
+
+    await axios.put(BackendUrl + `/api/categories/${editCategoryId}`, formData, {
+      headers: {
+        token,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
     setEditCategoryId(null);
+    setEditCategoryName("");
+    setEditCategoryImage(null);
     loadCategories();
   };
 
   const handleDeleteCategory = async (id) => {
-    await axios.delete(BackendUrl + `/api/categories/${id}`,{headers:{token}});
+    await axios.delete(BackendUrl + `/api/categories/${id}`, {
+      headers: { token },
+    });
     if (selectedCategory === id) {
       setSelectedCategory(null);
       setSubcategories([]);
@@ -60,22 +93,32 @@ export default function CategoryManager({token}) {
   // ---------------- SUBCATEGORY ACTIONS ----------------
   const handleAddSubcategory = async () => {
     if (!newSubcategory.trim() || !selectedCategory) return;
-    await axios.post(BackendUrl + "/api/subcategories", {
-      name: newSubcategory,
-      category: selectedCategory,
-    }, {headers:{token}});
+    await axios.post(
+      BackendUrl + "/api/subcategories",
+      {
+        name: newSubcategory,
+        category: selectedCategory,
+      },
+      { headers: { token } }
+    );
     setNewSubcategory("");
     loadSubcategories(selectedCategory);
   };
 
   const handleEditSubcategory = async (id, name) => {
-    await axios.put(BackendUrl + `/api/subcategories/${id}`, { name }, {headers:{token}});
+    await axios.put(
+      BackendUrl + `/api/subcategories/${id}`,
+      { name },
+      { headers: { token } }
+    );
     setEditSubcategoryId(null);
     loadSubcategories(selectedCategory);
   };
 
   const handleDeleteSubcategory = async (id) => {
-    await axios.delete(BackendUrl + `/api/subcategories/${id}`,{headers:{token}});
+    await axios.delete(BackendUrl + `/api/subcategories/${id}`, {
+      headers: { token },
+    });
     loadSubcategories(selectedCategory);
   };
 
@@ -92,7 +135,16 @@ export default function CategoryManager({token}) {
             onChange={(e) => setNewCategory(e.target.value)}
             placeholder="Add category..."
           />
-          <button onClick={handleAddCategory} className="bg-blue-500 text-white px-4 rounded">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setNewCategoryImage(e.target.files[0])}
+            className="border p-2 rounded"
+          />
+          <button
+            onClick={handleAddCategory}
+            className="bg-blue-500 text-white px-4 rounded"
+          >
             Add
           </button>
         </div>
@@ -101,17 +153,40 @@ export default function CategoryManager({token}) {
           {categories.map((c) => (
             <li key={c._id} className="flex justify-between items-center mb-2">
               {editCategoryId === c._id ? (
-                <>
+                <div className="flex gap-2 items-center flex-wrap">
                   <input
                     className="border p-1"
-                    defaultValue={c.name}
-                    onBlur={(e) => handleEditCategory(c._id, e.target.value)}
+                    value={editCategoryName}
+                    onChange={(e) => setEditCategoryName(e.target.value)}
                   />
-                </>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setEditCategoryImage(e.target.files[0])}
+                  />
+                  <button
+                    onClick={handleEditCategory}
+                    className="bg-green-500 text-white px-2 rounded"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditCategoryId(null);
+                      setEditCategoryName("");
+                      setEditCategoryImage(null);
+                    }}
+                    className="bg-gray-400 text-white px-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
               ) : (
                 <>
                   <span
-                    className={`cursor-pointer ${selectedCategory === c._id ? "font-bold" : ""}`}
+                    className={`cursor-pointer ${
+                      selectedCategory === c._id ? "font-bold" : ""
+                    }`}
                     onClick={() => {
                       setSelectedCategory(c._id);
                       loadSubcategories(c._id);
@@ -121,7 +196,10 @@ export default function CategoryManager({token}) {
                   </span>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => setEditCategoryId(c._id)}
+                      onClick={() => {
+                        setEditCategoryId(c._id);
+                        setEditCategoryName(c.name);
+                      }}
                       className="text-yellow-500"
                     >
                       Edit
@@ -152,14 +230,20 @@ export default function CategoryManager({token}) {
               onChange={(e) => setNewSubcategory(e.target.value)}
               placeholder="Add subcategory..."
             />
-            <button onClick={handleAddSubcategory} className="bg-green-500 text-white px-4 rounded">
+            <button
+              onClick={handleAddSubcategory}
+              className="bg-green-500 text-white px-4 rounded"
+            >
               Add
             </button>
           </div>
 
           <ul>
             {subcategories.map((sc) => (
-              <li key={sc._id} className="flex justify-between items-center mb-2">
+              <li
+                key={sc._id}
+                className="flex justify-between items-center mb-2"
+              >
                 {editSubcategoryId === sc._id ? (
                   <input
                     className="border p-1"
