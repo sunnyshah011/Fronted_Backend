@@ -1,26 +1,24 @@
-import { useEffect } from 'react'
-import Hero from '../component/Hero'
-import P_Category from '../component/MainCategory'
-import R_L from '../component/R_L'
-// import R_D from '../component/R_D'
-// import R_A from '../component/R_A'
-// import R_C from '../component/R_C'
-
+import { useEffect } from "react";
+import Hero from "../component/Hero";
+import P_Category from "../component/MainCategory";
+import AllProducts from "../component/AllProducts";
+import FlashSale from "../component/FlashSale";
+import TopProducts from "../component/TopProducts";
 
 const Home = () => {
-
-    useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
-
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div>
       <Hero />
       <P_Category />
-      <R_L />
+      <TopProducts />
+      <FlashSale />
+      <AllProducts />
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

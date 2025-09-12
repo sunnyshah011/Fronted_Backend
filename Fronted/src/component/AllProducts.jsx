@@ -15,9 +15,9 @@ const R_L = () => {
 
   return (
     <div className="w-full p-3">
-      <Title Category="R_L" More="View" />
+      <Title Category="All Products" More="View" />
 
-      <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-3 gap-x-2">
+      <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-3 gap-x-2">
         {recentProducts.length > 0 ? (
           recentProducts.map((product) => (
             <Product_Page

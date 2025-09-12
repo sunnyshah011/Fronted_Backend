@@ -61,6 +61,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { assets } from "../assets/frontend_assets/assets";
 
+
 const P_Category = () => {
   const { backendUrl } = useContext(ShopContext);
   const [categories, setCategories] = useState([]);
@@ -73,7 +74,7 @@ const P_Category = () => {
       if (data.success) {
         setCategories(data.categories);
       } else if (Array.isArray(data.categories)) {
-        setCategories(data.categories);
+        setCategories(data.categories.slice(0, 5));
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -85,12 +86,12 @@ const P_Category = () => {
   }, []);
 
   return (
-    <div className="bg-white py-2">
+    <div className="bg-white py-4">
       <h3
         onClick={() => navigate(`/categories`)}
-        className=" cursor-pointer font-medium mb-2 text-sm pl-3"
+        className="cursor-pointer font-semibold mb-2 text-sm pl-4"
       >
-        VIEW ALL CATEGORY
+        All Category
       </h3>
 
       {categories.length > 0 ? (

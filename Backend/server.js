@@ -35,10 +35,6 @@ app.use("/api/location", locationrRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/subcategories", subCategoryRouter);
 
-app.get("/", (req, res) => {
-  res.send("API");
-});
-
 app.listen(port, () => {
   console.log("server started on :: ", port);
 });

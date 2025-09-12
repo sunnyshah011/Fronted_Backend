@@ -2,8 +2,8 @@ import { assets } from "../assets/frontend_assets/assets";
 
 const Menubar = ({Category,More}) => {
   return (
-    <div className="flex items-center justify-center mt-3 px-4">
-      <div className="w-full flex justify-between items-center">
+    <div className="flex items-center justify-center mt-3 px-2">
+      <div className="w-full flex justify-between items-center font-semibold font-roboto">
         <div> {Category} </div>
 
         <div className="flex items-center gap-2 ">
