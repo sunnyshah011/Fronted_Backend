@@ -3,7 +3,7 @@ import { ShopContext } from "../Context/ShopContext";
 import Title from "./Title";
 import Product_Page from "./P_Page_Component";
 
-const R_L = () => {
+const AllProducts = () => {
   const { products } = useContext(ShopContext);
   const [recentProducts, setRecentProducts] = useState([]);
 
@@ -39,4 +39,4 @@ const R_L = () => {
   );
 };
 
-export default R_L;
+export default AllProducts;

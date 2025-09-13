@@ -254,6 +254,7 @@ const Collection = () => {
     fetchCategories();
   }, [backendUrl]);
 
+
   // Fetch products & subcategories for selected category
   useEffect(() => {
     if (!activeCategory) return;
@@ -278,6 +279,7 @@ const Collection = () => {
     fetchCategoryData();
   }, [activeCategory, backendUrl]);
 
+  
   // Filter & Sort products
   const filteredProducts = activeSub
     ? products.filter((p) => p.subcategorySlug === activeSub)

@@ -3,7 +3,7 @@ import { ShopContext } from "../Context/ShopContext";
 import Title from "./Title";
 import Product_Page from "./P_Page_Component";
 
-const R_D = () => {
+const FlashSale = () => {
 
   const { products } = useContext(ShopContext);
   const [R_D_product, setproduct] = useState([]);
@@ -33,4 +33,4 @@ const R_D = () => {
   );
 };
 
-export default R_D;
+export default FlashSale;
