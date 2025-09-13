@@ -107,6 +107,7 @@ const P_Category = () => {
                   src={assets.fishing}
                   className="w-full h-full object-scale-down"
                 />
+                <p> {cat.name} </p>
               </div>
             </div>
           ))}
