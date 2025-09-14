@@ -61,7 +61,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { assets } from "../assets/frontend_assets/assets";
 
-
 const P_Category = () => {
   const { backendUrl } = useContext(ShopContext);
   const [categories, setCategories] = useState([]);
@@ -86,20 +85,23 @@ const P_Category = () => {
   }, []);
 
   return (
-    <div className="bg-white py-4">
-      <h3
-        onClick={() => navigate(`/categories`)}
-        className="cursor-pointer font-semibold mb-2 text-sm pl-4"
-      >
-        All Category
-      </h3>
+    <div className="bg-white py-2">
+      <div className="flex justify-between px-3">
+        <h3 className="font-semibold text-sm" >All Category</h3>
+        <p
+          onClick={() => navigate(`/categories`)}
+          className="cursor-pointer font-semibold text-sm"
+        >
+          View All
+        </p>
+      </div>
 
       {categories.length > 0 ? (
         <div className="container mx-auto px-3 my-1 grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-3">
           {categories.map((cat) => (
             <div
               key={cat._id}
-              className="w-full h-full bg-blue-500 scale-90 rounded"
+              className="w-full h-full bg-blue-500 scale-90 p-1 rounded"
               onClick={() => navigate(`/categories/${cat.slug}`)} // navigate on click
             >
               <div>
@@ -107,7 +109,7 @@ const P_Category = () => {
                   src={assets.fishing}
                   className="w-full h-full object-scale-down"
                 />
-                <p> {cat.name} </p>
+                {/* <p> {cat.name} </p> */}
               </div>
             </div>
           ))}

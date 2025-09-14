@@ -98,7 +98,7 @@ const Product = () => {
   };
 
   return (
-    <div className="max-w-6xl p-6">
+    <div className="max-w-6xl p-3 pt-4">
       {loading && <p>Loading...</p>}
       {!loading && !fproduct && <p>Product not found</p>}
       {!loading && fproduct && (

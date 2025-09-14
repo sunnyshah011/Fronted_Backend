@@ -1,8 +1,7 @@
-import { Link, useLocation, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { ShopContext } from "../Context/ShopContext";
-import { useContext } from "react";
 
 const Breadcrumbs = () => {
   const { backendUrl } = useContext(ShopContext);
@@ -27,13 +26,14 @@ const Breadcrumbs = () => {
       }
     };
     fetchProductName();
-  }, [paths, backendUrl]);
+  }, [pathname, backendUrl]); // use pathname to detect URL change
 
   if (pathname === "/") return null;
 
   return (
-    <nav className="mt-17 py-2 px-4 text-sm text-gray-600">
-      <ol className="flex items-center space-x-2">
+    <nav className="mt-20 px-4 text-sm text-gray-600" aria-label="breadcrumb">
+      <ol className="flex items-center space-x-2 flex-wrap">
+        {/* Home */}
         <li>
           <Link to="/" className="hover:text-blue-600 font-medium">
             Home
@@ -45,28 +45,28 @@ const Breadcrumbs = () => {
           const isLast = index === paths.length - 1;
 
           // Replace productId with productName
+          let displayName = name;
           if (paths[0] === "product" && index === 1) {
-            return (
-              <li key={index} className="flex items-center space-x-2">
-                <span className="text-gray-400">/</span>
-                <span className="text-gray-500 truncate max-w-[110px] min-[320px]:max-w-[170px] min-[350px]:max-w-[190px] sm:max-w-[400px] md:max-w-[400px] lg:max-w-[700px]">
-                  {productName || "Loading..."}
-                </span>
-              </li>
-            );
+            displayName = productName || "Loading...";
           }
 
+          // Hide intermediate paths on very small screens
+          const hideOnSmall =
+            index !== paths.length - 1 && index !== 0 ? "hidden sm:inline" : "";
+
           return (
-            <li key={index} className="flex items-center space-x-2">
+            <li key={index} className={`flex items-center space-x-2 ${hideOnSmall}`}>
               <span className="text-gray-400">/</span>
               {isLast ? (
-                <span className="text-gray-500 capitalize">{name}</span>
+                <span className="text-gray-500 truncate max-w-[110px] sm:max-w-[250px] md:max-w-[400px] lg:max-w-[850px]">
+                  {displayName}
+                </span>
               ) : (
                 <Link
                   to={routeTo}
-                  className="hover:text-blue-600 capitalize font-medium"
+                  className="hover:text-blue-600 capitalize font-medium truncate max-w-[100px] sm:max-w-[150px] md:max-w-[250px]"
                 >
-                  {name}
+                  {displayName}
                 </Link>
               )}
             </li>
