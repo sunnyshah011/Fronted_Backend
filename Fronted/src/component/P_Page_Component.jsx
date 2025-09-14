@@ -9,11 +9,11 @@ const Product_Page = ({ categorySlug, productSlug, name, price, images }) => {
       className="text-gray-700 cursor-pointer rounded-b-[6px]  bg-white block"
       to={`/categories/${categorySlug}/${productSlug}`}
     >
-      <div className="aspect-square overflow-hidden rounded-t-[6px]">
+      <div className="w-full aspect-square overflow-hidden rounded-xl bg-white flex items-center justify-center">
         <img
           src={images[0]}
           alt={name}
-          className="w-full h-full object-cover object-top bottom-0 hover:opacity-90 transition ease-in-out"
+          className="max-w-full max-h-full object-contain"
         />
       </div>
       <p className="pt-5 pb-1 pl-2 text-sm line-clamp-1">{name}</p>
@@ -25,3 +25,4 @@ const Product_Page = ({ categorySlug, productSlug, name, price, images }) => {
 };
 
 export default Product_Page;
+
