@@ -98,12 +98,12 @@ const Product = () => {
   };
 
   return (
-    <div className="max-w-6xl p-3 pt-4">
+    <div className="max-w-[1250px] mt-3 pt-4 px-4 bg-white">
       {loading && <p>Loading...</p>}
       {!loading && !fproduct && <p>Product not found</p>}
       {!loading && fproduct && (
-        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-10">
-          {/* LEFT: Images */}
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          {/* LEFT: Images
           <div>
             <div>
               <div className="w-full aspect-square overflow-hidden rounded-xl bg-white mb-4 flex items-center justify-center">
@@ -136,15 +136,49 @@ const Product = () => {
                 ))}
               </div>
             )}
+          </div> */}
+          {/* LEFT: Images */}
+          <div className="w-full flex flex-col items-center">
+            <div className="w-full max-w-md aspect-square bg-white overflow-hidden rounded-xl mb-2 flex items-center justify-center shadow">
+              <Zoom>
+                <img
+                  src={mainImage}
+                  alt={fproduct.name}
+                  className="max-w-full max-h-full object-contain"
+                />
+              </Zoom>
+            </div>
+
+            {fproduct.images?.length > 1 && (
+              <div className="flex gap-3 flex-wrap justify-center">
+                {fproduct.images.map((img) => (
+                  <div
+                    key={img}
+                    onClick={() => setMainImage(img)}
+                    className={`w-15 h-15 rounded-lg overflow-hidden cursor-pointer border transition transform hover:scale-105 ${
+                      mainImage === img
+                        ? "border-black ring-2 ring-black"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt="Thumbnail"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* RIGHT: Info */}
-          <div className="flex flex-col">
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">
+          <div className="flex flex-col pr-5">
+            <h1 className="text-[13px] md:text-[20px] font-bold mb-2 mt-4">
               {fproduct.name}
             </h1>
-            <p className="text-3xl font-bold mb-4">
-              {currency} {displayPrice}
+            <p className="text-2xl font-bold mb-4">
+              {currency} {displayPrice} /-
             </p>
 
             {/* Size Selector */}
@@ -258,7 +292,7 @@ const Product = () => {
                   toast.error("Product out of stock");
                 }
               }}
-              className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition mb-4"
+              className="px-6 w-50 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition mb-4"
             >
               Add to Cart
             </button>
