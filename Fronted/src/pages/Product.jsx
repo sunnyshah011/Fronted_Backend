@@ -59,14 +59,14 @@ const Product = () => {
 
   const availableColors = selectedSize
     ? fproduct.variants
-      .filter((v) => v.size === selectedSize && v.stock > 0)
-      .map((v) => v.color)
+        .filter((v) => v.size === selectedSize && v.stock > 0)
+        .map((v) => v.color)
     : allColors;
 
   const availableSizes = selectedColor
     ? fproduct.variants
-      .filter((v) => v.color === selectedColor && v.stock > 0)
-      .map((v) => v.size)
+        .filter((v) => v.color === selectedColor && v.stock > 0)
+        .map((v) => v.size)
     : allSizes;
 
   const priceVariant = selectedSize
@@ -78,8 +78,8 @@ const Product = () => {
   const selectedVariant =
     selectedSize && selectedColor
       ? fproduct?.variants.find(
-        (v) => v.size === selectedSize && v.color === selectedColor
-      )
+          (v) => v.size === selectedSize && v.color === selectedColor
+        )
       : null;
 
   const variantToUse = selectedVariant || priceVariant;
@@ -98,21 +98,21 @@ const Product = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl p-6">
       {loading && <p>Loading...</p>}
       {!loading && !fproduct && <p>Product not found</p>}
       {!loading && fproduct && (
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-10">
           {/* LEFT: Images */}
           <div>
-            <div className="w-full aspect-square overflow-hidden rounded-xl bg-white mb-4 relative">
-              <Zoom>
+            <div>
+              <div className="w-full aspect-square overflow-hidden rounded-xl bg-white mb-4 flex items-center justify-center">
                 <img
                   src={mainImage}
                   alt={fproduct.name}
-                  className="w-full h-full object-cover object-center cursor-zoom-in"
+                  className="max-w-full max-h-full object-contain"
                 />
-              </Zoom>
+              </div>
             </div>
 
             {fproduct.images?.length > 1 && (
@@ -121,10 +121,11 @@ const Product = () => {
                   <div
                     key={idx}
                     onClick={() => setMainImage(img)}
-                    className={`w-20 h-20 rounded-lg overflow-hidden cursor-pointer border ${mainImage === img
+                    className={`w-20 h-20 rounded-lg overflow-hidden cursor-pointer border ${
+                      mainImage === img
                         ? "border-black ring-2 ring-black"
                         : "border-gray-300"
-                      }`}
+                    }`}
                   >
                     <img
                       src={img}
@@ -164,12 +165,13 @@ const Product = () => {
                         setSelectedColor("");
                       }
                     }}
-                    className={`px-4 py-2 border rounded-lg transition ${selectedSize === size
+                    className={`px-4 py-2 border rounded-lg transition ${
+                      selectedSize === size
                         ? "bg-black text-white"
                         : availableSizes.includes(size)
-                          ? "bg-white hover:bg-gray-100"
-                          : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                      }`}
+                        ? "bg-white hover:bg-gray-100"
+                        : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    }`}
                   >
                     {size}
                   </button>
@@ -185,12 +187,13 @@ const Product = () => {
                   <button
                     key={color}
                     onClick={() => setSelectedColor(color)}
-                    className={`px-4 py-2 border rounded-lg transition ${selectedColor === color
+                    className={`px-4 py-2 border rounded-lg transition ${
+                      selectedColor === color
                         ? "bg-black text-white"
                         : availableColors.includes(color)
-                          ? "bg-white hover:bg-gray-100"
-                          : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                      }`}
+                        ? "bg-white hover:bg-gray-100"
+                        : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    }`}
                     disabled={!availableColors.includes(color)}
                   >
                     {color}
@@ -202,8 +205,9 @@ const Product = () => {
             {/* Stock & Quantity */}
             <div className="mb-6 flex flex-col gap-2">
               <p
-                className={`text-sm font-medium ${variantToUse?.stock > 0 ? "text-green-600" : "text-red-500"
-                  }`}
+                className={`text-sm font-medium ${
+                  variantToUse?.stock > 0 ? "text-green-600" : "text-red-500"
+                }`}
               >
                 {variantToUse?.stock > 0
                   ? `Stock: ${variantToUse.stock}`
