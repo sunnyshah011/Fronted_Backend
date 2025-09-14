@@ -75,18 +75,20 @@ import { assets } from "../assets/frontend_assets/assets";
 
 const Hero = () => {
   return (
-    <section className="mt-20 mb-3 px-2" >
+    <section className="mt-20 mb-3 px-2">
       <div className="container mx-auto">
         <div
           className={`w-full rounded overflow-hidden ${
             !assets.banner1 && "animate-pulse my-2"
           }`}
         >
-          <img
-            src={assets.banner1}
-            alt="banner"
-            className="w-full h-auto object-cover rounded"
-          />
+          {assets.banner1 && (
+            <img
+              src={assets.banner1}
+              alt="banner"
+              className="w-full h-auto object-contain rounded"
+            />
+          )}
         </div>
       </div>
     </section>
@@ -94,3 +96,4 @@ const Hero = () => {
 };
 
 export default Hero;
+
