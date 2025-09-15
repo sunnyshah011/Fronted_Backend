@@ -139,7 +139,7 @@ const Product = () => {
           </div> */}
           {/* LEFT: Images */}
           <div className="w-full flex flex-col items-center">
-            <div className="w-full max-w-md aspect-square bg-white overflow-hidden rounded-xl mb-2 flex items-center justify-center shadow">
+            <div className="w-full max-w-[500px] aspect-square bg-white overflow-hidden rounded-xl mb-2 flex items-center justify-center shadow">
               <Zoom>
                 <img
                   src={mainImage}

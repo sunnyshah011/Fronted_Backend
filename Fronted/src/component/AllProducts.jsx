@@ -5,35 +5,29 @@ import Product_Page from "./P_Page_Component";
 
 const AllProducts = () => {
   const { products } = useContext(ShopContext);
-  const [recentProducts, setRecentProducts] = useState([]);
+  const [topProduct, setProduct] = useState([]);
 
   useEffect(() => {
-    if (products && products.length > 0) {
-      setRecentProducts(products.slice(0, 6));
+    if (products?.length > 0) {
+      setProduct(products);
     }
   }, [products]);
 
   return (
-    <div className="w-full p-3">
-      <Title Category="All Products" More="View" />
+    <div className="w-full px-2 py-10">
+      <Title Category="AllProducts" More="" />
 
-      <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-3 gap-x-2">
-        {recentProducts.length > 0 ? (
-          recentProducts.map((product) => (
-            <Product_Page
-              key={product._id}
-              categorySlug={product.subcategory?.category?.slug}
-              productSlug={product.slug}
-              name={product.name}
-              price={product.price}
-              images={product.images}
-            />
-          ))
-        ) : (
-          <p className="col-span-full text-center text-gray-500">
-            No products found
-          </p>
-        )}
+      <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-2 gap-x-2">
+        {topProduct.map((product) => (
+          <Product_Page
+            key={product?._id}
+            categorySlug={product?.subcategory?.category?.slug}
+            productSlug={product?.slug}
+            name={product?.name}
+            price={product?.variants?.[0]?.price}
+            images={product?.images}
+          />
+        ))}
       </div>
     </div>
   );

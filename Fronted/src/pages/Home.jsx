@@ -15,8 +15,8 @@ const Home = () => {
       <Hero />
       <P_Category />
       <TopProducts />
-      {/* <FlashSale />
-      <AllProducts /> */}
+      <FlashSale />
+      <AllProducts />
     </div>
   );
 };
