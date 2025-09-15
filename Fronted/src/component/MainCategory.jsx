@@ -87,7 +87,7 @@ const P_Category = () => {
   return (
     <div className="bg-white py-2">
       <div className="flex justify-between px-3">
-        <h3 className="font-semibold text-sm" >All Category</h3>
+        <h3 className="font-semibold text-sm">All Category</h3>
         <p
           onClick={() => navigate(`/categories`)}
           className="cursor-pointer font-semibold text-sm"
@@ -101,15 +101,20 @@ const P_Category = () => {
           {categories.map((cat) => (
             <div
               key={cat._id}
-              className="w-full h-full scale-90 p-1 rounded"
+              className="flex flex-col items-center"
               onClick={() => navigate(`/categories/${cat.slug}`)} // navigate on click
             >
               <div>
                 <img
                   src={cat.image}
-                  className="w-full h-full object-scale-down"
+                  className="w-full h-full aspect-square object-scale-down"
                 />
-                <p> {cat.name} </p>
+              </div>
+              <div>
+                <p className="max-[768px]:text-[13px] max-[768px]:font-medium md:text-[20px] font-normal ">
+                  {" "}
+                  {cat.name}{" "}
+                </p>
               </div>
             </div>
           ))}

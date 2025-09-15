@@ -72,34 +72,29 @@ const CategoryPageGroup = () => {
   }, []);
 
   return (
-    <div className="container mx-auto px-6 py-10">
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">
-        🛍️ Shop by Category
+    <div className="container mx-auto px-2 py-5">
+      <h3 className="text-2xl font-bold text-gray-800 mb-6 ">
+       Shop by Category
       </h3>
 
       {category.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
           {category.map((item) => (
             <Link
               to={`/categories/${item.slug}`}
               key={item._id}
               className="block"
             >
-              <div className="bg-white shadow-md rounded-2xl overflow-hidden transform hover:scale-105 transition duration-300 cursor-pointer">
-                {/* If you have category images */}
-                {item.image ? (
+              <div className="bg-white overflow-hidden transform hover:scale-105 transition duration-300 cursor-pointer">
+                <div className="p-3 pb-0">
                   <img
                     src={item.image}
                     alt={item.slug}
-                    className="w-full h-40 object-cover"
+                    className="w-full h-full aspect-square object-contain"
                   />
-                ) : (
-                  <div className="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500">
-                    No Image
-                  </div>
-                )}
+                </div>
 
-                <div className="p-4 text-center">
+                <div className="md:p-4 p-1 text-center">
                   <p className="text-lg font-semibold text-gray-700 capitalize">
                     {item.slug.replace("-", " ")}
                   </p>
