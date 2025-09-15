@@ -14,7 +14,7 @@ import adminAuth from "../middleware/adminAuth.middleware.js";
 const categoryRouter = express.Router();
 
 categoryRouter.post("/", adminAuth, upload.single("image"), createCategory);
-categoryRouter.put("/:id", adminAuth, updateCategory);
+categoryRouter.put("/:id", adminAuth, upload.single("image"), updateCategory);
 categoryRouter.delete("/:id", adminAuth, deleteCategory);
 
 //category routs
