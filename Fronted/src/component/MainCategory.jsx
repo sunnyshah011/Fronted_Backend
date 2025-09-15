@@ -101,15 +101,15 @@ const P_Category = () => {
           {categories.map((cat) => (
             <div
               key={cat._id}
-              className="w-full h-full bg-blue-500 scale-90 p-1 rounded"
+              className="w-full h-full scale-90 p-1 rounded"
               onClick={() => navigate(`/categories/${cat.slug}`)} // navigate on click
             >
               <div>
                 <img
-                  src={assets.fishing}
+                  src={cat.image}
                   className="w-full h-full object-scale-down"
                 />
-                {/* <p> {cat.name} </p> */}
+                <p> {cat.name} </p>
               </div>
             </div>
           ))}
