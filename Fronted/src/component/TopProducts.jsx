@@ -9,7 +9,9 @@ const TopProducts = () => {
 
   useEffect(() => {
     if (products?.length > 0) {
-      setProduct(products.slice(0, 6));
+      // ✅ filter only products with isTopProduct true
+      const filtered = products.filter((p) => p?.isTopProduct);
+      setProduct(filtered.slice(0, 6)); // take max 6 if needed
     }
   }, [products]);
 
@@ -34,3 +36,4 @@ const TopProducts = () => {
 };
 
 export default TopProducts;
+
