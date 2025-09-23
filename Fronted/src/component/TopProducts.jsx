@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import Title from "./Title";
 import Product_Page from "./P_Page_Component";
+import { Link } from "react-router-dom";
 
 const TopProducts = () => {
   const { products } = useContext(ShopContext);
@@ -17,7 +18,9 @@ const TopProducts = () => {
 
   return (
     <div className="w-full px-2 py-1">
-      <Title Category="Top Products" More="View" />
+      <Link to="all-top-products" > 
+        <Title Category="Top Products" More="View" />
+      </Link>
 
       <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-2 gap-x-2">
         {topProduct.map((product) => (
@@ -36,4 +39,3 @@ const TopProducts = () => {
 };
 
 export default TopProducts;
-

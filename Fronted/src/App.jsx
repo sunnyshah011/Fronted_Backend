@@ -19,6 +19,8 @@ import ResetPassword from "./pages/ResetPassword";
 import Breadcrumbs from "./component/Breadcrumb";
 import CategoryPage from "./pages/CategoryPage";
 import CategoryPageGroup from "./pages/CategoryPageGroup";
+import AllFlashSaleProducts from "./pages/AllFlashSaleProducts";
+import AllTopProducts from "./pages/AllTopProducts";
 
 const App = () => {
   return (
@@ -55,12 +57,6 @@ const App = () => {
             <Route path="/cart" element={<Cart />} />
 
             {/* category -> subcategory -> product */}
-            {/* <Route path="/categories" element={<CategoryPageGroup />} />
-            <Route path="/categories/:categorySlug" element={<CategoryPage />} />
-            <Route path="/categories/:categorySlug/:subSlug" element={<SubCategoryPage />} />
-            <Route path="/categories/:categorySlug/:subSlug/:productSlug" element={<Product />} /> */}
-
-            {/* category -> subcategory -> product */}
             <Route path="/categories" element={<CategoryPageGroup />} />
             <Route
               path="/categories/:categorySlug"
@@ -73,6 +69,13 @@ const App = () => {
 
             <Route path="/order" element={<Order />} />
             <Route path="/placeorder" element={<Placeorder />} />
+
+            {/* FlashSale and Topproducts pages */}
+            <Route
+              path="/all-flash-sale-products"
+              element={<AllFlashSaleProducts />}
+            />
+            <Route path="/all-top-products" element={<AllTopProducts />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
