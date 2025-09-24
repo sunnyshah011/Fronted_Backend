@@ -221,6 +221,167 @@
 
 // export default Collection;
 
+// import { useContext, useState, useEffect } from "react";
+// import { ShopContext } from "../Context/ShopContext";
+// import axios from "axios";
+// import Product_Page from "../component/P_Page_Component";
+
+// const Collection = () => {
+//   const { backendUrl, products } = useContext(ShopContext);
+
+//   const [categories, setCategories] = useState([]);
+//   const [subcategories, setSubcategories] = useState([]);
+//   const [activeCategory, setActiveCategory] = useState(null);
+//   const [activeSub, setActiveSub] = useState(null);
+//   const [sortType, setSortType] = useState("relavent");
+
+//   // Fetch all categories on mount
+//   useEffect(() => {
+//     const fetchCategories = async () => {
+//       try {
+//         const { data } = await axios.get(`${backendUrl}/api/categories`);
+//         if (data.success) {
+//           setCategories(data.categories);
+//           if (data.categories.length > 0) {
+//             setActiveCategory(data.categories[0].slug);
+//           }
+//         }
+//       } catch (err) {
+//         console.error(err);
+//       }
+//     };
+//     fetchCategories();
+//   }, [backendUrl]);
+
+//   // Fetch subcategories for selected category
+//   useEffect(() => {
+//     if (!activeCategory) return;
+//     const fetchSubcategories = async () => {
+//       try {
+//         const { data } = await axios.get(
+//           `${backendUrl}/api/categories/${activeCategory}`
+//         );
+//         if (data.success) {
+//           setSubcategories(data.subcategories);
+//           if (data.subcategories.length > 0) {
+//             setActiveSub(data.subcategories[0].slug);
+//           } else {
+//             setActiveSub(null);
+//           }
+//         }
+//       } catch (err) {
+//         console.error(err);
+//       }
+//     };
+//     fetchSubcategories();
+//   }, [activeCategory, backendUrl]);
+
+//   // ✅ Filter products by category + subcategory (safe check for ObjectId or populated)
+//   const filteredProducts = products.filter((p) => {
+//     // Get category & subcategory slug safely
+//     const productCategorySlug =
+//       p.subcategory?.category?.slug || p.category?.slug || null;
+//     const productSubSlug = p.subcategory?.slug || null;
+
+//     const matchesCategory = activeCategory
+//       ? productCategorySlug === activeCategory
+//       : true;
+
+//     const matchesSub = activeSub ? productSubSlug === activeSub : true;
+
+//     return matchesCategory && matchesSub;
+//   });
+
+//   // Sort products
+//   const sortedProducts = filteredProducts.slice().sort((a, b) => {
+//     const priceA = a?.variants?.[0]?.price || 0; // fallback to 0 if undefined
+//     const priceB = b?.variants?.[0]?.price || 0;
+
+//     if (sortType === "low-high") return priceA - priceB;
+//     if (sortType === "high-low") return priceB - priceA;
+//     return 0; // default / relevant
+//   });
+
+//   return (
+//     <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 mt-5 px-3">
+//       {/* Filter Sidebar */}
+//       <div className="min-w-60">
+//         <p className="mb-3 text-sm font-medium">CATEGORIES</p>
+//         <div className="flex flex-col gap-2">
+//           {categories.map((cat) => (
+//             <button
+//               key={cat._id}
+//               className={`text-left ${
+//                 activeCategory === cat.slug ? "font-bold" : ""
+//               }`}
+//               onClick={() => setActiveCategory(cat.slug)}
+//             >
+//               {cat.name}
+//             </button>
+//           ))}
+//         </div>
+
+//         <p className="mb-3 text-sm font-medium mt-5">SUBCATEGORIES</p>
+//         <div className="flex flex-col gap-2">
+//           {subcategories.map((sub) => (
+//             <button
+//               key={sub._id}
+//               className={`text-left ${
+//                 activeSub === sub.slug ? "font-bold" : ""
+//               }`}
+//               onClick={() => setActiveSub(sub.slug)}
+//             >
+//               {sub.name}
+//             </button>
+//           ))}
+//         </div>
+//       </div>
+
+//       {/* Products Grid */}
+//       <div className="flex-1">
+//         <div className="flex justify-between text-base sm:text-2xl mb-4">
+//           <p>ALL COLLECTION</p>
+//           <select
+//             className="border-2 border-gray-300 text-sm px-2"
+//             onChange={(e) => setSortType(e.target.value)}
+//             value={sortType}
+//           >
+//             <option value="relavent">Relavent</option>
+//             <option value="low-high">Low-High</option>
+//             <option value="high-low">High-Low</option>
+//           </select>
+//         </div>
+
+//         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 gap-y-3">
+//           {sortedProducts.length === 0 ? (
+//             <p className="w-full text-center text-2xl py-20">
+//               NO PRODUCT FOUND
+//             </p>
+//           ) : (
+//             sortedProducts.map((product) => (
+//               <Product_Page
+//                 key={product._id}
+//                 categorySlug={
+//                   product.subcategory?.category?.slug || product.category?.slug
+//                 }
+//                 productSlug={product.slug}
+//                 name={product.name}
+//                 price={product?.variants?.[0]?.price || product.price}
+//                 images={product.images}
+//               />
+//             ))
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Collection;
+
+
+
+
 import { useContext, useState, useEffect } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
@@ -234,18 +395,14 @@ const Collection = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSub, setActiveSub] = useState(null);
   const [sortType, setSortType] = useState("relavent");
+  const [showFilter, setShowFilter] = useState(false);
 
-  // Fetch all categories on mount
+  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const { data } = await axios.get(`${backendUrl}/api/categories`);
-        if (data.success) {
-          setCategories(data.categories);
-          if (data.categories.length > 0) {
-            setActiveCategory(data.categories[0].slug);
-          }
-        }
+        if (data.success) setCategories(data.categories);
       } catch (err) {
         console.error(err);
       }
@@ -255,20 +412,18 @@ const Collection = () => {
 
   // Fetch subcategories for selected category
   useEffect(() => {
-    if (!activeCategory) return;
+    if (!activeCategory) {
+      setSubcategories([]);
+      setActiveSub(null);
+      return;
+    }
+
     const fetchSubcategories = async () => {
       try {
         const { data } = await axios.get(
           `${backendUrl}/api/categories/${activeCategory}`
         );
-        if (data.success) {
-          setSubcategories(data.subcategories);
-          if (data.subcategories.length > 0) {
-            setActiveSub(data.subcategories[0].slug);
-          } else {
-            setActiveSub(null);
-          }
-        }
+        if (data.success) setSubcategories(data.subcategories);
       } catch (err) {
         console.error(err);
       }
@@ -276,9 +431,8 @@ const Collection = () => {
     fetchSubcategories();
   }, [activeCategory, backendUrl]);
 
-  // ✅ Filter products by category + subcategory (safe check for ObjectId or populated)
+  // Filter products
   const filteredProducts = products.filter((p) => {
-    // Get category & subcategory slug safely
     const productCategorySlug =
       p.subcategory?.category?.slug || p.category?.slug || null;
     const productSubSlug = p.subcategory?.slug || null;
@@ -286,7 +440,6 @@ const Collection = () => {
     const matchesCategory = activeCategory
       ? productCategorySlug === activeCategory
       : true;
-
     const matchesSub = activeSub ? productSubSlug === activeSub : true;
 
     return matchesCategory && matchesSub;
@@ -294,48 +447,107 @@ const Collection = () => {
 
   // Sort products
   const sortedProducts = filteredProducts.slice().sort((a, b) => {
-    const priceA = a?.variants?.[0]?.price || 0; // fallback to 0 if undefined
+    const priceA = a?.variants?.[0]?.price || 0;
     const priceB = b?.variants?.[0]?.price || 0;
 
     if (sortType === "low-high") return priceA - priceB;
     if (sortType === "high-low") return priceB - priceA;
-    return 0; // default / relevant
+    return 0;
   });
 
+  // Reset filter
+  const resetFilters = () => {
+    setActiveCategory(null);
+    setActiveSub(null);
+    setSortType("relavent");
+    setShowFilter(false);
+  };
+
   return (
-    <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 mt-5 px-3">
-      {/* Filter Sidebar */}
-      <div className="min-w-60">
-        <p className="mb-3 text-sm font-medium">CATEGORIES</p>
-        <div className="flex flex-col gap-2">
-          {categories.map((cat) => (
-            <button
-              key={cat._id}
-              className={`text-left ${
-                activeCategory === cat.slug ? "font-bold" : ""
-              }`}
-              onClick={() => setActiveCategory(cat.slug)}
-            >
-              {cat.name}
-            </button>
-          ))}
+    <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 mt-5 px-3 relative">
+      {/* Toggle Button */}
+      <button
+        className="sm:hidden mb-4 px-4 py-2 bg-blue-600 text-white rounded"
+        onClick={() => setShowFilter(true)}
+      >
+        Filter
+      </button>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed top-17 right-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ${
+          showFilter ? "translate-x-0" : "translate-x-full"
+        } sm:relative sm:translate-x-0 sm:flex sm:flex-col min-w-60`}
+      >
+        <div className="flex justify-between items-center p-4 border-b sm:hidden">
+          <p className="font-medium">Filter</p>
+          <button
+            className="text-gray-600"
+            onClick={() => setShowFilter(false)}
+          >
+            ✕
+          </button>
         </div>
 
-        <p className="mb-3 text-sm font-medium mt-5">SUBCATEGORIES</p>
-        <div className="flex flex-col gap-2">
-          {subcategories.map((sub) => (
-            <button
-              key={sub._id}
-              className={`text-left ${
-                activeSub === sub.slug ? "font-bold" : ""
-              }`}
-              onClick={() => setActiveSub(sub.slug)}
-            >
-              {sub.name}
-            </button>
-          ))}
+        <div className="p-4 flex flex-col gap-4">
+          <div>
+            <p className="mb-2 text-sm font-medium flex justify-between items-center">
+              CATEGORIES
+              <button
+                className="text-xs text-blue-600"
+                onClick={resetFilters}
+              >
+                Reset
+              </button>
+            </p>
+            <div className="flex flex-col gap-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat._id}
+                  className={`text-left ${
+                    activeCategory === cat.slug ? "font-bold" : ""
+                  }`}
+                  onClick={() => {
+                    setActiveCategory(cat.slug);
+                    setActiveSub(null);
+                    setShowFilter(false); // close sidebar on select
+                  }}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-2 text-sm font-medium">SUBCATEGORIES</p>
+            <div className="flex flex-col gap-2">
+              {subcategories.map((sub) => (
+                <button
+                  key={sub._id}
+                  className={`text-left ${
+                    activeSub === sub.slug ? "font-bold" : ""
+                  }`}
+                  onClick={() => {
+                    setActiveSub(sub.slug);
+                    setShowFilter(false); // close sidebar on select
+                  }}
+                >
+                  {sub.name}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Backdrop */}
+      {showFilter && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-30 z-40 sm:hidden"
+          onClick={() => setShowFilter(false)}
+        ></div>
+      )}
 
       {/* Products Grid */}
       <div className="flex-1">
@@ -343,7 +555,10 @@ const Collection = () => {
           <p>ALL COLLECTION</p>
           <select
             className="border-2 border-gray-300 text-sm px-2"
-            onChange={(e) => setSortType(e.target.value)}
+            onChange={(e) => {
+              setSortType(e.target.value);
+              setShowFilter(false); // auto-close sidebar
+            }}
             value={sortType}
           >
             <option value="relavent">Relavent</option>
@@ -378,3 +593,4 @@ const Collection = () => {
 };
 
 export default Collection;
+
