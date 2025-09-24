@@ -227,11 +227,10 @@ import axios from "axios";
 import Product_Page from "../component/P_Page_Component";
 
 const Collection = () => {
-  const { backendUrl } = useContext(ShopContext);
+  const { backendUrl, products } = useContext(ShopContext);
 
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
-  const [products, setProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSub, setActiveSub] = useState(null);
   const [sortType, setSortType] = useState("relavent");
@@ -254,18 +253,16 @@ const Collection = () => {
     fetchCategories();
   }, [backendUrl]);
 
-
-  // Fetch products & subcategories for selected category
+  // Fetch subcategories for selected category
   useEffect(() => {
     if (!activeCategory) return;
-    const fetchCategoryData = async () => {
+    const fetchSubcategories = async () => {
       try {
         const { data } = await axios.get(
           `${backendUrl}/api/categories/${activeCategory}`
         );
         if (data.success) {
           setSubcategories(data.subcategories);
-          setProducts(data.products);
           if (data.subcategories.length > 0) {
             setActiveSub(data.subcategories[0].slug);
           } else {
@@ -276,19 +273,33 @@ const Collection = () => {
         console.error(err);
       }
     };
-    fetchCategoryData();
+    fetchSubcategories();
   }, [activeCategory, backendUrl]);
 
-  
-  // Filter & Sort products
-  const filteredProducts = activeSub
-    ? products.filter((p) => p.subcategorySlug === activeSub)
-    : products;
+  // ✅ Filter products by category + subcategory (safe check for ObjectId or populated)
+  const filteredProducts = products.filter((p) => {
+    // Get category & subcategory slug safely
+    const productCategorySlug =
+      p.subcategory?.category?.slug || p.category?.slug || null;
+    const productSubSlug = p.subcategory?.slug || null;
 
+    const matchesCategory = activeCategory
+      ? productCategorySlug === activeCategory
+      : true;
+
+    const matchesSub = activeSub ? productSubSlug === activeSub : true;
+
+    return matchesCategory && matchesSub;
+  });
+
+  // Sort products
   const sortedProducts = filteredProducts.slice().sort((a, b) => {
-    if (sortType === "low-high") return a.price - b.price;
-    if (sortType === "high-low") return b.price - a.price;
-    return 0; // relevant/default
+    const priceA = a?.variants?.[0]?.price || 0; // fallback to 0 if undefined
+    const priceB = b?.variants?.[0]?.price || 0;
+
+    if (sortType === "low-high") return priceA - priceB;
+    if (sortType === "high-low") return priceB - priceA;
+    return 0; // default / relevant
   });
 
   return (
@@ -347,15 +358,16 @@ const Collection = () => {
               NO PRODUCT FOUND
             </p>
           ) : (
-            sortedProducts.map((prod) => (
+            sortedProducts.map((product) => (
               <Product_Page
-                key={products._id}
-                categorySlug={products.subcategory?.category?.slug}
-                subSlug={products.subcategory?.slug}
-                productSlug={products.slug}
-                name={products.name}
-                price={products.price}
-                images={products.images}
+                key={product._id}
+                categorySlug={
+                  product.subcategory?.category?.slug || product.category?.slug
+                }
+                productSlug={product.slug}
+                name={product.name}
+                price={product?.variants?.[0]?.price || product.price}
+                images={product.images}
               />
             ))
           )}
