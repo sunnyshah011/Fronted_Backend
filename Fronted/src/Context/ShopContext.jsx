@@ -382,7 +382,7 @@ const ShopContext = createContext();
 
 const ShopContextProvider = (props) => {
   const currency = "Rs.";
-  const delivery_fee = 200;
+  const delivery_fee = 150;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
