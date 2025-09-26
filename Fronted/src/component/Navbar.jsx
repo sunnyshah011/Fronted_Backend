@@ -5,15 +5,17 @@ import { ShopContext } from "../Context/ShopContext";
 import { UserIcon, Cog6ToothIcon } from "@heroicons/react/24/outline"; // or /outline
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline"; // or /outline
 import { toast } from "react-toastify";
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faFacebook} from '@fortawesome/free-brands-svg-icons';
-// import { ArrowRightOnRectangleIcon   } from '@heroicons/react/24/outline'; // or /outline
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faCoffee } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = () => {
-  const { setToken, userDetails, setUserDetails, token, getcartcount, setCartitem, navigate } =
-    useContext(ShopContext);
+  const {
+    setToken,
+    userDetails,
+    setUserDetails,
+    token,
+    getcartcount,
+    setCartitem,
+    navigate,
+  } = useContext(ShopContext);
 
   const [isOpen, setIsOpen] = useState(false);
   const [show, setShow] = useState(false);
@@ -36,7 +38,7 @@ const Navbar = () => {
     localStorage.removeItem("token");
     setToken("");
     setCartitem({});
-    };
+  };
 
   const order = () => {
     navigate("/order");
@@ -105,9 +107,8 @@ const Navbar = () => {
             />
           </div>
         </div>
-
         {/* Search bar */}
-        <div className="flex-1/7 hidden min-[850px]:block">
+        <div className="flex-1/12 hidden min-[850px]:block">
           <input
             type="text"
             value={search}
@@ -117,28 +118,29 @@ const Navbar = () => {
            focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div>
-
         {/* Desktop nav links */}
-        <nav className="hidden min-[850px]:flex md:gap-6 lg:gap-12 text-gray-700 flex-1 justify-center h-full">
+        <nav className="hidden min-[1050px]:flex md:gap-6 lg:gap-12 text-gray-700 flex-1 justify-center h-full">
           <div className="flex items-center gap-7 h-full">
-            <NavLink to="/" className="flex flex-col items-center gap-1">
-              Home
-            </NavLink>
             <NavLink
               to="/collection"
+              className="flex flex-col text-center items-center gap-1"
+            >
+              All Products
+            </NavLink>
+            <NavLink to="/rod" className="flex flex-col items-center gap-1">
+              Rod
+            </NavLink>
+            <NavLink to="/reel" className="flex flex-col items-center gap-1">
+              Reel
+            </NavLink>
+            <NavLink
+              to="/combo-set"
               className="flex flex-col items-center gap-1"
             >
-              Collection
-            </NavLink>
-            <NavLink to="/contact" className="flex flex-col items-center gap-1">
-              Contact
-            </NavLink>
-            <NavLink to="/about" className="flex flex-col items-center gap-1">
-              About
+              Combo Set
             </NavLink>
           </div>
         </nav>
-
         {/* Cart and User icons */}
         <div className="flex items-center justify-center">
           <div className="flex items-center gap-2 min-[350px]:gap-2">
@@ -149,7 +151,7 @@ const Navbar = () => {
                 alt="Cart"
               />
               <span className="absolute right-[-4px] bottom-[-6px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
-                 {Number(getcartcount()) || 0}
+                {Number(getcartcount()) || 0}
               </span>
             </Link>
 
@@ -165,8 +167,9 @@ const Navbar = () => {
                 />
               </button>
               <div
-                className={`absolute left-[-125px] pt-4 ${show ? "block" : "hidden"
-                  }`}
+                className={`absolute left-[-125px] pt-4 ${
+                  show ? "block" : "hidden"
+                }`}
               >
                 <div className="flex flex-col gap-4 w-50 py-4 px-4 bg-white border border-gray-300 rounded-[12px] text-gray-700">
                   {token ? (
@@ -228,7 +231,6 @@ const Navbar = () => {
                 {userDetails?.name ? userDetails.name.slice(0, 5) : ""}
               </p>
             </div>
-
           </div>
         </div>
 
@@ -239,17 +241,16 @@ const Navbar = () => {
             onClick={closeMenu}
           ></div>
         )}
-
-        {/* Mobile sidebar */}
         <aside
-          className={`fixed top-0 left-0 h-full w-64 bg-white z-50 transform ${isOpen ? "translate-x-0" : "-translate-x-full"
-            } transition-transform duration-300 ease-in-out`}
+          className={`fixed top-0 left-0 h-full w-64 bg-white z-50 transform ${
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out`}
         >
           <button className="p-4 text-xl" onClick={closeMenu}>
             &larr; Back
           </button>
 
-          <nav className="flex flex-col p-4 space-y-2">
+          <nav className="flex flex-col p-4 space-y-3">
             <NavLink
               to="/"
               onClick={closeMenu}
@@ -264,31 +265,31 @@ const Navbar = () => {
               className="text-gray-800 hover:text-blue-500 flex gap-3 items-center"
             >
               <i className="fa fa-th-large"></i>
-              <p className="text-[20px]">Collection</p>
+              <p className="text-[20px]">All Products</p>
             </NavLink>
             <NavLink
-              to="/about"
+              to="/rod"
               onClick={closeMenu}
               className="text-gray-800 hover:text-blue-500 flex gap-3 items-center"
             >
               <i className="fa fa-address-card"></i>
-              <p className="text-[20px]">About</p>
+              <p className="text-[20px]">Rod</p>
             </NavLink>
             <NavLink
-              to="/contact"
+              to="/reel"
               onClick={closeMenu}
               className="text-gray-800 hover:text-blue-500 flex gap-3 items-center"
             >
               <i className="fa fa-phone"></i>
-              <p className="text-[20px]">Contact</p>
+              <p className="text-[20px]">Reel</p>
             </NavLink>
             <NavLink
-              to="/location"
+              to="/combo-set"
               onClick={closeMenu}
               className="text-gray-800 hover:text-blue-500 flex gap-3 items-center"
             >
               <i className="fa fa-map-marker"></i>
-              <p className="text-[20px]">Location</p>
+              <p className="text-[20px]">Combo Set</p>
             </NavLink>
           </nav>
         </aside>
