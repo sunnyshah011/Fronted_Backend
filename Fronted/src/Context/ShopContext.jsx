@@ -653,114 +653,227 @@ const ShopContextProvider = (props) => {
 
   //---------------------------------------------
   // ✅ Add to Cart
-const addtocart = useCallback(
-  async (itemId, size, color, quantity = 1) => {
-    if (!size && !color) return toast.error("Select size/color");
+  const addtocart = useCallback(
+    async (itemId, size, color, quantity = 1) => {
+      if (!size && !color) return toast.error("Select size/color");
 
-    const cartdata = structuredClone(cartitem);
+      // if (!token) {
+      //   return toast.error("Please login or register to add items to cart!");
+      // }
 
-    if (!cartdata[itemId]) cartdata[itemId] = {};
-    if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
+      // 🔒 Check login before adding
+      // if (!token) {
 
-    cartdata[itemId][size][color] = (cartdata[itemId][size][color] || 0) + quantity;
+      //   toast.info(
+      //     <div className="flex flex-col items-center">
+      //       <p className="mb-2">Please login or register to add items to cart!</p>
+      //       <button
+      //         onClick={() => {
+      //           navigate("/login");
+      //           toast.dismiss(); // close toast after redirect
+      //         }}
+      //         className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
+      //       >
+      //         Go to Login
+      //       </button>
+      //     </div>,
+      //     {
+      //       position:"top-center", // 👈 popup from bottom center
+      //       autoClose: false, // stays until user interacts
+      //       closeOnClick: false,
+      //       draggable: false,
+      //     }
+      //   );
 
-    setCartitem(cartdata);
-    localStorage.setItem("cartItems", JSON.stringify(cartdata));
-    toast.success("Product added to cart!");
+      //   return;
+      // }
 
-    // ✅ Call backend if user is logged in
-    if (token) {
-      try {
-        await axios.post(
-          backendUrl + "/api/cart/add",
-          { itemId, size, color, quantity },
-          { headers: { token } }
-        );
-      } catch (error) {
-        handleApiError(error);
+      // if (!token) {
+      //   toast.info(
+      //     <div className="flex flex-col items-center">
+      //       <p className="mb-2">Please login or register to add items to cart!</p>
+      //       <button
+      //         onClick={() => {
+      //           navigate("/login");
+      //           toast.dismiss("login-toast"); // dismiss by ID
+      //         }}
+      //         className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
+      //       >
+      //         Go to Login
+      //       </button>
+      //     </div>,
+      //     {
+      //       toastId: "login-toast",   // 👈 prevents duplicates
+      //       position: "top-center",
+      //       autoClose: false,
+      //       closeOnClick: false,
+      //       draggable: false,
+      //     }
+      //   );
+
+      //   return;
+      // }
+
+      if (!token) {
+        const existing = toast.isActive("login-toast");
+
+        if (existing) {
+          // 👇 Update the toast with a "blink" effect
+          toast.update("login-toast", {
+            render: (
+              <div className="flex flex-col items-center animate-pulse">
+                <p className="mb-2">
+                  Please login or register to add items to cart!
+                </p>
+                <button
+                  onClick={() => {
+                    navigate("/login");
+                    toast.dismiss("login-toast");
+                  }}
+                  className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
+                >
+                  Go to Login
+                </button>
+              </div>
+            ),
+            className: "custom-toast-center", // ✅ apply custom CSS
+          });
+        } else {
+          // 👇 First time show toast
+          toast.info(
+            <div className="flex flex-col items-center">
+              <p className="mb-2">Please login or register to add items to cart!</p>
+              <button
+                onClick={() => {
+                  navigate("/register");
+                  toast.dismiss("login-toast");
+                }}
+                className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
+              >
+                Go to Login
+              </button>
+            </div>,
+            {
+              toastId: "login-toast",
+              className: "custom-toast-center", // ✅ apply custom CSS
+              autoClose: true,
+              closeOnClick: false,
+              draggable: false,
+            }
+          );
+        }
+
+        return;
       }
-    }
-  },
-  [cartitem, token, backendUrl]
-);
 
-// ✅ Get Cart Count
-const getcartcount = useCallback(() => {
-  let totalcount = 0;
-  for (const productId in cartitem) {
-    for (const size in cartitem[productId]) {
-      for (const color in cartitem[productId][size]) {
-        totalcount += cartitem[productId][size][color];
-      }
-    }
-  }
-  return totalcount;
-}, [cartitem]);
 
-// ✅ Update Quantity
-const updateQuantity = useCallback(
-  async (itemId, size, color, quantity) => {
-    const cartdata = structuredClone(cartitem);
-    if (!cartdata[itemId]) return;
 
-    if (quantity <= 0) {
-      delete cartdata[itemId][size][color];
-      if (Object.keys(cartdata[itemId][size]).length === 0) {
-        delete cartdata[itemId][size];
-      }
-      if (Object.keys(cartdata[itemId]).length === 0) {
-        delete cartdata[itemId];
-      }
 
-      toast.info("Item removed from cart", { autoClose: 1000 });
-    } else {
+
+      const cartdata = structuredClone(cartitem);
+
+      if (!cartdata[itemId]) cartdata[itemId] = {};
       if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
-      cartdata[itemId][size][color] = quantity;
-    }
 
-    setCartitem(cartdata);
-    localStorage.setItem("cartItems", JSON.stringify(cartdata));
+      cartdata[itemId][size][color] = (cartdata[itemId][size][color] || 0) + quantity;
 
-    // ✅ Update backend if user is logged in
-    if (token) {
-      try {
-        await axios.post(
-          backendUrl + "/api/cart/update",
-          { itemId, size, color, quantity },
-          { headers: { token } }
-        );
-      } catch (error) {
-        handleApiError(error);
+      setCartitem(cartdata);
+      localStorage.setItem("cartItems", JSON.stringify(cartdata));
+      toast.success("Product added to cart!");
+
+      // ✅ Call backend if user is logged in
+      if (token) {
+        try {
+          await axios.post(
+            backendUrl + "/api/cart/add",
+            { itemId, size, color, quantity },
+            { headers: { token } }
+          );
+        } catch (error) {
+          handleApiError(error);
+        }
+      }
+    },
+    [cartitem, token, backendUrl]
+  );
+
+  // ✅ Get Cart Count
+  const getcartcount = useCallback(() => {
+    let totalcount = 0;
+    for (const productId in cartitem) {
+      for (const size in cartitem[productId]) {
+        for (const color in cartitem[productId][size]) {
+          totalcount += cartitem[productId][size][color];
+        }
       }
     }
-  },
-  [cartitem, token, backendUrl]
-);
+    return totalcount;
+  }, [cartitem]);
 
-// ✅ Calculate total amount
-const calculatetotalamount = useCallback(() => {
-  let total = 0;
-  for (const productId in cartitem) {
-    const product = products.find((p) => p._id === productId);
-    if (!product) continue;
+  // ✅ Update Quantity
+  const updateQuantity = useCallback(
+    async (itemId, size, color, quantity) => {
+      const cartdata = structuredClone(cartitem);
+      if (!cartdata[itemId]) return;
 
-    for (const size in cartitem[productId]) {
-      for (const color in cartitem[productId][size]) {
-        const qty = cartitem[productId][size][color];
-        const variant = product.variants.find(
-          (v) => v.size === size && v.color === color
-        );
-        if (variant) total += variant.price * qty;
+      if (quantity <= 0) {
+        delete cartdata[itemId][size][color];
+        if (Object.keys(cartdata[itemId][size]).length === 0) {
+          delete cartdata[itemId][size];
+        }
+        if (Object.keys(cartdata[itemId]).length === 0) {
+          delete cartdata[itemId];
+        }
+
+        toast.info("Item removed from cart", { autoClose: 1000 });
+      } else {
+        if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
+        cartdata[itemId][size][color] = quantity;
+      }
+
+      setCartitem(cartdata);
+      localStorage.setItem("cartItems", JSON.stringify(cartdata));
+
+      // ✅ Update backend if user is logged in
+      if (token) {
+        try {
+          await axios.post(
+            backendUrl + "/api/cart/update",
+            { itemId, size, color, quantity },
+            { headers: { token } }
+          );
+        } catch (error) {
+          handleApiError(error);
+        }
+      }
+    },
+    [cartitem, token, backendUrl]
+  );
+
+  // ✅ Calculate total amount
+  const calculatetotalamount = useCallback(() => {
+    let total = 0;
+    for (const productId in cartitem) {
+      const product = products.find((p) => p._id === productId);
+      if (!product) continue;
+
+      for (const size in cartitem[productId]) {
+        for (const color in cartitem[productId][size]) {
+          const qty = cartitem[productId][size][color];
+          const variant = product.variants.find(
+            (v) => v.size === size && v.color === color
+          );
+          if (variant) total += variant.price * qty;
+        }
       }
     }
-  }
-  return total;
-}, [cartitem, products]);
+    return total;
+  }, [cartitem, products]);
 
-//-----------------------------------------------
+  //-----------------------------------------------
 
 
-  
+
   // Fetching Products
   const getProductsData = useCallback(async () => {
     setIsLoadingProducts(true);

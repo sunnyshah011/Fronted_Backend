@@ -2,9 +2,10 @@
 
 @import "tailwindcss";
 
-/* *{
+*{
     font-family: poppins;
-} */
+    font-weight: 400;
+}
 
 a.active hr {
   display: block;
@@ -24,7 +25,7 @@ a.active hr {
 
   /* Optional styling */
   width: fit-content !important;
-  min-width: 250px;
+  min-width: 300px;
   padding: 12px 20px !important;
   font-size: 14px !important;
   text-align: center;
