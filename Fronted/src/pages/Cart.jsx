@@ -200,7 +200,7 @@ const Cart = () => {
               {/* Product info */}
               <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
                 <div className="flex flex-col sm:flex-col sm:items-left gap-1 sm:gap-2 flex-wrap">
-                  <p className="text-sm sm:text-base font-medium text-gray-800 truncate max-w-[110px] min-[340px]:max-w-[170px] min-[360px]:max-w-[190px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-[700px]">
+                  <p className="text-sm sm:text-base font-medium text-gray-700 truncate max-w-[110px] min-[340px]:max-w-[170px] min-[360px]:max-w-[190px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-[700px]">
                     {productData.name}
                   </p>
 
@@ -209,11 +209,11 @@ const Cart = () => {
                     {currency} {price} /-
                   </span>
 
-                  <span className="px-2 py-0.5 max-w-45 text-xs border border-gray-300 bg-gray-50 rounded-md">
+                  <span className="px-2 py-0.5 max-w-45 text-xs border border-gray-200 bg-gray-50 rounded-md">
                     Size: {item.size}
                   </span>
                   {item.color && (
-                    <span className="px-2 py-0.5 max-w-45  text-xs border border-gray-300 bg-gray-50 rounded-md">
+                    <span className="px-2 py-0.5 max-w-45  text-xs border border-gray-200 bg-gray-50 rounded-md">
                       Color: {item.color}
                     </span>
                   )}
