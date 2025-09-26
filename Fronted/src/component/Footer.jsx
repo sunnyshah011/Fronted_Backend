@@ -17,11 +17,11 @@ const Footer = () => {
         <div>
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Product Categories</h3>
           <ul className="space-y-2">
-            <li className="hover:text-gray-900 cursor-pointer text-gray-600">Electronics</li>
-            <li className="hover:text-gray-900 cursor-pointer text-gray-600">Fashion</li>
-            <li className="hover:text-gray-900 cursor-pointer text-gray-600">Groceries</li>
-            <li className="hover:text-gray-900 cursor-pointer text-gray-600">Home & Living</li>
-            <li className="hover:text-gray-900 cursor-pointer text-gray-600">Health & Beauty</li>
+            <li className="hover:text-gray-900 cursor-pointer text-gray-600">Reel</li>
+            <li className="hover:text-gray-900 cursor-pointer text-gray-600">Rod</li>
+            <li className="hover:text-gray-900 cursor-pointer text-gray-600">Combo Set</li>
+            <li className="hover:text-gray-900 cursor-pointer text-gray-600">Accessories</li>
+            <li className="hover:text-gray-900 cursor-pointer text-gray-600">Fishing Net</li>
           </ul>
         </div>
 
@@ -49,8 +49,8 @@ const Footer = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-700 mt-8 pt-4 text-center text-sm text-gray-400">
-        © {new Date().getFullYear()} Khushi Bazar. All Rights Reserved. | Privacy Policy
+      <div className="border-t border-gray-300 mt-8 pt-4 text-center text-sm text-gray-400">
+        © {new Date().getFullYear()} FTS. All Rights Reserved. | Privacy Policy
       </div>
     </footer>
   );
