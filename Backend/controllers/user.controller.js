@@ -129,7 +129,9 @@ const createToken = (id) => {
 //Route for use register
 const registerUser = async (req, res) => {
   try {
-    const { name, gmail, phone, password, confirmPassword } = req.body;
+    // const { name, gmail, phone, password, confirmPassword } = req.body;
+    const { name, gmail, password, confirmPassword } = req.body;
+
 
     const exists = await userModel.findOne({ gmail });
     if (exists) {
@@ -164,7 +166,7 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
     const newUser = new userModel({
       name,
-      phone,
+      // phone,
       gmail,
       password: hashedPassword,
     });

@@ -200,13 +200,13 @@ const Navbar = () => {
                         <ClipboardDocumentListIcon className="h-6 w-6 text-gray-700" />
                         <span className="text-[15px]">My Orders</span>
                       </p>
-                      <p
+                      {/* <p
                         onClick={account}
                         className="cursor-pointer hover:text-black flex gap-3"
                       >
                         <Cog6ToothIcon className="h-6 w-6 text-gray-700" />
                         <span className="text-[15px]">Manage Account</span>
-                      </p>
+                      </p> */}
                       <p
                         onClick={logout}
                         className="cursor-pointer hover:text-black flex gap-3"
