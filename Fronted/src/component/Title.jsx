@@ -3,7 +3,7 @@ import { IoIosArrowForward } from "react-icons/io";
 
 const Menubar = ({ Category, More }) => {
   return (
-    <div className="flex items-center justify-center mt-3 px-1">
+    <div className="flex items-center justify-center mt-3 mb-3 px-1">
       <div className="w-full flex justify-between items-center font-semibold font-roboto">
         <div className="text-[18px] flex gap-1"> {Category} </div>
 

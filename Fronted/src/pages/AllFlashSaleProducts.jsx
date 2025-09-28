@@ -16,6 +16,11 @@ const AllFlashSaleProducts = () => {
     }
   }, [products]);
 
+   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+
   return (
     <div className="w-full px-2 py-1">
       <Link to="/all-flash-sale-products">

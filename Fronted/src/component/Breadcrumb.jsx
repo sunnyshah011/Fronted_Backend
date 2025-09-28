@@ -8,6 +8,7 @@ const Breadcrumbs = () => {
   const location = useLocation();
   const pathname = location.pathname;
   const paths = pathname.split("/").filter((x) => x);
+  const sign = ">"
 
   const [productName, setProductName] = useState("");
 
@@ -31,7 +32,7 @@ const Breadcrumbs = () => {
   if (pathname === "/") return null;
 
   return (
-    <nav className="mt-20 px-4 text-sm text-gray-600" aria-label="breadcrumb">
+    <nav className="mt-23 px-4 text-sm text-gray-600" aria-label="breadcrumb">
       <ol className="flex items-center space-x-2 flex-wrap">
         {/* Home */}
         <li>
@@ -56,7 +57,7 @@ const Breadcrumbs = () => {
 
           return (
             <li key={index} className={`flex items-center space-x-2 ${hideOnSmall}`}>
-              <span className="text-gray-400">/</span>
+              <span className="text-gray-400">{sign}</span>
               {isLast ? (
                 <span className="text-gray-500 truncate max-w-[110px] sm:max-w-[250px] md:max-w-[400px] lg:max-w-[850px]">
                   {displayName}
