@@ -271,8 +271,14 @@ const Cart = () => {
 
       {/* Empty state */}
       {cartdata.length === 0 && (
-        <div className="text-center text-gray-600 py-10">
-          Your cart is empty.
+        <div className="text-center text-gray-600 py-10 flex flex-col justify-center items-center gap-2">
+          <div>Your cart is empty.</div>
+
+          <Link to="/" >
+            <div className="border w-35 py-1 text-center border-gray-400 bg-sky-800 text-white rounded-sm">
+              Shop Now
+            </div>
+          </Link>
         </div>
       )}
     </div>
