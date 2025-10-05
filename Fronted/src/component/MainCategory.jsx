@@ -111,7 +111,7 @@ const P_Category = () => {
                 />
               </div>
               <div>
-                <p className="max-[768px]:text-[13px] max-[768px]:font-medium md:text-[20px] font-normal ">
+                <p className="max-[768px]:text-[12px] text-center max-[768px]:font-medium md:text-[17px] font-normal ">
                   {" "}
                   {cat.name}{" "}
                 </p>
