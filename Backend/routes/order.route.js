@@ -10,14 +10,12 @@ import adminAuth from "../middleware/adminAuth.middleware.js";
 
 const orderRouter = express.Router();
 
-//admin feature
+// Admin routes
 orderRouter.post("/status", adminAuth, updateStatus);
 orderRouter.post("/list", adminAuth, allOrders);
 
-//payment feature
+// User routes
 orderRouter.post("/place", authUser, placeOrder);
-
-//order for fronted
 orderRouter.post("/userorders", authUser, userOrders);
 
-export default orderRouter
+export default orderRouter;

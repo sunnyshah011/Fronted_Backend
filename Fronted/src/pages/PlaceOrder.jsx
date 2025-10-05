@@ -22,7 +22,6 @@ const Placeorder = () => {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [cities, setCities] = useState([]);
-
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -31,56 +30,51 @@ const Placeorder = () => {
     city: "",
     streetAddress: "",
   });
-
   const [originalData, setOriginalData] = useState({});
   const [isModified, setIsModified] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  // ✅ Fetch provinces
+  // Fetch locations
   const fetchProvinces = async () => {
     try {
       const res = await axios.get(`${backendUrl}/api/location/province`);
       setProvinces(res.data.provinces || []);
     } catch (err) {
-      console.error("Error fetching provinces:", err);
+      console.error(err);
     }
   };
 
-  // ✅ Fetch districts
-  const fetchDistricts = async (provinceName) => {
-    if (!provinceName) return;
+  const fetchDistricts = async (province) => {
+    if (!province) return;
     try {
       const res = await axios.get(
-        `${backendUrl}/api/location/${provinceName}/districts`
+        `${backendUrl}/api/location/${province}/districts`
       );
       setDistricts(res.data.districts || []);
     } catch (err) {
-      console.error("Error fetching districts:", err);
+      console.error(err);
     }
   };
 
-  // ✅ Fetch cities
-  const fetchCities = async (provinceName, districtName) => {
-    if (!provinceName || !districtName) return;
+  const fetchCities = async (province, district) => {
+    if (!province || !district) return;
     try {
       const res = await axios.get(
-        `${backendUrl}/api/location/${provinceName}/${districtName}/cities`
+        `${backendUrl}/api/location/${province}/${district}/cities`
       );
       setCities(res.data.cities || []);
     } catch (err) {
-      console.error("Error fetching cities:", err);
+      console.error(err);
     }
   };
 
-  // ✅ Load address from context
   useEffect(() => {
-    window.scrollTo(0, 0);
     fetchProvinces();
 
     if (address && Object.keys(address).length > 0) {
       const data = {
         fullName: address.name || "",
-        phone: address.phone || "",
+        phone: address.phone ? String(address.phone) : "",
         province: address.province || "",
         district: address.district || "",
         city: address.city || "",
@@ -90,26 +84,17 @@ const Placeorder = () => {
       setOriginalData(data);
       setIsModified(false);
 
-      // preload dependent dropdowns
       if (address.province) fetchDistricts(address.province);
       if (address.province && address.district)
         fetchCities(address.province, address.district);
+    } else {
+      setIsEditing(true);
     }
   }, [address]);
 
-  // ✅ Compare changes
-  const checkIfModified = (newData) =>
-    newData.fullName !== originalData.fullName ||
-    newData.phone !== originalData.phone ||
-    newData.province !== originalData.province ||
-    newData.district !== originalData.district ||
-    newData.city !== originalData.city ||
-    newData.streetAddress !== originalData.streetAddress;
-
-  // ✅ Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    let updatedForm = { ...formData, [name]: value };
+    const updatedForm = { ...formData, [name]: value };
 
     if (name === "province") {
       updatedForm.district = "";
@@ -126,7 +111,7 @@ const Placeorder = () => {
     }
 
     setFormData(updatedForm);
-    setIsModified(checkIfModified(updatedForm));
+    setIsModified(JSON.stringify(updatedForm) !== JSON.stringify(originalData));
   };
 
   const handleReset = () => {
@@ -141,7 +126,7 @@ const Placeorder = () => {
 
     const payload = {
       name: formData.fullName,
-      phone: formData.phone,
+      phone: Number(formData.phone),
       province: formData.province,
       district: formData.district,
       city: formData.city,
@@ -149,195 +134,166 @@ const Placeorder = () => {
     };
 
     try {
-      const response = await axios.post(
+      const res = await axios.post(
         `${backendUrl}/api/profile/setaddress`,
         payload,
-        { headers: { token } }
+        {
+          headers: { token },
+        }
       );
-
-      if (response.data.success) {
-        toast.success("Address updated successfully!", {
-          autoClose: 1000,
-          hideProgressBar: true,
-        });
-
+      if (res.data.success) {
+        toast.success("Address updated!");
         setOriginalData(formData);
         setIsModified(false);
         setIsEditing(false);
         updateAddress(payload);
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       toast.error("Failed to update address");
     }
   };
 
-  // ✅ Place Order
   const handlePlaceOrder = async () => {
     if (!payment) {
-      toast.error("Please select a payment method", {
-        autoClose: 1000,
-        hideProgressBar: true,
-      });
+      toast.error("Select payment method");
       return;
     }
 
-    try {
-      let orderitems = [];
-      for (const items in cartitem) {
-        for (const item in cartitem[items]) {
-          if (cartitem[items][item] > 0) {
-            const itemInfo = structuredClone(
-              products.find((product) => product._id === items)
-            );
-            if (itemInfo) {
-              itemInfo.size = item;
-              itemInfo.quantity = cartitem[items][item];
-              orderitems.push(itemInfo);
-            }
-          }
+    if (isModified) {
+      toast.warning("Update address first");
+      return;
+    }
+
+    const items = [];
+
+    for (const productId in cartitem) {
+      const productCart = cartitem[productId];
+
+      for (const size in productCart) {
+        const quantity = productCart[size];
+        if (quantity <= 0) continue;
+
+        const product = products.find((p) => p._id === productId);
+        if (!product) continue;
+
+        const variant = product.variants.find((v) => v.size === size);
+        if (!variant) continue;
+
+        if (quantity > variant.stock) {
+          toast.error(`Not enough stock for ${product.name} (${size})`);
+          return;
         }
+
+        items.push({
+          productId: product._id,
+          size: variant.size,
+          quantity,
+          price: variant.price,
+        });
       }
+    }
 
-      const payload = {
-        items: orderitems,
-        amount: calculatetotalamount() + delivery_fee,
-        address: formData,
-      };
+    if (items.length === 0) {
+      toast.error("Cart is empty");
+      return;
+    }
 
-      const response = await axios.post(
-        `${backendUrl}/api/order/place`,
-        payload,
-        { headers: { token } }
-      );
+    const payload = {
+      items,
+      amount: calculatetotalamount() + delivery_fee,
+      address: {
+        name: formData.fullName,
+        phone: Number(formData.phone),
+        province: formData.province,
+        district: formData.district,
+        city: formData.city,
+        street: formData.streetAddress,
+      },
+    };
 
-      if (response.data.success) {
-        localStorage.setItem("cartItems", JSON.stringify({}));
+    try {
+      const res = await axios.post(`${backendUrl}/api/order/place`, payload, {
+        headers: { token },
+      });
+      if (res.data.success) {
         setCartitem({});
-        toast.success("Order placed successfully!", { autoClose: 1000 });
+        localStorage.setItem("cartItems", JSON.stringify({}));
+        toast.success("Order placed!");
         navigate("/order");
       } else {
-        toast.error(response.data.message || "Failed to place order");
+        toast.error(res.data.message || "Failed to place order");
       }
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to place order");
     }
   };
 
   return (
-    <div className="p-4 mt-5 flex flex-col sm:flex-row gap-8 pt-5 sm:pt-14 min-h-[80vh]">
+    <div className="p-4 mt-5 flex flex-col sm:flex-row gap-8 min-h-[80vh]">
       {/* Left: Address Form */}
       <form
         onSubmit={handleUpdate}
         className="flex-1 bg-white shadow-sm rounded-xl p-6"
       >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Shipping Address
-          </h2>
-          {!isEditing && (
-            <button
-              type="button"
-              onClick={() => setIsEditing(true)}
-              className="text-blue-600 text-sm hover:underline"
-            >
-              Edit
-            </button>
-          )}
-        </div>
-
-        {/* Input Fields */}
+        <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
         {[
-          { label: "Full Name", name: "fullName", type: "text" },
-          { label: "Phone", name: "phone", type: "tel" },
-        ].map(({ label, name, type }) => (
-          <div className="mb-4" key={name}>
+          "fullName",
+          "phone",
+          "province",
+          "district",
+          "city",
+          "streetAddress",
+        ].map((field) => (
+          <div className="mb-4" key={field}>
             <label className="block mb-1 font-medium text-gray-700">
-              {label} *
+              {field} *
             </label>
-            <input
-              type={type}
-              name={name}
-              value={formData[name] || ""}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className={`w-full p-3 rounded-lg border ${
-                isEditing
-                  ? "bg-gray-50 border-gray-300 focus:ring-2 focus:ring-blue-500"
-                  : "bg-gray-100 border-gray-200 cursor-not-allowed"
-              }`}
-              required
-            />
+            {["province", "district", "city"].includes(field) ? (
+              <select
+                name={field}
+                value={formData[field]}
+                onChange={handleChange}
+                disabled={!isEditing}
+                className="w-full p-3 border rounded-lg"
+              >
+                <option value="">Select {field}</option>
+                {(field === "province"
+                  ? provinces
+                  : field === "district"
+                  ? districts
+                  : cities
+                ).map((val) => (
+                  <option key={val._id || val.name} value={val.name}>
+                    {val.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type={field === "phone" ? "tel" : "text"}
+                name={field}
+                value={formData[field]}
+                onChange={handleChange}
+                disabled={!isEditing}
+                className="w-full p-3 border rounded-lg"
+              />
+            )}
           </div>
         ))}
-
-        {/* Select Dropdowns */}
-        {[
-          { label: "Province", name: "province", options: provinces },
-          { label: "District", name: "district", options: districts },
-          { label: "City", name: "city", options: cities },
-        ].map(({ label, name, options }) => (
-          <div className="mb-4" key={name}>
-            <label className="block mb-1 font-medium text-gray-700">
-              {label} *
-            </label>
-            <select
-              name={name}
-              value={formData[name] || ""}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className={`w-full p-3 rounded-lg border ${
-                isEditing
-                  ? "bg-gray-50 border-gray-300 focus:ring-2 focus:ring-blue-500"
-                  : "bg-gray-100 border-gray-200 cursor-not-allowed"
-              }`}
-              required
-            >
-              <option value="">Select {label}</option>
-              {options.map((val) => (
-                <option key={val._id || val.name} value={val.name}>
-                  {val.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        ))}
-
-        {/* Street Address */}
-        <div className="mb-6">
-          <label className="block mb-1 font-medium text-gray-700">
-            Street Address *
-          </label>
-          <input
-            type="text"
-            name="streetAddress"
-            value={formData.streetAddress || ""}
-            onChange={handleChange}
-            disabled={!isEditing}
-            placeholder="Enter street address"
-            className={`w-full p-3 rounded-lg border ${
-              isEditing
-                ? "bg-gray-50 border-gray-300 focus:ring-2 focus:ring-blue-500"
-                : "bg-gray-100 border-gray-200 cursor-not-allowed"
-            }`}
-            required
-          />
-        </div>
-
-        {/* Update / Cancel */}
         {isEditing && (
-          <div className="flex gap-4 mt-8">
+          <div className="flex gap-4 mt-4">
             <button
               type="submit"
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium"
+              className="flex-1 bg-blue-600 text-white py-2 rounded-lg"
             >
               Update
             </button>
             <button
               type="button"
               onClick={handleReset}
-              className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2.5 rounded-lg font-medium"
+              className="flex-1 bg-gray-200 py-2 rounded-lg"
             >
               Cancel
             </button>
@@ -347,21 +303,13 @@ const Placeorder = () => {
 
       {/* Right: Cart + Payment */}
       <div className="flex-1 space-y-6">
+        <CartTotal />
         <div className="bg-white shadow-sm rounded-xl p-6">
-          <CartTotal />
-        </div>
-
-        <div className="bg-white shadow-sm rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">
-            Payment Method
-          </h2>
-
+          <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
           <div
             onClick={() => setPayment(!payment)}
-            className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer transition ${
-              payment
-                ? "border-green-500 bg-green-50"
-                : "border-gray-200 hover:border-gray-300"
+            className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${
+              payment ? "border-green-500 bg-green-50" : "border-gray-200"
             }`}
           >
             <div
@@ -369,17 +317,15 @@ const Placeorder = () => {
                 payment ? "bg-green-500 border-green-500" : "border-gray-400"
               }`}
             ></div>
-            <span className="text-gray-700 font-medium">Cash on Delivery</span>
+            <span>Cash on Delivery</span>
           </div>
-
-          <div className="w-full text-end mt-8">
-            <button
-              onClick={handlePlaceOrder}
-              className="bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-lg font-medium"
-            >
-              Place Order
-            </button>
-          </div>
+          <button
+            onClick={handlePlaceOrder}
+            disabled={isModified}
+            className="mt-4 w-full py-3 bg-black text-white rounded-lg"
+          >
+            {isModified ? "Update address first" : "Place Order"}
+          </button>
         </div>
       </div>
     </div>
