@@ -77,7 +77,7 @@ const placeOrder = async (req, res) => {
     await newOrder.save();
 
     // ✅ Clear user's cart
-    await userModel.findByIdAndUpdate(userId, { cart: {} });
+    await userModel.findByIdAndUpdate(userId, { category: {} });
 
     res.status(201).json({
       success: true,
