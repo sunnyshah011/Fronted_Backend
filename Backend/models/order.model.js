@@ -11,10 +11,11 @@ const orderSchema = new mongoose.Schema(
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
+          ref: "product",
           required: true,
         },
         size: { type: String, required: true },
+        color: { type: String, required: true },
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
       },
