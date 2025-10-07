@@ -196,12 +196,12 @@ const Order = () => {
                         </p>
                       </div>
 
-                      <button
+                      {/* <button
                         onClick={loadOrderData}
                         className="border border-gray-200 px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
                       >
                         Track
-                      </button>
+                      </button> */}
 
                       {order.status === "Processing" && (
                         <button
