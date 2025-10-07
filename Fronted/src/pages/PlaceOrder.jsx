@@ -73,12 +73,12 @@ const Placeorder = () => {
 
     if (address && Object.keys(address).length > 0) {
       const data = {
-        fullName: address.name || "",
+        fullName: address.fullName || address.name || "",
         phone: address.phone ? String(address.phone) : "",
         province: address.province || "",
         district: address.district || "",
         city: address.city || "",
-        streetAddress: address.street || "",
+        streetAddress: address.streetAddress || address.street || "",
       };
       setFormData(data);
       setOriginalData(data);
@@ -125,12 +125,12 @@ const Placeorder = () => {
     if (!isModified) return;
 
     const payload = {
-      name: formData.fullName,
+      fullName: formData.fullName,
       phone: Number(formData.phone),
       province: formData.province,
       district: formData.district,
       city: formData.city,
-      street: formData.streetAddress,
+      streetAddress: formData.streetAddress,
     };
 
     try {
@@ -167,30 +167,40 @@ const Placeorder = () => {
 
     const items = [];
 
+    // ✅ Handle color + size nested structure
     for (const productId in cartitem) {
       const productCart = cartitem[productId];
 
       for (const size in productCart) {
-        const quantity = productCart[size];
-        if (quantity <= 0) continue;
+        const colorData = productCart[size];
 
-        const product = products.find((p) => p._id === productId);
-        if (!product) continue;
+        for (const color in colorData) {
+          const quantity = colorData[color];
+          if (quantity <= 0) continue;
 
-        const variant = product.variants.find((v) => v.size === size);
-        if (!variant) continue;
+          const product = products.find((p) => p._id === productId);
+          if (!product) continue;
 
-        if (quantity > variant.stock) {
-          toast.error(`Not enough stock for ${product.name} (${size})`);
-          return;
+          const variant = product.variants.find(
+            (v) => v.size === size && v.color === color
+          );
+          if (!variant) continue;
+
+          if (quantity > variant.stock) {
+            toast.error(
+              `Not enough stock for ${product.name} (${size} - ${color})`
+            );
+            return;
+          }
+
+          items.push({
+            productId: product._id,
+            size: variant.size,
+            color: variant.color,
+            quantity,
+            price: variant.price,
+          });
         }
-
-        items.push({
-          productId: product._id,
-          size: variant.size,
-          quantity,
-          price: variant.price,
-        });
       }
     }
 
@@ -203,12 +213,12 @@ const Placeorder = () => {
       items,
       amount: calculatetotalamount() + delivery_fee,
       address: {
-        name: formData.fullName,
+        fullName: formData.fullName,
         phone: Number(formData.phone),
         province: formData.province,
         district: formData.district,
         city: formData.city,
-        street: formData.streetAddress,
+        streetAddress: formData.streetAddress,
       },
     };
 
