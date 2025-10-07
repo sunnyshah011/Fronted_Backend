@@ -255,4 +255,43 @@ const updateStatus = async (req, res) => {
   }
 };
 
-export { placeOrder, allOrders, userOrders, updateStatus };
+// Cancel Order (User)
+const cancelOrder = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    const userId = req.userId; // from auth middleware
+
+    // Find order belonging to user
+    const order = await orderModel.findOne({ _id: orderId, user: userId });
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    // Check if order is in Processing phase
+    if (order.orderStatus !== "Processing") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "You can only cancel orders that are still in Processing phase.",
+      });
+    }
+
+    // Update order status
+    order.orderStatus = "Cancelled";
+    await order.save();
+
+    res.json({
+      success: true,
+      message: "Order has been cancelled successfully.",
+      order,
+    });
+  } catch (error) {
+    console.error("Cancel order error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export { placeOrder, allOrders, userOrders, updateStatus, cancelOrder };

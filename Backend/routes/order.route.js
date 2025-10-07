@@ -4,6 +4,7 @@ import {
   allOrders,
   userOrders,
   updateStatus,
+  cancelOrder,
 } from "../controllers/order.controller.js";
 import authUser from "../middleware/auth.middleware.js";
 import adminAuth from "../middleware/adminAuth.middleware.js";
@@ -17,5 +18,7 @@ orderRouter.post("/list", adminAuth, allOrders);
 // User routes
 orderRouter.post("/place", authUser, placeOrder);
 orderRouter.post("/userorders", authUser, userOrders);
+
+orderRouter.post("/cancel", authUser, cancelOrder); // 🆕 cancel route
 
 export default orderRouter;
