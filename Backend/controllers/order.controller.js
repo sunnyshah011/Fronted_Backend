@@ -185,7 +185,7 @@ const placeOrder = async (req, res) => {
     await newOrder.save();
 
     // Clear user's cart after order
-    await userModel.findByIdAndUpdate(userId, { cart: {} });
+    await userModel.findByIdAndUpdate(userId, { category: {} });
 
     res.status(201).json({
       success: true,

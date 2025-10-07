@@ -240,6 +240,10 @@ const Placeorder = () => {
     }
   };
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="p-4 mt-5 flex flex-col sm:flex-row gap-8 min-h-[80vh]">
       {/* Left: Address Form */}
