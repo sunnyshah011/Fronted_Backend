@@ -190,6 +190,7 @@ const Cart = () => {
           const productData = products.find((p) => p._id === item._id);
           const key = `${item._id}_${item.size}_${item.color}`;
           if (!productData) return null;
+          
 
           // ✅ Variant-based price and stock
           const variant = productData.variants?.find(
@@ -198,13 +199,23 @@ const Cart = () => {
           const price = variant?.price ?? productData.price ?? 0;
           const maxStock = variant?.stock ?? Infinity;
 
+          // ✅ Build product link (fallback to /product/:id if missing category)
+          const productLink =
+            productData.subcategory.category?.slug && productData.slug
+              ? `/categories/${productData.subcategory.category.slug}/${productData.slug}`
+              : `/product/${productData._id}`;
+
           return (
             <div
               key={key}
               className="bg-white shadow-sm rounded-xl px-3 py-2 sm:p-4 flex items-center gap-2 sm:gap-4"
             >
               {/* 🔹 Product Image */}
-              <Link to={`/${item._id}`} className="flex-shrink-0">
+              <Link
+                to={productLink}
+                // `/categories/${categorySlug}/${productSlug}`
+                className="flex-shrink-0"
+              >
                 <img
                   className="w-14 sm:w-20 h-14 sm:h-20 rounded-lg object-cover"
                   src={productData.images?.[0] || "/placeholder.png"}
