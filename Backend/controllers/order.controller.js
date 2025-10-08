@@ -12,10 +12,6 @@ const placeOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 
-    // ✅ Shipping charge
-    const shippingCharge = 150;
-    const totalAmount = amount + shippingCharge;
-
     // ✅ Validate variant stock before placing order
     for (const item of items) {
       const product = await ProductModel.findById(item.productId);
@@ -66,7 +62,7 @@ const placeOrder = async (req, res) => {
     const newOrder = new orderModel({
       user: userId,
       items,
-      amount: totalAmount, // include shipping
+      amount,
       address,
       paymentMethod: "COD",
       paymentStatus: "Pending",
