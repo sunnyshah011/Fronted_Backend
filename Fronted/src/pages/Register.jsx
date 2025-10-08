@@ -314,8 +314,8 @@ const Register = () => {
   return (
     <div className="mt-5 flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-xl font-bold text-gray-800 mb-2">
-          Welcome To React JS
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+          Welcome To FTS
         </h2>
         <p className="text-gray-600 mb-6">Create New Account</p>
 
@@ -342,7 +342,7 @@ const Register = () => {
               type="email"
               placeholder="Enter email address"
               required
-              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none"
             />
           </div>
 
@@ -369,7 +369,7 @@ const Register = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
                 required
-                className="w-full px-4 py-2 pr-10 border rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none"
               />
               <button
                 type="button"
@@ -391,7 +391,7 @@ const Register = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm password"
                 required
-                className="w-full px-4 py-2 pr-10 border rounded-md focus:ring-2 focus:ring-red-500 outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none"
               />
               <button
                 type="button"

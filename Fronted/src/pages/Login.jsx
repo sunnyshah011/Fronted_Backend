@@ -21,7 +21,7 @@
 //       if (response.data.success) {
 //         setToken(response.data.token);
 //         localStorage.setItem("token", response.data.token);
-        
+
 //         setUser(response.data.user.name)
 //         localStorage.setItem("user", response.data.user.name);
 //         // console.log("Logged in user:", response.data); // ✅ Will work!
@@ -87,11 +87,6 @@
 
 // export default Login;
 
-
-
-
-
-
 import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShopContext } from "../Context/ShopContext";
@@ -117,8 +112,8 @@ const Login = () => {
       if (response.data.success) {
         setToken(response.data.token);
         localStorage.setItem("token", response.data.token);
-        
-       toast.success("You Are Logged In", {
+
+        toast.success("You Are Logged In", {
           className: "custom-toast-center",
           autoClose: 1000,
           pauseOnHover: false,
@@ -142,7 +137,7 @@ const Login = () => {
   return (
     <div className="mt-5 flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Welcome Back</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome Back</h2>
         <p className="text-gray-600 mb-6">Please log in to your account</p>
 
         <form onSubmit={onsubmithandler} className="space-y-4">
@@ -181,13 +176,10 @@ const Login = () => {
             </div>
           </div>
 
-          <div className="flex justify-between text-sm text-gray-600">
-            <p className="cursor-pointer hover:underline text-red-600">
+          <div className="text-sm text-gray-600">
+            <p className="cursor-pointer hover:underline text-red-400">
               Forgot your password?
             </p>
-            <Link to="/register" className="hover:underline text-red-600">
-              Create New Account
-            </Link>
           </div>
 
           <button
@@ -196,6 +188,26 @@ const Login = () => {
           >
             Sign In
           </button>
+
+          {/* Divider */}
+          <div className="flex items-center gap-2 my-4">
+            <hr className="flex-1 border-gray-300" />
+            <span className="text-gray-500 text-sm">OR</span>
+            <hr className="flex-1 border-gray-300" />
+          </div>
+
+          <div className="text-center">
+            <Link to="/register" className="hover:underline text-blue-700">
+              Create New Account
+            </Link>
+          </div>
+          {/* Login link */}
+          <p className="text-center text-gray-600 text-sm">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-red-600 font-medium">
+              Signup
+            </Link>
+          </p>
         </form>
       </div>
     </div>

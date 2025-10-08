@@ -350,6 +350,8 @@ const getuserdata = async (req, res) => {
   }
 };
 
+
+
 //send password reset otp
 const sendResetOtp = async (req, res) => {
   const { gmail } = req.body || {};
