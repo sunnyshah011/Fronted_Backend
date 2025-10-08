@@ -178,7 +178,7 @@ const Login = () => {
 
           <div className="text-sm text-gray-600">
             <p className="cursor-pointer hover:underline text-red-400">
-              Forgot your password?
+              <Link to="/reset-password">Forgot your password?</Link>
             </p>
           </div>
 

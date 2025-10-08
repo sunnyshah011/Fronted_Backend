@@ -132,7 +132,6 @@ const registerUser = async (req, res) => {
     // const { name, gmail, phone, password, confirmPassword } = req.body;
     const { name, gmail, password, confirmPassword } = req.body;
 
-
     const exists = await userModel.findOne({ gmail });
     if (exists) {
       return res.json({ success: false, message: "User already exists" });
@@ -276,10 +275,13 @@ const sendVerifyOtp = async (req, res) => {
 
     await transporter.sendMail(mailOption);
 
-    return res.json({ success: true, message: "Verificatin OTP Send on Email" });
+    return res.json({
+      success: true,
+      message: "Verificatin OTP Send on Email",
+    });
   } catch (error) {
     return res.json({ success: false, message: error.message });
-   }
+  }
 };
 
 //verify the account according to otp send by user
@@ -350,8 +352,6 @@ const getuserdata = async (req, res) => {
   }
 };
 
-
-
 //send password reset otp
 const sendResetOtp = async (req, res) => {
   const { gmail } = req.body || {};
@@ -410,6 +410,13 @@ const resetPassword = async (req, res) => {
 
     if (user.resetOtpExpireAt < Date.now()) {
       return res.json({ success: false, message: "OTP Expired" });
+    }
+
+    if (newPassword.length < 8) {
+      return res.json({
+        success: false,
+        message: "Password should be 8 character",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
