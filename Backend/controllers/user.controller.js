@@ -387,50 +387,71 @@ const sendResetOtp = async (req, res) => {
   }
 };
 
-//Reset User Password
-const resetPassword = async (req, res) => {
-  const { gmail, otp, newPassword } = req.body || {};
+// verify OTP
+const verifyResetOtp = async (req, res) => {
+  const { gmail, otp } = req.body || {};
 
-  if (!gmail || !otp || !newPassword) {
-    return res.json({
-      success: false,
-      message: "Email, OTP, and New password is required",
-    });
+  if (!gmail || !otp) {
+    return res.json({ success: false, message: "Email and OTP are required" });
   }
 
   try {
     const user = await userModel.findOne({ gmail });
-    if (!user) {
-      return res.json({ success: false, message: "User Not Found" });
-    }
+    if (!user) return res.json({ success: false, message: "User not found" });
 
-    if (user.resetOtp === "" || user.resetOtp !== otp) {
+    if (user.resetOtp !== otp)
       return res.json({ success: false, message: "Invalid OTP" });
-    }
 
-    if (user.resetOtpExpireAt < Date.now()) {
-      return res.json({ success: false, message: "OTP Expired" });
-    }
+    if (user.resetOtpExpireAt < Date.now())
+      return res.json({ success: false, message: "OTP expired" });
 
-    if (newPassword.length < 8) {
+    return res.json({ success: true, message: "OTP verified" });
+  } catch (error) {
+    console.log(error);
+    return res.json({ success: false, message: error.message });
+  }
+};
+
+
+// reset user password
+const resetPassword = async (req, res) => {
+  const { gmail, otp, newPassword } = req.body || {};
+
+  if (!gmail || !otp || !newPassword)
+    return res.json({
+      success: false,
+      message: "Email, OTP, and new password are required",
+    });
+
+  try {
+    const user = await userModel.findOne({ gmail });
+    if (!user) return res.json({ success: false, message: "User not found" });
+
+    if (user.resetOtp !== otp)
+      return res.json({ success: false, message: "Invalid OTP" });
+
+    if (user.resetOtpExpireAt < Date.now())
+      return res.json({ success: false, message: "OTP expired" });
+
+    if (newPassword.length < 8)
       return res.json({
         success: false,
-        message: "Password should be 8 character",
+        message: "Password must be at least 8 characters",
       });
-    }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
     user.password = hashedPassword;
     user.resetOtp = "";
     user.resetOtpExpireAt = 0;
 
     await user.save();
-
-    res.json({ success: true, message: "Password Change Successfully" });
+    return res.json({
+      success: true,
+      message: "Password changed successfully",
+    });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: error.message });
+    return res.json({ success: false, message: error.message });
   }
 };
 
@@ -444,6 +465,7 @@ export {
   sendResetOtp,
   resetPassword,
   getuserdata,
+  verifyResetOtp,
 };
 
 // //send password reset otp
@@ -539,5 +561,55 @@ export {
 //   } catch (error) {
 //     console.log(error);
 //     res.json({ success: false, message: "Invalid or expired reset session token" });
+//   }
+// };
+
+
+
+//....................................................
+//Reset User Password
+// const resetPassword = async (req, res) => {
+//   const { gmail, otp, newPassword } = req.body || {};
+
+//   if (!gmail || !otp || !newPassword) {
+//     return res.json({
+//       success: false,
+//       message: "Email, OTP, and New password is required",
+//     });
+//   }
+
+//   try {
+//     const user = await userModel.findOne({ gmail });
+//     if (!user) {
+//       return res.json({ success: false, message: "User Not Found" });
+//     }
+
+//     if (user.resetOtp === "" || user.resetOtp !== otp) {
+//       return res.json({ success: false, message: "Invalid OTP" });
+//     }
+
+//     if (user.resetOtpExpireAt < Date.now()) {
+//       return res.json({ success: false, message: "OTP Expired" });
+//     }
+
+//     if (newPassword.length < 8) {
+//       return res.json({
+//         success: false,
+//         message: "Password should be 8 character",
+//       });
+//     }
+
+//     const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+//     user.password = hashedPassword;
+//     user.resetOtp = "";
+//     user.resetOtpExpireAt = 0;
+
+//     await user.save();
+
+//     res.json({ success: true, message: "Password Change Successfully" });
+//   } catch (error) {
+//     console.log(error);
+//     res.json({ success: false, message: error.message });
 //   }
 // };
