@@ -32,7 +32,7 @@ const productSchema = new mongoose.Schema(
 
     isActive: { type: Boolean, default: true },
 
-    // ⭐ new flags
+    // ⭐ new flag
     isTopProduct: { type: Boolean, default: false },
     isBestSelling: { type: Boolean, default: false },
     isFlashSale: { type: Boolean, default: false },
