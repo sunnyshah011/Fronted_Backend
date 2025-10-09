@@ -28,7 +28,6 @@ const Order = ({ token }) => {
 
   useEffect(() => {
     fetchOrders();
-    console.log(orders);
   }, []);
 
   // Update order status

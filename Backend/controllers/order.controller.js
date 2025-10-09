@@ -109,7 +109,7 @@ const allOrders = async (req, res) => {
   try {
     const orders = await orderModel
       .find()
-      .populate("user", "name email")
+      .populate("user", "name gmail")
       .sort({ createdAt: -1 });
 
     res.json({ success: true, orders });
