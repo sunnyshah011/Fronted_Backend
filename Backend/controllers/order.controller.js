@@ -102,6 +102,8 @@ const userOrders = async (req, res) => {
   }
 };
 
+
+
 // 🔹 Get All Orders (Admin)
 const allOrders = async (req, res) => {
   try {
@@ -140,6 +142,9 @@ const updateStatus = async (req, res) => {
   }
 };
 
+
+
+
 // 🔹 Cancel Order (User)
 const cancelOrder = async (req, res) => {
   try {
@@ -168,7 +173,6 @@ const cancelOrder = async (req, res) => {
             "You can only cancel orders that are still in Processing phase.",
         });
     }
-
     // ✅ Restore stock for each variant
     for (const item of order.items) {
       const product = await ProductModel.findById(item.productId);
@@ -180,7 +184,6 @@ const cancelOrder = async (req, res) => {
         await product.save();
       }
     }
-
     // ✅ Update order status
     order.orderStatus = "Cancelled";
     await order.save();
