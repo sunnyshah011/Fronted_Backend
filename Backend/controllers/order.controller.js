@@ -16,33 +16,27 @@ const placeOrder = async (req, res) => {
     for (const item of items) {
       const product = await ProductModel.findById(item.productId);
       if (!product) {
-        return res
-          .status(404)
-          .json({
-            success: false,
-            message: `Product not found: ${item.productId}`,
-          });
+        return res.status(404).json({
+          success: false,
+          message: `Product not found: ${item.productId}`,
+        });
       }
 
       const variant = product.variants.find(
         (v) => v.color === item.color && v.size === item.size
       );
       if (!variant) {
-        return res
-          .status(404)
-          .json({
-            success: false,
-            message: `Variant not found for ${product.name} (${item.color}, ${item.size})`,
-          });
+        return res.status(404).json({
+          success: false,
+          message: `Variant not found for ${product.name} (${item.color}, ${item.size})`,
+        });
       }
 
       if (variant.stock < item.quantity) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: `Not enough stock for ${product.name} (${item.color}, ${item.size})`,
-          });
+        return res.status(400).json({
+          success: false,
+          message: `Not enough stock for ${product.name} (${item.color}, ${item.size})`,
+        });
       }
     }
 
@@ -102,8 +96,6 @@ const userOrders = async (req, res) => {
   }
 };
 
-
-
 // 🔹 Get All Orders (Admin)
 const allOrders = async (req, res) => {
   try {
@@ -142,8 +134,20 @@ const updateStatus = async (req, res) => {
   }
 };
 
-
-
+//delete order (admin)
+const deleteOrder = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    const deleted = await orderModel.findByIdAndDelete(orderId);
+    if (!deleted) {
+      return res.json({ success: false, message: "Order not found" });
+    }
+    res.json({ success: true, message: "Order deleted successfully" });
+  } catch (error) {
+    console.error("Delete order error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 // 🔹 Cancel Order (User)
 const cancelOrder = async (req, res) => {
@@ -165,13 +169,11 @@ const cancelOrder = async (req, res) => {
     }
 
     if (order.orderStatus !== "Processing") {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            "You can only cancel orders that are still in Processing phase.",
-        });
+      return res.status(400).json({
+        success: false,
+        message:
+          "You can only cancel orders that are still in Processing phase.",
+      });
     }
     // ✅ Restore stock for each variant
     for (const item of order.items) {
@@ -199,4 +201,4 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-export { placeOrder, allOrders, userOrders, updateStatus, cancelOrder };
+export { placeOrder, allOrders, userOrders, updateStatus, cancelOrder, deleteOrder };
