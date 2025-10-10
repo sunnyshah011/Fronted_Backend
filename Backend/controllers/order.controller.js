@@ -7,7 +7,6 @@ import { generateUniqueOrderId } from "../utils/generateUniqueOrderId.js";
 const placeOrder = async (req, res) => {
   try {
     const { items, amount, address } = req.body;
-    const userId = req.userId;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
