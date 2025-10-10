@@ -19,13 +19,19 @@ const Order = () => {
         {},
         { headers: { token } }
       );
-
       if (response.data.success && Array.isArray(response.data.orders)) {
         const formattedOrders = response.data.orders.map((order) => ({
           orderId: order._id,
+          amount: order.amount,
+          orderNumber: order.orderId,
           date: order.createdAt,
           status: order.orderStatus,
           paymentMethod: order.paymentMethod,
+          returnRequest: order.returnRequest || {
+            isRequested: false,
+            status: "Pending",
+            reason: "",
+          }, // ✅ Add this
           items: order.items.map((item) => ({
             ...item,
             productName: item.productId?.name || "Unknown Product",
@@ -51,10 +57,11 @@ const Order = () => {
 
   const statuses = [
     "All",
-    "Processing",
+    "Pending",
     "Ready To Ship",
     "Delivered",
     "Cancelled",
+    "Returned",
   ];
 
   // ✅ drag-to-scroll horizontally
@@ -154,7 +161,7 @@ const Order = () => {
                 (sum, item) => sum + item.price * item.quantity,
                 0
               );
-              const total = subtotal + SHIPPING_CHARGE; // ✅ add shipping charge
+              // const total = subtotal + SHIPPING_CHARGE; // ✅ add shipping charge
 
               return (
                 <div
@@ -166,7 +173,9 @@ const Order = () => {
                     <div>
                       <p className="font-medium text-gray-700">
                         Order ID:{" "}
-                        <span className="text-gray-500">{order.orderId}</span>
+                        <span className="text-gray-500">
+                          #{order.orderNumber}
+                        </span>
                       </p>
                       <p className="text-sm text-gray-500">
                         Date: {new Date(order.date).toLocaleDateString()}
@@ -176,18 +185,20 @@ const Order = () => {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-5 max-[630px]:w-full justify-between">
                       <div className="flex items-center gap-2">
                         <span
                           className={`w-2.5 h-2.5 rounded-full ${
                             order.status === "Delivered"
                               ? "bg-green-500"
-                              : order.status === "Processing"
+                              : order.status === "Pending"
                               ? "bg-yellow-500"
                               : order.status === "Ready To Ship"
                               ? "bg-blue-500"
                               : order.status === "Cancelled"
                               ? "bg-red-500"
+                              : order.status === "Returned"
+                              ? "bg-pink-500"
                               : "bg-gray-400"
                           }`}
                         ></span>
@@ -203,13 +214,68 @@ const Order = () => {
                         Track
                       </button> */}
 
-                      {order.status === "Processing" && (
+                      {order.status === "Pending" && (
                         <button
                           onClick={() => cancelOrder(order.orderId)}
                           className="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition"
                         >
                           Cancel
                         </button>
+                      )}
+
+                      {order.status === "Delivered" && (
+                        <div className="flex flex-col items-center">
+                          <button
+                            onClick={() => {
+                              const reason = prompt(
+                                "Please enter reason for return (or leave blank to cancel):"
+                              );
+                              if (!reason) return;
+                              axios
+                                .post(
+                                  `${backendUrl}/api/order/return`,
+                                  { orderId: order.orderId, reason },
+                                  { headers: { token } }
+                                )
+                                .then((res) => {
+                                  if (res.data.success) {
+                                    alert("Return request submitted!");
+                                    loadOrderData();
+                                  } else {
+                                    alert(res.data.message);
+                                  }
+                                })
+                                .catch((err) => {
+                                  console.error(err);
+                                  alert("Failed to submit return request.");
+                                });
+                            }}
+                            className={`px-3 py-1 text-sm rounded-md transition ${
+                              order.returnRequest.isRequested
+                                ? order.returnRequest.status === "Approved" ||
+                                  order.returnRequest.status === "Rejected"
+                                  ? "bg-gray-400 text-white cursor-not-allowed"
+                                  : "bg-pink-500 text-white hover:bg-pink-600"
+                                : "bg-pink-500 text-white hover:bg-pink-600"
+                            }`}
+                            disabled={
+                              order.returnRequest.status === "Approved" ||
+                              order.returnRequest.status === "Rejected"
+                            }
+                          >
+                            {order.returnRequest.isRequested
+                              ? `Return ${order.returnRequest.status}`
+                              : "Return"}
+                          </button>
+
+                          {/* Show return reason and status */}
+                          {order.returnRequest.isRequested && (
+                            <p className="text-xs text-gray-700 mt-1">
+                              <strong>Status:</strong>{" "}
+                              {order.returnRequest.status}
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -227,7 +293,7 @@ const Order = () => {
                           alt={item.productName}
                         />
                         <div>
-                          <p className="font-semibold text-gray-800 text-sm sm:text-base">
+                          <p className="font-semibold text-gray-800 text-sm sm:text-base line-clamp-2">
                             {item.productName}
                           </p>
                           <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
@@ -257,7 +323,7 @@ const Order = () => {
                       </span>
                     </p>
                     <p className="font-semibold text-[16px] text-gray-900 mt-1">
-                      Total: {currency} {total.toFixed(2)} /-
+                      Total: {currency} {order.amount.toFixed(2)} /-
                     </p>
                   </div>
                 </div>

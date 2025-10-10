@@ -243,7 +243,7 @@ const Placeorder = () => {
   }, []);
 
   return (
-    <div className="p-4 mt-5 flex flex-col sm:flex-row gap-8 min-h-[65vh]">
+    <div className="p-4 mt-5 flex flex-col md:flex-row gap-8 min-h-[65vh]">
       {/* Left: Address Form */}
       <form
         onSubmit={handleUpdate}
@@ -328,6 +328,67 @@ const Placeorder = () => {
 
       {/* Right: Cart + Payment */}
       <div className="flex-1 space-y-6">
+        {/* 🔹 Cart Items Preview */}
+        {Object.keys(cartitem).length > 0 && (
+          <div className="bg-white shadow-sm rounded-xl p-6">
+            <h2 className="text-xl font-semibold mb-4">Products in Cart</h2>
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {Object.keys(cartitem).map((productId) => {
+                const productCart = cartitem[productId];
+                const product = products.find((p) => p._id === productId);
+                if (!product) return null;
+
+                return Object.keys(productCart).map((size) => {
+                  const colorData = productCart[size];
+                  return Object.keys(colorData).map((color) => {
+                    const quantity = colorData[color];
+                    if (quantity <= 0) return null;
+
+                    const variant = product.variants.find(
+                      (v) => v.size === size && v.color === color
+                    );
+                    if (!variant) return null;
+
+                    return (
+                      <div
+                        key={`${productId}-${size}-${color}`}
+                        className="flex items-center gap-4 pb-2"
+                      >
+                        <img
+                          src={product.images?.[0] || "/placeholder.png"}
+                          alt={product.name}
+                          className="w-14 sm:w-20 h-14 sm:h-20 rounded-lg object-cover"
+                        />
+                        <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+                          <div className="flex flex-col gap-1 sm:gap-2 flex-wrap">
+                            <p className="text-sm sm:text-base font-medium text-gray-700 truncate max-w-[300px]">
+                              {product.name}
+                            </p>
+                            <span className="text-[15px] font-semibold text-gray-900">
+                              ₹ {variant.price} /-
+                            </span>
+                            <span className="px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md">
+                              Size: {variant.size}
+                            </span>
+                            {variant.color && (
+                              <span className="px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md">
+                                Color: {variant.color}
+                              </span>
+                            )}
+                            <span className="px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md">
+                              Qty: {quantity}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  });
+                });
+              })}
+            </div>
+          </div>
+        )}
+
         <CartTotal />
         <div className="bg-white shadow-sm rounded-xl p-6">
           <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
