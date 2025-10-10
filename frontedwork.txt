@@ -9,3 +9,7 @@ order page quantity problem
 Fronted outofstock problem
 - when product is outofstock by variant it not clear of user to see outofstock alert
 image -> outofstock.png
+
+filtering problem
+-when combining filtering then jump to another category to filer not work
+- rod -> lucana then if we click to accessories without changing lucana then it not show product
