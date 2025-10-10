@@ -19,13 +19,17 @@ const Order = () => {
         {},
         { headers: { token } }
       );
-
       if (response.data.success && Array.isArray(response.data.orders)) {
         const formattedOrders = response.data.orders.map((order) => ({
           orderId: order._id,
           date: order.createdAt,
           status: order.orderStatus,
           paymentMethod: order.paymentMethod,
+          returnRequest: order.returnRequest || {
+            isRequested: false,
+            status: "Pending",
+            reason: "",
+          }, // ✅ Add this
           items: order.items.map((item) => ({
             ...item,
             productName: item.productId?.name || "Unknown Product",
@@ -33,6 +37,20 @@ const Order = () => {
           })),
         }));
         setOrders(formattedOrders);
+
+        // if (response.data.success && Array.isArray(response.data.orders)) {
+        //   const formattedOrders = response.data.orders.map((order) => ({
+        //     orderId: order._id,
+        //     date: order.createdAt,
+        //     status: order.orderStatus,
+        //     paymentMethod: order.paymentMethod,
+        //     items: order.items.map((item) => ({
+        //       ...item,
+        //       productName: item.productId?.name || "Unknown Product",
+        //       productImage: item.productId?.images?.[0] || "/placeholder.jpg",
+        //     })),
+        //   }));
+        //   setOrders(formattedOrders);
       }
     } catch (error) {
       console.error("Error loading user orders:", error);
@@ -215,7 +233,7 @@ const Order = () => {
                         </button>
                       )}
 
-                      {order.status === "Delivered" && (
+                      {/* {order.status === "Delivered" && (
                         <button
                           onClick={() => {
                             const reason = prompt(
@@ -242,9 +260,68 @@ const Order = () => {
                               });
                           }}
                           className="bg-pink-500 text-white px-3 py-1 text-sm rounded-md hover:bg-pink-600 transition"
+                          disabled={
+                            order.returnRequest?.status === "Approved" ||
+                            order.returnRequest?.status === "Rejected"
+                          }
                         >
                           Return
                         </button>
+                      )} */}
+
+                      {order.status === "Delivered" && (
+                        <div className="flex flex-col gap-1">
+                          <button
+                            onClick={() => {
+                              const reason = prompt(
+                                "Please enter reason for return (or leave blank to cancel):"
+                              );
+                              if (!reason) return;
+                              axios
+                                .post(
+                                  `${backendUrl}/api/order/return`,
+                                  { orderId: order.orderId, reason },
+                                  { headers: { token } }
+                                )
+                                .then((res) => {
+                                  if (res.data.success) {
+                                    alert("Return request submitted!");
+                                    loadOrderData();
+                                  } else {
+                                    alert(res.data.message);
+                                  }
+                                })
+                                .catch((err) => {
+                                  console.error(err);
+                                  alert("Failed to submit return request.");
+                                });
+                            }}
+                            className={`px-3 py-1 text-sm rounded-md transition ${
+                              order.returnRequest.isRequested
+                                ? order.returnRequest.status === "Approved" ||
+                                  order.returnRequest.status === "Rejected"
+                                  ? "bg-gray-400 text-white cursor-not-allowed"
+                                  : "bg-pink-500 text-white hover:bg-pink-600"
+                                : "bg-pink-500 text-white hover:bg-pink-600"
+                            }`}
+                            disabled={
+                              order.returnRequest.status === "Approved" ||
+                              order.returnRequest.status === "Rejected"
+                            }
+                          >
+                            {order.returnRequest.isRequested
+                              ? `Return ${order.returnRequest.status}`
+                              : "Return"}
+                          </button>
+
+                          {/* Show return reason and status */}
+                          {order.returnRequest.isRequested && (
+                            <p className="text-xs text-gray-700 mt-1">
+                              <strong>Status:</strong>{" "}
+                              {order.returnRequest.status}
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
