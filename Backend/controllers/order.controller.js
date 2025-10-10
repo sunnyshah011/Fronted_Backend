@@ -6,6 +6,7 @@ import { generateUniqueOrderId } from "../utils/generateUniqueOrderId.js";
 // 🔹 Place Order (COD)
 const placeOrder = async (req, res) => {
   try {
+    const userId = req.userId; // ✅ from auth middleware
     const { items, amount, address } = req.body;
 
     if (!items || items.length === 0) {
@@ -114,29 +115,6 @@ const allOrders = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// // 🔹 Update Order Status (Admin)
-// const updateStatus = async (req, res) => {
-//   try {
-//     const { orderId, status } = req.body;
-
-//     const order = await orderModel.findByIdAndUpdate(
-//       orderId,
-//       { orderStatus: status },
-//       { new: true }
-//     );
-
-//     if (!order)
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Order not found" });
-
-//     res.json({ success: true, message: "Order status updated", order });
-//   } catch (error) {
-//     console.error("Update status error:", error);
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
 
 // 🔹 Update Order Status (Admin)
 const updateStatus = async (req, res) => {

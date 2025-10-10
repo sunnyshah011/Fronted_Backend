@@ -100,7 +100,7 @@ const Order = ({ token }) => {
           <tbody>
             {orders.map((order) => (
               <tr key={order._id} className="text-sm">
-                <td className="p-2 border">{order._id}</td>
+                <td className="p-2 border">{order.orderId}</td>
                 <td className="p-2 border">
                   {order.user?.name} <br />
                   {order.user?.gmail}

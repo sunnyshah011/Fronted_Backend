@@ -22,6 +22,8 @@ const Order = () => {
       if (response.data.success && Array.isArray(response.data.orders)) {
         const formattedOrders = response.data.orders.map((order) => ({
           orderId: order._id,
+          amount: order.amount,
+          orderNumber: order.orderId,
           date: order.createdAt,
           status: order.orderStatus,
           paymentMethod: order.paymentMethod,
@@ -37,7 +39,6 @@ const Order = () => {
           })),
         }));
         setOrders(formattedOrders);
-        console.log(orders);
       }
     } catch (error) {
       console.error("Error loading user orders:", error);
@@ -160,7 +161,7 @@ const Order = () => {
                 (sum, item) => sum + item.price * item.quantity,
                 0
               );
-              const total = subtotal + SHIPPING_CHARGE; // ✅ add shipping charge
+              // const total = subtotal + SHIPPING_CHARGE; // ✅ add shipping charge
 
               return (
                 <div
@@ -172,7 +173,9 @@ const Order = () => {
                     <div>
                       <p className="font-medium text-gray-700">
                         Order ID:{" "}
-                        <span className="text-gray-500">{order.orderId}</span>
+                        <span className="text-gray-500">
+                          #{order.orderNumber}
+                        </span>
                       </p>
                       <p className="text-sm text-gray-500">
                         Date: {new Date(order.date).toLocaleDateString()}
@@ -290,7 +293,7 @@ const Order = () => {
                           alt={item.productName}
                         />
                         <div>
-                          <p className="font-semibold text-gray-800 text-sm sm:text-base">
+                          <p className="font-semibold text-gray-800 text-sm sm:text-base line-clamp-2">
                             {item.productName}
                           </p>
                           <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
@@ -320,7 +323,7 @@ const Order = () => {
                       </span>
                     </p>
                     <p className="font-semibold text-[16px] text-gray-900 mt-1">
-                      Total: {currency} {total.toFixed(2)} /-
+                      Total: {currency} {order.amount.toFixed(2)} /-
                     </p>
                   </div>
                 </div>
