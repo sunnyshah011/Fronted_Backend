@@ -43,6 +43,8 @@ const orderSchema = new mongoose.Schema(
         default: "Pending",
       },
     },
+    // 🆕 8-digit unique order ID
+    orderId: { type: String, required: true, unique: true },
   },
   { timestamps: true }
 );

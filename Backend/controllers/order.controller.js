@@ -1,6 +1,7 @@
 import orderModel from "../models/order.model.js";
 import userModel from "../models/user.model.js";
 import ProductModel from "../models/product.model.js";
+import { generateUniqueOrderId } from "../utils/generateUniqueOrderId.js";
 
 // 🔹 Place Order (COD)
 const placeOrder = async (req, res) => {
@@ -11,6 +12,9 @@ const placeOrder = async (req, res) => {
     if (!items || items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
+
+    // Generate unique 8-digit orderId
+    const orderId = await generateUniqueOrderId();
 
     // ✅ Validate variant stock before placing order
     for (const item of items) {
@@ -61,6 +65,7 @@ const placeOrder = async (req, res) => {
       paymentMethod: "COD",
       paymentStatus: "Pending",
       orderStatus: "Pending",
+      orderId, // ✅ Save 8-digit orderId
       date: Date.now(),
     });
 
@@ -255,10 +260,6 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-
-
-
-
 // 🔹 User - Request Return
 const requestReturn = async (req, res) => {
   try {
@@ -267,7 +268,9 @@ const requestReturn = async (req, res) => {
 
     const order = await orderModel.findOne({ _id: orderId, user: userId });
     if (!order)
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
 
     if (order.orderStatus !== "Delivered") {
       return res.status(400).json({
@@ -301,7 +304,6 @@ const requestReturn = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 // 🔹 Admin - Approve/Reject Return
 const handleReturnStatus = async (req, res) => {
@@ -348,7 +350,6 @@ const handleReturnStatus = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 export {
   placeOrder,

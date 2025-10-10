@@ -21,7 +21,7 @@ const Order = () => {
       );
       if (response.data.success && Array.isArray(response.data.orders)) {
         const formattedOrders = response.data.orders.map((order) => ({
-          orderId: order._id,
+          orderId: order.orderId,
           date: order.createdAt,
           status: order.orderStatus,
           paymentMethod: order.paymentMethod,
@@ -37,20 +37,7 @@ const Order = () => {
           })),
         }));
         setOrders(formattedOrders);
-
-        // if (response.data.success && Array.isArray(response.data.orders)) {
-        //   const formattedOrders = response.data.orders.map((order) => ({
-        //     orderId: order._id,
-        //     date: order.createdAt,
-        //     status: order.orderStatus,
-        //     paymentMethod: order.paymentMethod,
-        //     items: order.items.map((item) => ({
-        //       ...item,
-        //       productName: item.productId?.name || "Unknown Product",
-        //       productImage: item.productId?.images?.[0] || "/placeholder.jpg",
-        //     })),
-        //   }));
-        //   setOrders(formattedOrders);
+        console.log(orders);
       }
     } catch (error) {
       console.error("Error loading user orders:", error);
@@ -195,7 +182,7 @@ const Order = () => {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-5 max-[630px]:w-full justify-between">
                       <div className="flex items-center gap-2">
                         <span
                           className={`w-2.5 h-2.5 rounded-full ${
@@ -233,44 +220,8 @@ const Order = () => {
                         </button>
                       )}
 
-                      {/* {order.status === "Delivered" && (
-                        <button
-                          onClick={() => {
-                            const reason = prompt(
-                              "Please enter reason for return (or leave blank to cancel):"
-                            );
-                            if (!reason) return;
-                            axios
-                              .post(
-                                `${backendUrl}/api/order/return`,
-                                { orderId: order.orderId, reason },
-                                { headers: { token } }
-                              )
-                              .then((res) => {
-                                if (res.data.success) {
-                                  alert("Return request submitted!");
-                                  loadOrderData();
-                                } else {
-                                  alert(res.data.message);
-                                }
-                              })
-                              .catch((err) => {
-                                console.error(err);
-                                alert("Failed to submit return request.");
-                              });
-                          }}
-                          className="bg-pink-500 text-white px-3 py-1 text-sm rounded-md hover:bg-pink-600 transition"
-                          disabled={
-                            order.returnRequest?.status === "Approved" ||
-                            order.returnRequest?.status === "Rejected"
-                          }
-                        >
-                          Return
-                        </button>
-                      )} */}
-
                       {order.status === "Delivered" && (
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col items-center">
                           <button
                             onClick={() => {
                               const reason = prompt(
