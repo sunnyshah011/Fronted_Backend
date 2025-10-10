@@ -51,10 +51,11 @@ const Order = () => {
 
   const statuses = [
     "All",
-    "Processing",
+    "Pending",
     "Ready To Ship",
     "Delivered",
     "Cancelled",
+    "Returned",
   ];
 
   // ✅ drag-to-scroll horizontally
@@ -180,14 +181,16 @@ const Order = () => {
                       <div className="flex items-center gap-2">
                         <span
                           className={`w-2.5 h-2.5 rounded-full ${
-                            order.status === "Delivered"
+                              order.status === "Delivered"
                               ? "bg-green-500"
-                              : order.status === "Processing"
+                              : order.status === "Pending"
                               ? "bg-yellow-500"
                               : order.status === "Ready To Ship"
                               ? "bg-blue-500"
                               : order.status === "Cancelled"
                               ? "bg-red-500"
+                              : order.status === "Returned"
+                              ? "bg-pink-500"
                               : "bg-gray-400"
                           }`}
                         ></span>
@@ -203,7 +206,7 @@ const Order = () => {
                         Track
                       </button> */}
 
-                      {order.status === "Processing" && (
+                      {order.status === "Pending" && (
                         <button
                           onClick={() => cancelOrder(order.orderId)}
                           className="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition"

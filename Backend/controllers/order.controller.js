@@ -60,7 +60,7 @@ const placeOrder = async (req, res) => {
       address,
       paymentMethod: "COD",
       paymentStatus: "Pending",
-      orderStatus: "Processing",
+      orderStatus: "Pending",
       date: Date.now(),
     });
 
@@ -111,23 +111,78 @@ const allOrders = async (req, res) => {
   }
 };
 
+// // 🔹 Update Order Status (Admin)
+// const updateStatus = async (req, res) => {
+//   try {
+//     const { orderId, status } = req.body;
+
+//     const order = await orderModel.findByIdAndUpdate(
+//       orderId,
+//       { orderStatus: status },
+//       { new: true }
+//     );
+
+//     if (!order)
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Order not found" });
+
+//     res.json({ success: true, message: "Order status updated", order });
+//   } catch (error) {
+//     console.error("Update status error:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
 // 🔹 Update Order Status (Admin)
 const updateStatus = async (req, res) => {
   try {
     const { orderId, status } = req.body;
 
-    const order = await orderModel.findByIdAndUpdate(
-      orderId,
-      { orderStatus: status },
-      { new: true }
-    );
-
-    if (!order)
+    const order = await orderModel.findById(orderId);
+    if (!order) {
       return res
         .status(404)
         .json({ success: false, message: "Order not found" });
+    }
 
-    res.json({ success: true, message: "Order status updated", order });
+    // ✅ If already cancelled, don't restock again
+    if (order.orderStatus === "Cancelled" && status === "Cancelled") {
+      return res.status(400).json({
+        success: false,
+        message: "This order is already cancelled.",
+      });
+    }
+
+    // ✅ If changing status to Cancelled, restore stock
+    if (status === "Cancelled" && order.orderStatus !== "Cancelled") {
+      for (const item of order.items) {
+        const product = await ProductModel.findById(item.productId);
+        if (!product) continue;
+
+        const variantIndex = product.variants.findIndex(
+          (v) => v.color === item.color && v.size === item.size
+        );
+
+        if (variantIndex !== -1) {
+          product.variants[variantIndex].stock += item.quantity;
+          await product.save();
+        }
+      }
+    }
+
+    // ✅ Update order status
+    order.orderStatus = status;
+    await order.save();
+
+    res.json({
+      success: true,
+      message:
+        status === "Cancelled"
+          ? "Order cancelled and stock restored."
+          : "Order status updated successfully.",
+      order,
+    });
   } catch (error) {
     console.error("Update status error:", error);
     res.status(500).json({ success: false, message: error.message });
@@ -168,11 +223,10 @@ const cancelOrder = async (req, res) => {
         .json({ success: false, message: "This order is already cancelled." });
     }
 
-    if (order.orderStatus !== "Processing") {
+    if (order.orderStatus !== "Pending") {
       return res.status(400).json({
         success: false,
-        message:
-          "You can only cancel orders that are still in Processing phase.",
+        message: "You can only cancel orders that are still in Pending phase.",
       });
     }
     // ✅ Restore stock for each variant
@@ -201,4 +255,11 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-export { placeOrder, allOrders, userOrders, updateStatus, cancelOrder, deleteOrder };
+export {
+  placeOrder,
+  allOrders,
+  userOrders,
+  updateStatus,
+  cancelOrder,
+  deleteOrder,
+};
