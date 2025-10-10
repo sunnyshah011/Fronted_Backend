@@ -150,6 +150,39 @@ const Order = ({ token }) => {
                     ))}
                   </select>
 
+                  {/* 🆕 Return Request Handling */}
+                  {order.returnRequest?.isRequested && (
+                    <div className="flex flex-col gap-1 border p-2 rounded bg-gray-50">
+                      <p className="text-xs text-gray-700">
+                        <strong>Return Reason:</strong>{" "}
+                        {order.returnRequest.reason}
+                      </p>
+                      <select
+                        defaultValue={order.returnRequest.status}
+                        onChange={(e) =>
+                          axios
+                            .post(
+                              `${BackendUrl}/api/order/return/handle`,
+                              { orderId: order._id, decision: e.target.value },
+                              { headers: { token } }
+                            )
+                            .then((res) => {
+                              alert(res.data.message);
+                              fetchOrders();
+                            })
+                            .catch(() =>
+                              alert("Failed to update return status")
+                            )
+                        }
+                        className="border px-2 py-1 rounded"
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approve</option>
+                        <option value="Rejected">Reject</option>
+                      </select>
+                    </div>
+                  )}
+
                   {/* 🗑️ Delete Button */}
                   <button
                     onClick={() => deleteOrder(order._id)}

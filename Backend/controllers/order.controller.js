@@ -255,6 +255,101 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+
+
+
+
+// 🔹 User - Request Return
+const requestReturn = async (req, res) => {
+  try {
+    const { orderId, reason } = req.body;
+    const userId = req.userId;
+
+    const order = await orderModel.findOne({ _id: orderId, user: userId });
+    if (!order)
+      return res.status(404).json({ success: false, message: "Order not found" });
+
+    if (order.orderStatus !== "Delivered") {
+      return res.status(400).json({
+        success: false,
+        message: "You can only request a return for Delivered orders.",
+      });
+    }
+
+    if (order.returnRequest.isRequested) {
+      return res.status(400).json({
+        success: false,
+        message: "Return already requested for this order.",
+      });
+    }
+
+    order.returnRequest = {
+      isRequested: true,
+      reason,
+      status: "Pending",
+    };
+    order.orderStatus = "Return Requested";
+    await order.save();
+
+    res.json({
+      success: true,
+      message: "Return request submitted successfully.",
+      order,
+    });
+  } catch (error) {
+    console.error("Return request error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+// 🔹 Admin - Approve/Reject Return
+const handleReturnStatus = async (req, res) => {
+  try {
+    const { orderId, decision } = req.body; // decision: "Approved" or "Rejected"
+    const order = await orderModel.findById(orderId);
+
+    if (!order || !order.returnRequest.isRequested)
+      return res
+        .status(404)
+        .json({ success: false, message: "Return request not found" });
+
+    order.returnRequest.status = decision;
+
+    if (decision === "Approved") {
+      order.orderStatus = "Returned";
+
+      // ✅ Restore product stock
+      for (const item of order.items) {
+        const product = await ProductModel.findById(item.productId);
+        if (!product) continue;
+
+        const variantIndex = product.variants.findIndex(
+          (v) => v.color === item.color && v.size === item.size
+        );
+
+        if (variantIndex !== -1) {
+          product.variants[variantIndex].stock += item.quantity;
+          await product.save();
+        }
+      }
+    } else {
+      order.orderStatus = "Delivered"; // Return rejected, keep delivered
+    }
+
+    await order.save();
+    res.json({
+      success: true,
+      message: `Return ${decision.toLowerCase()} successfully.`,
+      order,
+    });
+  } catch (error) {
+    console.error("Handle return error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
 export {
   placeOrder,
   allOrders,
@@ -262,4 +357,6 @@ export {
   updateStatus,
   cancelOrder,
   deleteOrder,
+  requestReturn,
+  handleReturnStatus,
 };

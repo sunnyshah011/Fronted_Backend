@@ -181,7 +181,7 @@ const Order = () => {
                       <div className="flex items-center gap-2">
                         <span
                           className={`w-2.5 h-2.5 rounded-full ${
-                              order.status === "Delivered"
+                            order.status === "Delivered"
                               ? "bg-green-500"
                               : order.status === "Pending"
                               ? "bg-yellow-500"
@@ -212,6 +212,38 @@ const Order = () => {
                           className="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition"
                         >
                           Cancel
+                        </button>
+                      )}
+
+                      {order.status === "Delivered" && (
+                        <button
+                          onClick={() => {
+                            const reason = prompt(
+                              "Please enter reason for return (or leave blank to cancel):"
+                            );
+                            if (!reason) return;
+                            axios
+                              .post(
+                                `${backendUrl}/api/order/return`,
+                                { orderId: order.orderId, reason },
+                                { headers: { token } }
+                              )
+                              .then((res) => {
+                                if (res.data.success) {
+                                  alert("Return request submitted!");
+                                  loadOrderData();
+                                } else {
+                                  alert(res.data.message);
+                                }
+                              })
+                              .catch((err) => {
+                                console.error(err);
+                                alert("Failed to submit return request.");
+                              });
+                          }}
+                          className="bg-pink-500 text-white px-3 py-1 text-sm rounded-md hover:bg-pink-600 transition"
+                        >
+                          Return
                         </button>
                       )}
                     </div>

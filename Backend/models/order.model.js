@@ -32,6 +32,17 @@ const orderSchema = new mongoose.Schema(
     paymentMethod: { type: String, required: true },
     paymentStatus: { type: String, default: "Pending" },
     orderStatus: { type: String, default: "Processing" },
+
+    // 🆕 Return information
+    returnRequest: {
+      isRequested: { type: Boolean, default: false },
+      reason: { type: String, default: "" },
+      status: {
+        type: String,
+        enum: ["Pending", "Approved", "Rejected"],
+        default: "Pending",
+      },
+    },
   },
   { timestamps: true }
 );
