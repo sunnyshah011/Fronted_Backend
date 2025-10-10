@@ -137,11 +137,21 @@ const Order = ({ token }) => {
                   </span>
                 </td>
                 <td className="p-2 border flex flex-col gap-2">
+                  {/* <select
+                    value={order.orderStatus}
+                    onChange={(e) => updateStatus(order._id, e.target.value)}
+                    className="border px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={order.orderStatus === "Cancelled" } // ✅ disable if cancelled
+                  > */}
                   <select
                     value={order.orderStatus}
                     onChange={(e) => updateStatus(order._id, e.target.value)}
                     className="border px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={order.orderStatus === "Cancelled"} // ✅ disable if cancelled
+                    disabled={
+                      order.orderStatus === "Cancelled" ||
+                      order.orderStatus === "Returned" ||
+                      order.returnRequest?.status === "Approved"
+                    } // disable if cancelled, returned, or return approved
                   >
                     {statuses.map((status) => (
                       <option key={status} value={status}>
@@ -174,7 +184,12 @@ const Order = ({ token }) => {
                               alert("Failed to update return status")
                             )
                         }
-                        className="border px-2 py-1 rounded"
+                        className="border px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={
+                          order.orderStatus === "Cancelled" ||
+                          order.orderStatus === "Returned" ||
+                          order.returnRequest?.status === "Approved"
+                        } // disable if cancelled, returned, or return approved
                       >
                         <option value="Pending">Pending</option>
                         <option value="Approved">Approve</option>
