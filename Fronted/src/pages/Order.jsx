@@ -21,7 +21,7 @@ const Order = () => {
       );
       if (response.data.success && Array.isArray(response.data.orders)) {
         const formattedOrders = response.data.orders.map((order) => ({
-          orderId: order.orderId,
+          orderId: order._id,
           date: order.createdAt,
           status: order.orderStatus,
           paymentMethod: order.paymentMethod,
