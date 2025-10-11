@@ -13,3 +13,6 @@ image -> outofstock.png
 filtering problem
 -when combining filtering then jump to another category to filer not work
 - rod -> lucana then if we click to accessories without changing lucana then it not show product
+
+
+-clamp in product page Name
