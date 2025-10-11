@@ -59,7 +59,8 @@ const Breadcrumbs = () => {
             <li key={index} className={`flex items-center space-x-2 ${hideOnSmall}`}>
               <span className="text-gray-400">{sign}</span>
               {isLast ? (
-                <span className="text-gray-500 truncate max-w-[110px] sm:max-w-[250px] md:max-w-[400px] lg:max-w-[850px]">
+                <span className="text-gray-500 truncate max-w-[110px] sm:max-w-[250px] md:max-w-[400px] lg:max-w-[800px]">
+                {/* <span className="line-clamp-1"> */}
                   {displayName}
                 </span>
               ) : (
@@ -79,3 +80,6 @@ const Breadcrumbs = () => {
 };
 
 export default Breadcrumbs;
+
+
+
