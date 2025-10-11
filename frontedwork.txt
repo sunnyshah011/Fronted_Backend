@@ -4,7 +4,7 @@ collection page
 order page quantity problem
 - user order then cancelled -> product restock -> if admin update to cancelled 
   order status to pending then cancelled order again restock but the actual 
-  product quantity did not set according to order quantity 
+  product quantity did not set according to order quantity ->>> Done
 
 Fronted outofstock problem
 - when product is outofstock by variant it not clear of user to see outofstock alert
