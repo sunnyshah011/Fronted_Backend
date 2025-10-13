@@ -16,3 +16,6 @@ filtering problem
 
 
 -clamp in product page Name
+
+
+- placeorder page product quatity is not enough error

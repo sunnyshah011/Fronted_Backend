@@ -4,7 +4,10 @@ import { NavLink, Link } from "react-router-dom";
 import { ShopContext } from "../Context/ShopContext";
 import { UserIcon, Cog6ToothIcon } from "@heroicons/react/24/outline"; // or /outline
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline"; // or /outline
+import { HomeIcon } from "@heroicons/react/24/outline"; // Add at the top of your file
+
 import { toast } from "react-toastify";
+import axios from "axios";
 
 const Navbar = () => {
   const {
@@ -17,11 +20,34 @@ const Navbar = () => {
     navigate,
   } = useContext(ShopContext);
 
+  const { backendUrl } = useContext(ShopContext);
+  const [categories, setCategories] = useState([]);
+  const [mobilecategories, setmobileCategories] = useState([]);
+
   const [isOpen, setIsOpen] = useState(false);
   const [show, setShow] = useState(false);
   // const [search, setSearch] = useState("");
 
   const userRef = useRef(null);
+
+  const fetchCategory = async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/categories`);
+
+      if (data.success) {
+        setCategories(data.categories.slice(0, 7));
+        setmobileCategories(data.categories);
+      } else if (Array.isArray(data.categories)) {
+        setCategories(data.categories.slice(0, 5));
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategory();
+  }, []);
 
   const logout = () => {
     navigate("/");
@@ -94,6 +120,9 @@ const Navbar = () => {
               src={assets.home}
               className="w-5.5 cursor-pointer flex-shrink-0"
               alt="H"
+              onClick={() => {
+                  window.scrollTo(0, 0);
+              }}
             />
           </Link>
 
@@ -107,6 +136,7 @@ const Navbar = () => {
             />
           </div>
         </div>
+
         {/* Search bar */}
         {/* <div className="flex-1/12 hidden min-[850px]:block">
           <input
@@ -118,41 +148,30 @@ const Navbar = () => {
            focus:ring-blue-500 focus:border-blue-500 transition duration-200"
           />
         </div> */}
-        {/* Desktop nav links */}
-        <nav className="hidden min-[1000px]:flex md:gap-6 lg:gap-12 text-gray-700 flex-1 justify-center h-full">
-          <div className="flex items-center gap-7 h-full">
-            <NavLink
-              to="/collection"
-              className="flex flex-col text-center items-center gap-1"
-            >
-              All Products
-            </NavLink>
-            <NavLink to="/rod" className="flex flex-col items-center gap-1">
-              Rod
-            </NavLink>
-            <NavLink to="/reel" className="flex flex-col items-center gap-1">
-              Reel
-            </NavLink>
-            <NavLink
-              to="/combo-set"
-              className="flex flex-col items-center gap-1"
-            >
-              Combo Set
-            </NavLink>
-             <NavLink
-              to="/accessories"
-              className="flex flex-col items-center gap-1"
-            >
-              Accessories
-            </NavLink>
-             <NavLink
-              to="/fishing-net"
-              className="flex flex-col items-center gap-1"
-            >
-             Fishing Net
-            </NavLink>
+
+        {categories.length > 0 ? (
+          <div className="hidden min-[1000px]:flex md:gap-6 lg:gap-12 text-gray-700 flex-1 justify-center h-full">
+            <div className="flex items-center gap-7 h-full">
+              {categories.map((cat) => (
+                <div
+                  key={cat._id}
+                  className="flex flex-col items-center"
+                  onClick={() => navigate(`/collection?category=${cat.slug}`)}
+                >
+                  <div>
+                    <p className="max-[768px]:text-[12px] text-center max-[768px]:font-medium md:text-[17px] font-normal ">
+                      {" "}
+                      {cat.name}{" "}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </nav>
+        ) : (
+          <p className="text-gray-500 text-sm"></p>
+        )}
+
         {/* Cart and User icons */}
         <div className="flex items-center justify-center">
           <div className="flex items-center gap-2 min-[350px]:gap-2">
@@ -258,51 +277,31 @@ const Navbar = () => {
             isOpen ? "translate-x-0" : "-translate-x-full"
           } transition-transform duration-300 ease-in-out`}
         >
-          <button className="p-4 text-xl" onClick={closeMenu}>
+          <button className="p-4 text-[17px]" onClick={closeMenu}>
             &larr; Back
           </button>
 
-          <nav className="flex flex-col p-4 space-y-3">
+          <nav className="flex flex-col p-4 space-y-5 items-center">
             <NavLink
               to="/"
               onClick={closeMenu}
-              className="text-gray-800 hover:text-blue-500 flex gap-3 items-center"
+              className="hover:text-blue-500 flex gap-3 items-center"
             >
-              <i className="fa fa-home"></i>
-              <p className="text-[20px]">Home</p>
+              <HomeIcon className="h-5 w-5" /> {/* Home icon */}
+              <p className="text-[17px]">Home</p>
             </NavLink>
-            <NavLink
-              to="/collection"
-              onClick={closeMenu}
-              className="text-gray-800 hover:text-blue-500 flex gap-3 items-center"
-            >
-              <i className="fa fa-th-large"></i>
-              <p className="text-[20px]">All Products</p>
-            </NavLink>
-            <NavLink
-              to="/rod"
-              onClick={closeMenu}
-              className="text-gray-800 hover:text-blue-500 flex gap-3 items-center"
-            >
-              <i className="fa fa-address-card"></i>
-              <p className="text-[20px]">Rod</p>
-            </NavLink>
-            <NavLink
-              to="/reel"
-              onClick={closeMenu}
-              className="text-gray-800 hover:text-blue-500 flex gap-3 items-center"
-            >
-              <i className="fa fa-phone"></i>
-              <p className="text-[20px]">Reel</p>
-            </NavLink>
-            <NavLink
-              to="/combo-set"
-              onClick={closeMenu}
-              className="text-gray-800 hover:text-blue-500 flex gap-3 items-center"
-            >
-              <i className="fa fa-map-marker"></i>
-              <p className="text-[20px]">Combo Set</p>
-            </NavLink>
+            {mobilecategories.map((cat) => (
+              <div
+                key={cat._id}
+                onClick={() => {
+                  navigate(`/collection?category=${cat.slug}`);
+                  closeMenu(); // <-- Close sidebar after navigation
+                }}
+                className="cursor-pointer hover:text-blue-500"
+              >
+                {cat.name}
+              </div>
+            ))}
           </nav>
         </aside>
       </div>

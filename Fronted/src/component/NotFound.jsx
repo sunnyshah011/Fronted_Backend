@@ -2,7 +2,7 @@ import React from "react";
 
 const NotFound = () => {
   return (
-    <div className="mt-5 flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-purple-400 via-pink-500 to-red-400 text-white p-4">
+    <div className="mt-5 flex flex-col items-center justify-center  p-4">
       <h1 className="text-6xl sm:text-8xl font-bold animate-bounce mb-4">
         😱
       </h1>
