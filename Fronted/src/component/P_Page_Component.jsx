@@ -6,10 +6,10 @@ const Product_Page = ({ categorySlug, productSlug, name, price, images }) => {
   const { currency } = useContext(ShopContext);
   return (
     <Link
-      className="text-gray-700 cursor-pointer rounded-b-[6px]  bg-white block"
+      className="text-gray-700 cursor-pointer rounded bg-white block"
       to={`/categories/${categorySlug}/${productSlug}`}
     >
-      <div className="w-full aspect-square overflow-hidden rounded-xl bg-white flex items-center justify-center">
+      <div className="w-full aspect-square overflow-hidden rounded  bg-white flex items-center justify-center">
         <img
           src={images[0]}
           alt={name}
