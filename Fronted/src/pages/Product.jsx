@@ -95,6 +95,10 @@ const Product = () => {
     setQuantity(selectedVariant.stock > 0 ? 1 : 0);
   }, [selectedVariant]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="max-w-[1250px] mt-3 pt-4 px-4 bg-white">
       {loading && <p>Loading...</p>}

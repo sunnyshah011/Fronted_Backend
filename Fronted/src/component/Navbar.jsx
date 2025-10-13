@@ -277,11 +277,11 @@ const Navbar = () => {
             isOpen ? "translate-x-0" : "-translate-x-full"
           } transition-transform duration-300 ease-in-out`}
         >
-          <button className="p-4 text-[17px]" onClick={closeMenu}>
+          <button className="px-3 py-2 text-[17px]" onClick={closeMenu}>
             &larr; Back
           </button>
 
-          <nav className="flex flex-col p-4 space-y-5 items-center">
+          <nav className="flex flex-col p-4 space-y-5 items-center pb-10 overflow-y-auto h-[calc(100vh-4rem)]">
             <NavLink
               to="/"
               onClick={closeMenu}
@@ -297,7 +297,7 @@ const Navbar = () => {
                   navigate(`/collection?category=${cat.slug}`);
                   closeMenu(); // <-- Close sidebar after navigation
                 }}
-                className="cursor-pointer hover:text-blue-500"
+                className="cursor-pointer hover:text-blue-500 "
               >
                 {cat.name}
               </div>
