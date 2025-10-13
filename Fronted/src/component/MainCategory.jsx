@@ -3,7 +3,7 @@ import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const P_Category = () => {
+const Main_Category = () => {
   const { backendUrl } = useContext(ShopContext);
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
@@ -44,7 +44,6 @@ const P_Category = () => {
             <div
               key={cat._id}
               className="flex flex-col items-center"
-              // onClick={() => navigate(`/categories/${cat.slug}`)}
               onClick={() => navigate(`/collection?category=${cat.slug}`)}
             >
               <div>
@@ -69,4 +68,4 @@ const P_Category = () => {
   );
 };
 
-export default P_Category;
+export default Main_Category;

@@ -1,5 +1,5 @@
 collection page
-- filter hide on small screen 
+- filter hide on small screen >> Done
 
 order page quantity problem
 - user order then cancelled -> product restock -> if admin update to cancelled 

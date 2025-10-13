@@ -9,7 +9,6 @@ import Order from "./pages/Order";
 import Placeorder from "./pages/PlaceOrder";
 import Product from "./pages/Product";
 import Footer from "./component/Footer";
-import { ToastContainer } from "react-toastify";
 import NotFound from "./component/NotFound";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
@@ -17,10 +16,9 @@ import Account from "./pages/Account";
 import EmailVerify from "./pages/EmailVerify";
 import ResetPassword from "./pages/ResetPassword";
 import Breadcrumbs from "./component/Breadcrumb";
-import CategoryPage from "./pages/CategoryPage";
-import CategoryPageGroup from "./pages/CategoryPageGroup";
 import AllFlashSaleProducts from "./pages/AllFlashSaleProducts";
 import AllTopProducts from "./pages/AllTopProducts";
+import { ToastContainer } from "react-toastify";
 
 const App = () => {
   return (
@@ -56,12 +54,6 @@ const App = () => {
             <Route path="/collection" element={<Collection />} />
             <Route path="/cart" element={<Cart />} />
 
-            {/* category -> subcategory -> product */}
-            <Route path="/categories" element={<CategoryPageGroup />} />
-            <Route
-              path="/categories/:categorySlug"
-              element={<CategoryPage />}
-            />
             <Route
               path="/categories/:categorySlug/:productSlug"
               element={<Product />}
