@@ -112,6 +112,7 @@ const Order = () => {
       if (response.data.success) {
         alert("Order cancelled successfully!");
         loadOrderData();
+        window.location.reload();
       } else {
         alert(response.data.message);
       }
