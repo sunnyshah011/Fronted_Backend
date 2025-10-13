@@ -1,5 +1,5 @@
 collection page
-- filter hide on small screen
+- filter hide on small screen 
 
 order page quantity problem
 - user order then cancelled -> product restock -> if admin update to cancelled 
@@ -8,11 +8,11 @@ order page quantity problem
 
 Fronted outofstock problem
 - when product is outofstock by variant it not clear of user to see outofstock alert
-image -> outofstock.png
+image -> outofstock.png >> Done
 
 filtering problem
 -when combining filtering then jump to another category to filer not work
-- rod -> lucana then if we click to accessories without changing lucana then it not show product
+- rod -> lucana then if we click to accessories without changing lucana then it not show product >> Done
 
 
 -clamp in product page Name
