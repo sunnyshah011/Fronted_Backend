@@ -1,8 +1,9 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useMemo } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import { assets } from "../assets/frontend_assets/assets";
 import CartTotal from "../component/CartTotal";
 import { Link } from "react-router-dom";
+import debounce from "lodash.debounce";
 
 const Cart = () => {
   const { products, currency, cartitem, updateQuantity, navigate } =
@@ -25,6 +26,27 @@ const Cart = () => {
     setCartData(temp);
   }, [cartitem, products]);
 
+  // 🔹 Debounce quantity updates (prevents localStorage lag)
+  const debouncedUpdateQuantity = useMemo(
+    () => debounce(updateQuantity, 300),
+    [updateQuantity]
+  );
+
+  // 🔹 Optimistic UI update + sync context/backend
+  const handleQuantityChange = (item, newQty) => {
+    // Immediate UI update
+    setCartData((prev) =>
+      prev.map((i) =>
+        i._id === item._id && i.size === item.size && i.color === item.color
+          ? { ...i, quantity: newQty }
+          : i
+      )
+    );
+
+    // Trigger backend/context update (debounced)
+    debouncedUpdateQuantity(item._id, item.size, item.color, newQty);
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -36,20 +58,18 @@ const Cart = () => {
       <div className="space-y-3">
         {cartdata.map((item) => {
           const productData = products.find((p) => p._id === item._id);
-          const key = `${item._id}_${item.size}_${item.color}`;
           if (!productData) return null;
-          
 
-          // ✅ Variant-based price and stock
+          const key = `${item._id}_${item.size}_${item.color}`;
           const variant = productData.variants?.find(
             (v) => v.size === item.size && v.color === item.color
           );
+
           const price = variant?.price ?? productData.price ?? 0;
           const maxStock = variant?.stock ?? Infinity;
 
-          // ✅ Build product link (fallback to /product/:id if missing category)
           const productLink =
-            productData.subcategory.category?.slug && productData.slug
+            productData.subcategory?.category?.slug && productData.slug
               ? `/categories/${productData.subcategory.category.slug}/${productData.slug}`
               : `/product/${productData._id}`;
 
@@ -59,11 +79,7 @@ const Cart = () => {
               className="bg-white shadow-sm rounded-xl px-3 py-2 sm:p-4 flex items-center gap-2 sm:gap-4"
             >
               {/* 🔹 Product Image */}
-              <Link
-                to={productLink}
-                // `/categories/${categorySlug}/${productSlug}`
-                className="flex-shrink-0"
-              >
+              <Link to={productLink} className="flex-shrink-0">
                 <img
                   className="w-14 sm:w-20 h-14 sm:h-20 rounded-lg object-cover"
                   src={productData.images?.[0] || "/placeholder.png"}
@@ -72,9 +88,9 @@ const Cart = () => {
               </Link>
 
               {/* 🔹 Product Details */}
-              <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-                <div className="flex flex-col sm:flex-col sm:items-left gap-1 sm:gap-2 flex-wrap">
-                  <p className="text-sm sm:text-base font-medium text-gray-700 truncate max-w-[110px] min-[340px]:max-w-[170px] min-[360px]:max-w-[190px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-[700px]">
+              <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 flex-wrap">
+                <div className="flex flex-col gap-1 sm:gap-2">
+                  <p className="text-sm sm:text-base font-medium text-gray-700 truncate max-w-[700px]">
                     {productData.name}
                   </p>
 
@@ -98,12 +114,7 @@ const Cart = () => {
                   <button
                     onClick={() => {
                       if (item.quantity > 1) {
-                        updateQuantity(
-                          item._id,
-                          item.size,
-                          item.color,
-                          item.quantity - 1
-                        );
+                        handleQuantityChange(item, item.quantity - 1);
                       }
                     }}
                     className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-100 transition"
@@ -118,12 +129,7 @@ const Cart = () => {
                   <button
                     onClick={() => {
                       if (item.quantity < maxStock) {
-                        updateQuantity(
-                          item._id,
-                          item.size,
-                          item.color,
-                          item.quantity + 1
-                        );
+                        handleQuantityChange(item, item.quantity + 1);
                       }
                     }}
                     className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-100 transition"
@@ -135,9 +141,7 @@ const Cart = () => {
 
               {/* 🔹 Delete Button */}
               <img
-                onClick={() =>
-                  updateQuantity(item._id, item.size, item.color, 0)
-                }
+                onClick={() => handleQuantityChange(item, 0)}
                 className="w-5 sm:w-6 cursor-pointer hover:opacity-70 transition"
                 src={assets.bin_icon}
                 alt="Remove"

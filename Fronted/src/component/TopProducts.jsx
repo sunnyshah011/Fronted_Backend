@@ -18,7 +18,7 @@ const TopProducts = () => {
 
   return (
     <div className="w-full px-2 py-1">
-      <Link to="all-top-products" > 
+      <Link to="all-top-products" >
         <Title Category="Top Products" More="View" />
       </Link>
 

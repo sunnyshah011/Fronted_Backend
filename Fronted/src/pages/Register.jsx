@@ -248,7 +248,7 @@
 
 // export default Register;
 
-import { useContext, useState,useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
@@ -305,11 +305,15 @@ const Register = () => {
     }
   };
 
-    useEffect(() => {
-      if (token) {
-        navigate("/");
-      }
-    }, [token]);
+  useEffect(() => {
+    if (token) {
+      navigate("/");
+    }
+  }, [token]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="mt-5 flex items-center justify-center bg-gray-100 px-4">

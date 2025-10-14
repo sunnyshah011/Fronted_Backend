@@ -2,57 +2,22 @@
 // import { toast } from "react-toastify";
 // import { useNavigate } from "react-router-dom";
 // import axios from "axios";
-// import { useQuery } from "@tanstack/react-query";
+// import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // const ShopContext = createContext();
 
 // const ShopContextProvider = (props) => {
 //   const currency = "Rs.";
-//   const delivery_fee = 200;
+//   const delivery_fee = 150;
 //   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 //   const navigate = useNavigate();
+//   const queryClient = useQueryClient();
 
 //   // State variables
 //   const [cartitem, setCartitem] = useState({});
 //   const [products, setProducts] = useState([]);
 //   const [token, setToken] = useState(null);
 //   const [address, setAddress] = useState(null);
-//   // const [userDetails, setUserDetails] = useState({});
-
-//   // to fetch user data from backend
-//   const { data: userDetails, isLoading, isError } = useQuery(
-//     ["userDetails", token],
-//     async () => {
-//       const res = await axios.post(
-//         backendUrl + "/api/user/user-data",
-//         {},
-//         { headers: { token } }
-//       );
-//       if (!res.data.success) throw new Error("Failed to fetch user data");
-//       return res.data.message;
-//     },
-//     {
-//       enabled: !!token,        // don’t run if no token
-//       staleTime: 5 * 60 * 1000, // cache 5 mins
-//       refetchOnWindowFocus: false, // no spam calls
-//     }
-//   );
-//   // const getUserData = async () => {
-//   //   try {
-//   //     const response = await axios.post(
-//   //       backendUrl + "/api/user/user-data",
-//   //       {},
-//   //       { headers: { token } }
-//   //     );
-//   //     if (response.data.success) {
-//   //       setUserDetails(response.data.message || {});
-//   //     } else {
-//   //       toast.error("error");
-//   //     }
-//   //   } catch (error) {
-//   //     handleApiError(error);
-//   //   }
-//   // };
 
 //   // Loading states
 //   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
@@ -73,49 +38,108 @@
 //     });
 //   };
 
-//   // Function to update address manually from anywhere
+//   // -----------------------
+//   // React Query: userDetails
+//   // -----------------------
+//   const { data: userDetails, isLoading: isLoadingUser } = useQuery({
+//     queryKey: ["userDetails", token],
+//     queryFn: async () => {
+//       const res = await axios.post(
+//         backendUrl + "/api/user/user-data",
+//         {},
+//         { headers: { token } }
+//       );
+//       if (!res.data.success) throw new Error("Failed to fetch user data");
+//       return res.data.message;
+//     },
+//     enabled: !!token, // only fetch if token exists
+//     staleTime: 5 * 60 * 1000, // cache 5 minutes
+//     refetchOnWindowFocus: false, // avoid refetch on window focus
+//   });
+
+//   // -----------------------
+//   // Functions
+//   // -----------------------
 //   const updateAddress = useCallback((newAddress) => {
 //     setAddress(newAddress);
 //   }, []);
 
-//   // Add to cart function
+//   //---------------------------------------------
+//   // ✅ Add to Cart
 //   const addtocart = useCallback(
-//     async (itemId, size) => {
-//       if (!size) {
-//         toast.error("Please Select Size!", {
-//           position: "top-center",
-//           className: "custom-toast-center",
-//           bodyClassName: "text-sm",
-//           closeOnClick: true,
-//           pauseOnHover: true,
-//           autoClose: 2000,
-//         });
+//     async (itemId, size, color, quantity = 1) => {
+
+//       if (!size && !color) return toast.error("Select size/color");
+
+//       if (!token) {
+//         const existing = toast.isActive("login-toast");
+
+//         if (existing) {
+//           // 👇 Update the toast with a "blink" effect
+//           toast.update("login-toast", {
+//             render: (
+//               <div className="flex flex-col items-center animate-pulse">
+//                 <p className="mb-2">
+//                   Please login or register to add items to cart!
+//                 </p>
+//                 <button
+//                   onClick={() => {
+//                     navigate("/login");
+//                     toast.dismiss("login-toast");
+//                   }}
+//                   className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
+//                 >
+//                   Go to Login
+//                 </button>
+//               </div>
+//             ),
+//             className: "custom-toast-center", // ✅ apply custom CSS
+//           });
+//         } else {
+//           // 👇 First time show toast
+//           toast.info(
+//             <div className="flex flex-col items-center">
+//               <p className="mb-2">Please login or register to add items to cart!</p>
+//               <button
+//                 onClick={() => {
+//                   navigate("/register");
+//                   toast.dismiss("login-toast");
+//                 }}
+//                 className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
+//               >
+//                 Go to Login
+//               </button>
+//             </div>,
+//             {
+//               toastId: "login-toast",
+//               className: "custom-toast-center", // ✅ apply custom CSS
+//               autoClose: true,
+//               closeOnClick: false,
+//               draggable: false,
+//             }
+//           );
+//         }
+
 //         return;
 //       }
 
-//       let cartdata = structuredClone(cartitem);
-//       if (cartdata[itemId]) {
-//         cartdata[itemId][size] = (cartdata[itemId][size] || 0) + 1;
-//       } else {
-//         cartdata[itemId] = { [size]: 1 };
-//       }
+//       const cartdata = structuredClone(cartitem);
+
+//       if (!cartdata[itemId]) cartdata[itemId] = {};
+//       if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
+
+//       cartdata[itemId][size][color] = (cartdata[itemId][size][color] || 0) + quantity;
+
 //       setCartitem(cartdata);
 //       localStorage.setItem("cartItems", JSON.stringify(cartdata));
+//       toast.success("Product added to cart!");
 
-//       toast.success("Product added to cart!", {
-//         position: "top-center",
-//         className: "custom-toast-center",
-//         bodyClassName: "text-sm",
-//         autoClose: 2000,
-//         closeOnClick: true,
-//         pauseOnHover: true,
-//       });
-
+//       // ✅ Call backend if user is logged in
 //       if (token) {
 //         try {
 //           await axios.post(
 //             backendUrl + "/api/cart/add",
-//             { itemId, size },
+//             { itemId, size, color, quantity },
 //             { headers: { token } }
 //           );
 //         } catch (error) {
@@ -126,117 +150,84 @@
 //     [cartitem, token, backendUrl]
 //   );
 
-//   // Get total cart count
+//   // ✅ Get Cart Count
 //   const getcartcount = useCallback(() => {
 //     let totalcount = 0;
-//     for (const items in cartitem) {
-//       for (const item in cartitem[items]) {
-//         try {
-//           if (cartitem[items][item] > 0) {
-//             totalcount += cartitem[items][item];
-//           }
-//         } catch (error) {
-//           console.error(error);
+//     for (const productId in cartitem) {
+//       for (const size in cartitem[productId]) {
+//         for (const color in cartitem[productId][size]) {
+//           totalcount += cartitem[productId][size][color];
 //         }
 //       }
 //     }
 //     return totalcount;
 //   }, [cartitem]);
 
-//   // Update quantity in cart
+//   // ✅ Update Quantity
 //   const updateQuantity = useCallback(
-//     async (itemId, size, quantity) => {
-//       let cartdata = structuredClone(cartitem);
+//     async (itemId, size, color, quantity) => {
+//       const cartdata = structuredClone(cartitem);
+//       if (!cartdata[itemId]) return;
 
 //       if (quantity <= 0) {
-//         if (cartdata[itemId] && cartdata[itemId][size]) {
+//         delete cartdata[itemId][size][color];
+//         if (Object.keys(cartdata[itemId][size]).length === 0) {
 //           delete cartdata[itemId][size];
-//           if (Object.keys(cartdata[itemId]).length === 0) {
-//             delete cartdata[itemId];
-//           }
 //         }
-//         setCartitem(cartdata);
-//         localStorage.setItem("cartItems", JSON.stringify(cartdata));
-
-//         if (token) {
-//           try {
-//             await axios.post(
-//               backendUrl + "/api/cart/update",
-//               { itemId, size, quantity },
-//               { headers: { token } }
-//             );
-//           } catch (error) {
-//             handleApiError(error);
-//           }
+//         if (Object.keys(cartdata[itemId]).length === 0) {
+//           delete cartdata[itemId];
 //         }
 
-//         toast.info("Item removed from cart", {
-//           position: "top-center",
-//           className: "custom-toast-center",
-//           bodyClassName: "text-sm",
-//           autoClose: 1000,
-//           closeOnClick: true,
-//           pauseOnHover: true,
-//         });
+//         toast.info("Item removed from cart", { autoClose: 1000 });
 //       } else {
-//         cartdata[itemId][size] = quantity;
-//         setCartitem(cartdata);
-//         localStorage.setItem("cartItems", JSON.stringify(cartdata));
+//         if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
+//         cartdata[itemId][size][color] = quantity;
+//       }
 
-//         const toastId = toast.loading("Updating...", {
-//           position: "top-center",
-//           className: "custom-toast-center",
-//           bodyClassName: "text-sm",
-//           closeOnClick: false,
-//           draggable: false,
-//           closeButton: false,
-//         });
+//       setCartitem(cartdata);
+//       localStorage.setItem("cartItems", JSON.stringify(cartdata));
 
-//         if (token) {
-//           try {
-//             await axios.post(
-//               backendUrl + "/api/cart/update",
-//               { itemId, size, quantity },
-//               { headers: { token } }
-//             );
-//             toast.update(toastId, {
-//               render: "Quantity updated",
-//               type: "success",
-//               isLoading: false,
-//               autoClose: 1000,
-//               closeOnClick: true,
-//               draggable: true,
-//               closeButton: true,
-//             });
-//           } catch (error) {
-//             toast.dismiss(toastId);
-//             handleApiError(error);
-//           }
-//         } else {
-//           toast.dismiss(toastId);
+//       // ✅ Update backend if user is logged in
+//       if (token) {
+//         try {
+//           await axios.post(
+//             backendUrl + "/api/cart/update",
+//             { itemId, size, color, quantity },
+//             { headers: { token } }
+//           );
+//         } catch (error) {
+//           handleApiError(error);
 //         }
 //       }
 //     },
 //     [cartitem, token, backendUrl]
 //   );
 
-//   // Calculate total amount
+//   // ✅ Calculate total amount
 //   const calculatetotalamount = useCallback(() => {
-//     let totalamount = 0;
-//     for (const items in cartitem) {
-//       const cartinfo = products.find((product) => product._id === items);
-//       for (const item in cartitem[items]) {
-//         try {
-//           if (cartinfo) totalamount += cartinfo.price * cartitem[items][item];
-//         } catch (error) {
-//           console.error(error);
+//     let total = 0;
+//     for (const productId in cartitem) {
+//       const product = products.find((p) => p._id === productId);
+//       if (!product) continue;
+
+//       for (const size in cartitem[productId]) {
+//         for (const color in cartitem[productId][size]) {
+//           const qty = cartitem[productId][size][color];
+//           const variant = product.variants.find(
+//             (v) => v.size === size && v.color === color
+//           );
+//           if (variant) total += variant.price * qty;
 //         }
 //       }
 //     }
-//     return totalamount;
+//     return total;
 //   }, [cartitem, products]);
 
-//   // Fetch products data
+//   //-----------------------------------------------
+
+
+
+//   // Fetching Products
 //   const getProductsData = useCallback(async () => {
 //     setIsLoadingProducts(true);
 //     try {
@@ -253,7 +244,6 @@
 //     }
 //   }, [backendUrl]);
 
-//   // Fetch user cart
 //   const getUserCart = useCallback(
 //     async (token) => {
 //       setIsLoadingCart(true);
@@ -279,7 +269,6 @@
 //     [backendUrl]
 //   );
 
-//   // Fetch profile data
 //   const getProfileData = useCallback(async () => {
 //     if (!token) return;
 //     setIsLoadingProfile(true);
@@ -292,7 +281,7 @@
 //       if (response.data.success) {
 //         setAddress(response.data.userprofiledet.address || null);
 //       } else {
-//         toast.error("failed");
+//         toast.error("Failed to fetch profile");
 //       }
 //     } catch (error) {
 //       handleApiError(error);
@@ -301,7 +290,10 @@
 //     }
 //   }, [token, backendUrl]);
 
-//   // Load token on mount
+//   // -----------------------
+//   // Effects
+//   // -----------------------
+//   // Load token & cart from localStorage
 //   useEffect(() => {
 //     const savedToken = localStorage.getItem("token");
 //     const savedCart = localStorage.getItem("cartItems");
@@ -314,31 +306,23 @@
 //     getProductsData();
 //   }, [getProductsData]);
 
-//   // Fetch profile data
+//   // Fetch profile
 //   useEffect(() => {
 //     getProfileData();
 //   }, [getProfileData]);
 
-//   // 🔹 Fix: Fetch cart immediately after login & clear on logout
+//   // Fetch cart after login/logout
 //   useEffect(() => {
-//     if (token) {
-//       getUserCart(token);
-//     } else {
-//       // logout: clear cart
+//     if (token) getUserCart(token);
+//     else {
 //       setCartitem({});
 //       localStorage.setItem("cartItems", JSON.stringify({}));
 //     }
 //   }, [token, getUserCart]);
 
-//   useEffect(() => {
-//     if (token) {
-//       getUserData(); // fetch user details
-//     } else {
-//       setUserDetails(null); // clear user details if no token
-//     }
-//   }, [token]);
-
+//   // -----------------------
 //   // Context value
+//   // -----------------------
 //   const value = {
 //     currency,
 //     delivery_fee,
@@ -359,9 +343,9 @@
 //     setAddress,
 //     updateAddress,
 //     isLoadingProfile,
-//     getUserData,
-//     userDetails,
-//     // setUserDetails,
+//     userDetails, // reactive via React Query
+//     isLoadingUser,
+//     queryClient, // optionally expose for invalidation
 //   };
 
 //   return (
@@ -371,6 +355,8 @@
 
 // export default ShopContextProvider;
 // export { ShopContext };
+
+
 
 import { createContext, useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
@@ -419,7 +405,7 @@ const ShopContextProvider = (props) => {
     queryKey: ["userDetails", token],
     queryFn: async () => {
       const res = await axios.post(
-        backendUrl + "/api/user/user-data",
+        `${backendUrl}/api/user/user-data`,
         {},
         { headers: { token } }
       );
@@ -427,8 +413,9 @@ const ShopContextProvider = (props) => {
       return res.data.message;
     },
     enabled: !!token, // only fetch if token exists
-    staleTime: 5 * 60 * 1000, // cache 5 minutes
-    refetchOnWindowFocus: false, // avoid refetch on window focus
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    onError: (error) => handleApiError(error),
   });
 
   // -----------------------
@@ -438,287 +425,101 @@ const ShopContextProvider = (props) => {
     setAddress(newAddress);
   }, []);
 
-  // const addtocart = useCallback(
-  //   async (itemId, size) => {
-  //     if (!size) {
-  //       toast.error("Please Select Size!");
-  //       return;
-  //     }
-  //     let cartdata = structuredClone(cartitem);
-  //     if (cartdata[itemId]) {
-  //       cartdata[itemId][size] = (cartdata[itemId][size] || 0) + 1;
-  //     } else {
-  //       cartdata[itemId] = { [size]: 1 };
-  //     }
-  //     setCartitem(cartdata);
-  //     localStorage.setItem("cartItems", JSON.stringify(cartdata));
-
-  //     toast.success("Product added to cart!");
-
-  //     if (token) {
-  //       try {
-  //         await axios.post(
-  //           backendUrl + "/api/cart/add",
-  //           { itemId, size },
-  //           { headers: { token } }
-  //         );
-  //       } catch (error) {
-  //         handleApiError(error);
-  //       }
-  //     }
-  //   },
-  //   [cartitem, token, backendUrl]
-  // );
-
-  // const getcartcount = useCallback(() => {
-  //   let totalcount = 0;
-  //   for (const items in cartitem) {
-  //     for (const item in cartitem[items]) {
-  //       totalcount += cartitem[items][item];
-  //     }
-  //   }
-  //   return totalcount;
-  // }, [cartitem]);
-
-  // const updateQuantity = useCallback(
-  //   async (itemId, size, quantity) => {
-  //     let cartdata = structuredClone(cartitem);
-
-  //     if (quantity <= 0) {
-  //       if (cartdata[itemId] && cartdata[itemId][size]) {
-  //         delete cartdata[itemId][size];
-  //         if (Object.keys(cartdata[itemId]).length === 0) {
-  //           delete cartdata[itemId];
-  //         }
-  //       }
-  //       setCartitem(cartdata);
-  //       localStorage.setItem("cartItems", JSON.stringify(cartdata));
-  //       if (token) {
-  //         try {
-  //           await axios.post(
-  //             backendUrl + "/api/cart/update",
-  //             { itemId, size, quantity },
-  //             { headers: { token } }
-  //           );
-  //         } catch (error) {
-  //           handleApiError(error);
-  //         }
-  //       }
-  //       toast.info("Item removed from cart", { autoClose: 1000 });
-  //     } else {
-  //       cartdata[itemId][size] = quantity;
-  //       setCartitem(cartdata);
-  //       localStorage.setItem("cartItems", JSON.stringify(cartdata));
-  //       if (token) {
-  //         try {
-  //           await axios.post(
-  //             backendUrl + "/api/cart/update",
-  //             { itemId, size, quantity },
-  //             { headers: { token } }
-  //           );
-  //         } catch (error) {
-  //           handleApiError(error);
-  //         }
-  //       }
-  //     }
-  //   },
-  //   [cartitem, token, backendUrl]
-  // );
-
-  // const calculatetotalamount = useCallback(() => {
-  //   let totalamount = 0;
-  //   for (const items in cartitem) {
-  //     const cartinfo = products.find((product) => product._id === items);
-  //     for (const item in cartitem[items]) {
-  //       if (cartinfo) totalamount += cartinfo.price * cartitem[items][item];
-  //     }
-  //   }
-  //   return totalamount;
-  // }, [cartitem, products]);
-
+  //---------------------------------------------
   // ✅ Add to Cart
   // const addtocart = useCallback(
   //   async (itemId, size, color, quantity = 1) => {
-  //     if (!size && !color) {
-  //       toast.error("Please select size and/or color!");
+  //     if (!size && !color) return toast.error("Select size/color");
+
+  //     if (!token) {
+  //       const existing = toast.isActive("login-toast");
+
+  //       if (existing) {
+  //         toast.update("login-toast", {
+  //           render: (
+  //             <div className="flex flex-col items-center animate-pulse">
+  //               <p className="mb-2">
+  //                 Please login or register to add items to cart!
+  //               </p>
+  //               <button
+  //                 onClick={() => {
+  //                   navigate("/login");
+  //                   toast.dismiss("login-toast");
+  //                 }}
+  //                 className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
+  //               >
+  //                 Go to Login
+  //               </button>
+  //             </div>
+  //           ),
+  //           className: "custom-toast-center",
+  //         });
+  //       } else {
+  //         toast.info(
+  //           <div className="flex flex-col items-center">
+  //             <p className="mb-2">Please login or register to add items to cart!</p>
+  //             <button
+  //               onClick={() => {
+  //                 navigate("/register");
+  //                 toast.dismiss("login-toast");
+  //               }}
+  //               className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
+  //             >
+  //               Go to Login
+  //             </button>
+  //           </div>,
+  //           {
+  //             toastId: "login-toast",
+  //             className: "custom-toast-center",
+  //             autoClose: true,
+  //             closeOnClick: false,
+  //             draggable: false,
+  //           }
+  //         );
+  //       }
+
   //       return;
   //     }
 
-  //     const key = `${size || ""}|${color || ""}`; // unique key for size+color
-  //     let cartdata = structuredClone(cartitem);
-
-  //     if (cartdata[itemId]) {
-  //       cartdata[itemId][key] = (cartdata[itemId][key] || 0) + quantity;
-  //     } else {
-  //       cartdata[itemId] = { [key]: quantity };
-  //     }
+  //     const cartdata = structuredClone(cartitem);
+  //     if (!cartdata[itemId]) cartdata[itemId] = {};
+  //     if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
+  //     cartdata[itemId][size][color] = (cartdata[itemId][size][color] || 0) + quantity;
 
   //     setCartitem(cartdata);
   //     localStorage.setItem("cartItems", JSON.stringify(cartdata));
-  //     toast.success("Product added to cart!");
+  //     toast.success("Product added to cart!", {
+  //       className: "custom-toast-center",
+  //       autoClose: true,
+  //       closeOnClick: false,
+  //       draggable: false,
+  //     });
 
+  //     // ✅ Update backend
   //     if (token) {
   //       try {
   //         await axios.post(
-  //           backendUrl + "/api/cart/add",
+  //           `${backendUrl}/api/cart/add`,
   //           { itemId, size, color, quantity },
   //           { headers: { token } }
   //         );
+  //         queryClient.invalidateQueries(["cart", token]); // refresh cart query
   //       } catch (error) {
   //         handleApiError(error);
   //       }
   //     }
   //   },
-  //   [cartitem, token, backendUrl]
+  //   [cartitem, token, backendUrl, navigate, queryClient]
   // );
 
-  // // ✅ Get Cart Count
-  // const getcartcount = useCallback(() => {
-  //   let totalcount = 0;
-  //   for (const items in cartitem) {
-  //     for (const key in cartitem[items]) {
-  //       totalcount += cartitem[items][key];
-  //     }
-  //   }
-  //   return totalcount;
-  // }, [cartitem]);
-
-  // // ✅ Update Quantity
-  // const updateQuantity = useCallback(
-  //   async (itemId, size, color, quantity) => {
-  //     const key = `${size || ""}|${color || ""}`;
-  //     let cartdata = structuredClone(cartitem);
-
-  //     if (quantity <= 0) {
-  //       if (cartdata[itemId] && cartdata[itemId][key]) {
-  //         delete cartdata[itemId][key];
-  //         if (Object.keys(cartdata[itemId]).length === 0) {
-  //           delete cartdata[itemId];
-  //         }
-  //       }
-  //       setCartitem(cartdata);
-  //       localStorage.setItem("cartItems", JSON.stringify(cartdata));
-
-  //       if (token) {
-  //         try {
-  //           await axios.post(
-  //             backendUrl + "/api/cart/update",
-  //             { itemId, size, color, quantity },
-  //             { headers: { token } }
-  //           );
-  //         } catch (error) {
-  //           handleApiError(error);
-  //         }
-  //       }
-  //       toast.info("Item removed from cart", { autoClose: 1000 });
-  //     } else {
-  //       if (!cartdata[itemId]) cartdata[itemId] = {};
-  //       cartdata[itemId][key] = quantity;
-  //       setCartitem(cartdata);
-  //       localStorage.setItem("cartItems", JSON.stringify(cartdata));
-
-  //       if (token) {
-  //         try {
-  //           await axios.post(
-  //             backendUrl + "/api/cart/update",
-  //             { itemId, size, color, quantity },
-  //             { headers: { token } }
-  //           );
-  //         } catch (error) {
-  //           handleApiError(error);
-  //         }
-  //       }
-  //     }
-  //   },
-  //   [cartitem, token, backendUrl]
-  // );
-
-  // // ✅ Calculate Total Amount
-  // const calculatetotalamount = useCallback(() => {
-  //   let totalamount = 0;
-  //   for (const items in cartitem) {
-  //     const cartinfo = products.find((product) => product._id === items);
-  //     for (const key in cartitem[items]) {
-  //       if (cartinfo) {
-  //         totalamount += cartinfo.price * cartitem[items][key];
-  //       }
-  //     }
-  //   }
-  //   return totalamount;
-  // }, [cartitem, products]);
-
-
-
-
-
-  //---------------------------------------------
-  // ✅ Add to Cart
   const addtocart = useCallback(
     async (itemId, size, color, quantity = 1) => {
       if (!size && !color) return toast.error("Select size/color");
-
-      // if (!token) {
-      //   return toast.error("Please login or register to add items to cart!");
-      // }
-
-      // 🔒 Check login before adding
-      // if (!token) {
-
-      //   toast.info(
-      //     <div className="flex flex-col items-center">
-      //       <p className="mb-2">Please login or register to add items to cart!</p>
-      //       <button
-      //         onClick={() => {
-      //           navigate("/login");
-      //           toast.dismiss(); // close toast after redirect
-      //         }}
-      //         className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
-      //       >
-      //         Go to Login
-      //       </button>
-      //     </div>,
-      //     {
-      //       position:"top-center", // 👈 popup from bottom center
-      //       autoClose: false, // stays until user interacts
-      //       closeOnClick: false,
-      //       draggable: false,
-      //     }
-      //   );
-
-      //   return;
-      // }
-
-      // if (!token) {
-      //   toast.info(
-      //     <div className="flex flex-col items-center">
-      //       <p className="mb-2">Please login or register to add items to cart!</p>
-      //       <button
-      //         onClick={() => {
-      //           navigate("/login");
-      //           toast.dismiss("login-toast"); // dismiss by ID
-      //         }}
-      //         className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
-      //       >
-      //         Go to Login
-      //       </button>
-      //     </div>,
-      //     {
-      //       toastId: "login-toast",   // 👈 prevents duplicates
-      //       position: "top-center",
-      //       autoClose: false,
-      //       closeOnClick: false,
-      //       draggable: false,
-      //     }
-      //   );
-
-      //   return;
-      // }
 
       if (!token) {
         const existing = toast.isActive("login-toast");
 
         if (existing) {
-          // 👇 Update the toast with a "blink" effect
           toast.update("login-toast", {
             render: (
               <div className="flex flex-col items-center animate-pulse">
@@ -736,13 +537,14 @@ const ShopContextProvider = (props) => {
                 </button>
               </div>
             ),
-            className: "custom-toast-center", // ✅ apply custom CSS
+            className: "custom-toast-center",
           });
         } else {
-          // 👇 First time show toast
           toast.info(
             <div className="flex flex-col items-center">
-              <p className="mb-2">Please login or register to add items to cart!</p>
+              <p className="mb-2">
+                Please login or register to add items to cart!
+              </p>
               <button
                 onClick={() => {
                   navigate("/register");
@@ -755,7 +557,7 @@ const ShopContextProvider = (props) => {
             </div>,
             {
               toastId: "login-toast",
-              className: "custom-toast-center", // ✅ apply custom CSS
+              className: "custom-toast-center",
               autoClose: true,
               closeOnClick: false,
               draggable: false,
@@ -766,36 +568,54 @@ const ShopContextProvider = (props) => {
         return;
       }
 
-
-
-
-
+      // 🧠 Get current cart quantity
       const cartdata = structuredClone(cartitem);
+      const currentQty = cartdata[itemId]?.[size]?.[color] || 0;
 
+      // 🧠 Validate stock from products (must have 'products' available in context)
+      const product = products?.find((p) => p._id === itemId);
+      const variant = product?.variants?.find(
+        (v) => v.size === size && v.color === color
+      );
+      const maxStock = variant?.stock || 0;
+
+      // ✅ Prevent adding more than available stock
+      if (currentQty + quantity > maxStock) {
+        toast.error(`Only ${maxStock - currentQty} items left in stock`);
+        return;
+      }
+
+      // 🛒 Proceed to add
       if (!cartdata[itemId]) cartdata[itemId] = {};
       if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
-
-      cartdata[itemId][size][color] = (cartdata[itemId][size][color] || 0) + quantity;
+      cartdata[itemId][size][color] = currentQty + quantity;
 
       setCartitem(cartdata);
       localStorage.setItem("cartItems", JSON.stringify(cartdata));
-      toast.success("Product added to cart!");
+      toast.success("Product added to cart!", {
+        className: "custom-toast-center",
+        autoClose: true,
+        closeOnClick: false,
+        draggable: false,
+      });
 
-      // ✅ Call backend if user is logged in
+      // ✅ Update backend
       if (token) {
         try {
           await axios.post(
-            backendUrl + "/api/cart/add",
+            `${backendUrl}/api/cart/add`,
             { itemId, size, color, quantity },
             { headers: { token } }
           );
+          queryClient.invalidateQueries(["cart", token]); // refresh cart query
         } catch (error) {
           handleApiError(error);
         }
       }
     },
-    [cartitem, token, backendUrl]
+    [cartitem, products, token, backendUrl, navigate, queryClient]
   );
+
 
   // ✅ Get Cart Count
   const getcartcount = useCallback(() => {
@@ -818,36 +638,42 @@ const ShopContextProvider = (props) => {
 
       if (quantity <= 0) {
         delete cartdata[itemId][size][color];
-        if (Object.keys(cartdata[itemId][size]).length === 0) {
-          delete cartdata[itemId][size];
-        }
-        if (Object.keys(cartdata[itemId]).length === 0) {
-          delete cartdata[itemId];
-        }
-
-        toast.info("Item removed from cart", { autoClose: 1000 });
+        if (Object.keys(cartdata[itemId][size]).length === 0) delete cartdata[itemId][size];
+        if (Object.keys(cartdata[itemId]).length === 0) delete cartdata[itemId];
+        toast.info("Item removed from cart", {
+          className: "custom-toast-center",
+          autoClose: true,
+          closeOnClick: false,
+          draggable: false, autoClose: 1000
+        });
       } else {
         if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
         cartdata[itemId][size][color] = quantity;
+        toast.success("Cart Updated!!", {
+          className: "custom-toast-center",
+          autoClose: true,
+          closeOnClick: false,
+          draggable: false, autoClose: 1000
+        });
       }
 
       setCartitem(cartdata);
       localStorage.setItem("cartItems", JSON.stringify(cartdata));
 
-      // ✅ Update backend if user is logged in
       if (token) {
         try {
           await axios.post(
-            backendUrl + "/api/cart/update",
+            `${backendUrl}/api/cart/update`,
             { itemId, size, color, quantity },
             { headers: { token } }
           );
+          queryClient.invalidateQueries(["cart", token]);
         } catch (error) {
           handleApiError(error);
         }
       }
     },
-    [cartitem, token, backendUrl]
+    [cartitem, token, backendUrl, queryClient]
   );
 
   // ✅ Calculate total amount
@@ -856,13 +682,10 @@ const ShopContextProvider = (props) => {
     for (const productId in cartitem) {
       const product = products.find((p) => p._id === productId);
       if (!product) continue;
-
       for (const size in cartitem[productId]) {
         for (const color in cartitem[productId][size]) {
           const qty = cartitem[productId][size][color];
-          const variant = product.variants.find(
-            (v) => v.size === size && v.color === color
-          );
+          const variant = product.variants.find((v) => v.size === size && v.color === color);
           if (variant) total += variant.price * qty;
         }
       }
@@ -871,101 +694,84 @@ const ShopContextProvider = (props) => {
   }, [cartitem, products]);
 
   //-----------------------------------------------
-
-
-
-  // Fetching Products
-  const getProductsData = useCallback(async () => {
-    setIsLoadingProducts(true);
-    try {
-      const response = await axios.get(backendUrl + "/api/product/list");
-      if (response.data.success) {
-        setProducts(response.data.products);
-      } else {
-        toast.error(response.data.message);
-      }
-    } catch (error) {
-      handleApiError(error);
-    } finally {
-      setIsLoadingProducts(false);
-    }
-  }, [backendUrl]);
-
-  const getUserCart = useCallback(
-    async (token) => {
-      setIsLoadingCart(true);
-      try {
-        const response = await axios.post(
-          backendUrl + "/api/cart/get",
-          {},
-          { headers: { token } }
-        );
-        if (response.data.success) {
-          setCartitem(response.data.cartData || {});
-          localStorage.setItem(
-            "cartItems",
-            JSON.stringify(response.data.cartData || {})
-          );
-        }
-      } catch (error) {
-        handleApiError(error);
-      } finally {
-        setIsLoadingCart(false);
-      }
+  // -----------------------
+  // ✅ Fetching Products (TanStack Query)
+  // -----------------------
+  const {
+    data: productsData,
+    isLoading: isLoadingProductsQuery,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const response = await axios.get(`${backendUrl}/api/product/list`);
+      if (!response.data.success) throw new Error(response.data.message);
+      return response.data.products;
     },
-    [backendUrl]
-  );
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    onError: (error) => handleApiError(error),
+  });
 
-  const getProfileData = useCallback(async () => {
-    if (!token) return;
-    setIsLoadingProfile(true);
-    try {
-      const response = await axios.post(
-        backendUrl + "/api/profile/getprofile",
-        {},
-        { headers: { token } }
-      );
-      if (response.data.success) {
-        setAddress(response.data.userprofiledet.address || null);
-      } else {
-        toast.error("Failed to fetch profile");
-      }
-    } catch (error) {
-      handleApiError(error);
-    } finally {
-      setIsLoadingProfile(false);
-    }
-  }, [token, backendUrl]);
+  useEffect(() => {
+    if (productsData) setProducts(productsData);
+  }, [productsData]);
 
   // -----------------------
-  // Effects
+  // ✅ Fetch User Cart
+  // -----------------------
+  const {
+    data: cartDataQuery,
+    isLoading: isLoadingCartQuery,
+    refetch: refetchCartQuery,
+  } = useQuery({
+    queryKey: ["cart", token],
+    queryFn: async () => {
+      if (!token) return {};
+      const response = await axios.post(`${backendUrl}/api/cart/get`, {}, { headers: { token } });
+      if (!response.data.success) throw new Error("Failed to fetch cart");
+      return response.data.cartData || {};
+    },
+    enabled: !!token,
+    refetchOnWindowFocus: false,
+    onError: (error) => handleApiError(error),
+  });
+
+  useEffect(() => {
+    if (cartDataQuery) {
+      setCartitem(cartDataQuery);
+      localStorage.setItem("cartItems", JSON.stringify(cartDataQuery));
+    }
+  }, [cartDataQuery]);
+
+  // -----------------------
+  // ✅ Fetch Profile Data
+  // -----------------------
+  const { data: profileData, isLoading: isLoadingProfileQuery, refetch: refetchProfileQuery } = useQuery({
+    queryKey: ["profile", token],
+    queryFn: async () => {
+      if (!token) return {};
+      const response = await axios.post(`${backendUrl}/api/profile/getprofile`, {}, { headers: { token } });
+      if (!response.data.success) throw new Error("Failed to fetch profile");
+      return response.data.userprofiledet || {};
+    },
+    enabled: !!token,
+    refetchOnWindowFocus: false,
+    onError: (error) => handleApiError(error),
+  });
+
+  useEffect(() => {
+    if (profileData?.address) setAddress(profileData.address);
+  }, [profileData]);
+
   // -----------------------
   // Load token & cart from localStorage
+  // -----------------------
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     const savedCart = localStorage.getItem("cartItems");
     if (savedToken) setToken(savedToken);
     if (savedCart) setCartitem(JSON.parse(savedCart));
   }, []);
-
-  // Fetch products once
-  useEffect(() => {
-    getProductsData();
-  }, [getProductsData]);
-
-  // Fetch profile
-  useEffect(() => {
-    getProfileData();
-  }, [getProfileData]);
-
-  // Fetch cart after login/logout
-  useEffect(() => {
-    if (token) getUserCart(token);
-    else {
-      setCartitem({});
-      localStorage.setItem("cartItems", JSON.stringify({}));
-    }
-  }, [token, getUserCart]);
 
   // -----------------------
   // Context value
@@ -974,9 +780,9 @@ const ShopContextProvider = (props) => {
     currency,
     delivery_fee,
     products,
-    isLoadingProducts,
+    isLoadingProducts: isLoadingProducts || isLoadingProductsQuery,
     cartitem,
-    isLoadingCart,
+    isLoadingCart: isLoadingCart || isLoadingCartQuery,
     addtocart,
     getcartcount,
     updateQuantity,
@@ -989,15 +795,15 @@ const ShopContextProvider = (props) => {
     address,
     setAddress,
     updateAddress,
-    isLoadingProfile,
-    userDetails, // reactive via React Query
+    isLoadingProfile: isLoadingProfile || isLoadingProfileQuery,
+    userDetails,
     isLoadingUser,
-    queryClient, // optionally expose for invalidation
+    queryClient,
+    refetchCartQuery,
+    refetchProfileQuery,
   };
 
-  return (
-    <ShopContext.Provider value={value}>{props.children}</ShopContext.Provider>
-  );
+  return <ShopContext.Provider value={value}>{props.children}</ShopContext.Provider>;
 };
 
 export default ShopContextProvider;

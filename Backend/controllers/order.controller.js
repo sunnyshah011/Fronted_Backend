@@ -1,3 +1,347 @@
+// import orderModel from "../models/order.model.js";
+// import userModel from "../models/user.model.js";
+// import ProductModel from "../models/product.model.js";
+// import { generateUniqueOrderId } from "../utils/generateUniqueOrderId.js";
+
+// // 🔹 Place Order (COD)
+// const placeOrder = async (req, res) => {
+//   try {
+//     const userId = req.userId; // ✅ from auth middleware
+//     const { items, amount, address } = req.body;
+
+//     if (!items || items.length === 0) {
+//       return res.status(400).json({ success: false, message: "Cart is empty" });
+//     }
+
+//     // Generate unique 8-digit orderId
+//     const orderId = await generateUniqueOrderId();
+
+//     // ✅ Validate variant stock before placing order
+//     for (const item of items) {
+//       const product = await ProductModel.findById(item.productId);
+//       if (!product) {
+//         return res.status(404).json({
+//           success: false,
+//           message: `Product not found: ${item.productId}`,
+//         });
+//       }
+
+//       const variant = product.variants.find(
+//         (v) => v.color === item.color && v.size === item.size
+//       );
+//       if (!variant) {
+//         return res.status(404).json({
+//           success: false,
+//           message: `Variant not found for ${product.name} (${item.color}, ${item.size})`,
+//         });
+//       }
+
+//       if (variant.stock < item.quantity) {
+//         return res.status(400).json({
+//           success: false,
+//           message: `Not enough stock for ${product.name} (${item.color}, ${item.size})`,
+//         });
+//       }
+//     }
+
+//     // ✅ Deduct stock from variant
+//     for (const item of items) {
+//       const product = await ProductModel.findById(item.productId);
+//       const variantIndex = product.variants.findIndex(
+//         (v) => v.color === item.color && v.size === item.size
+//       );
+//       if (variantIndex !== -1) {
+//         product.variants[variantIndex].stock -= item.quantity;
+//         await product.save();
+//       }
+//     }
+
+//     // ✅ Create new order
+//     const newOrder = new orderModel({
+//       user: userId,
+//       items,
+//       amount,
+//       address,
+//       paymentMethod: "COD",
+//       paymentStatus: "Pending",
+//       orderStatus: "Pending",
+//       orderId, // ✅ Save 8-digit orderId
+//       date: Date.now(),
+//     });
+
+//     await newOrder.save();
+
+//     // ✅ Clear user's cart
+//     await userModel.findByIdAndUpdate(userId, { category: {} });
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Order placed successfully",
+//       order: newOrder,
+//     });
+//   } catch (error) {
+//     console.error("Place order error:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// // 🔹 Get Orders for Logged-in User
+// const userOrders = async (req, res) => {
+//   try {
+//     const userId = req.userId;
+//     const orders = await orderModel
+//       .find({ user: userId })
+//       .populate({ path: "items.productId", select: "name images variants" })
+//       .sort({ createdAt: -1 });
+
+//     res.json({ success: true, orders });
+//   } catch (error) {
+//     console.error("Error fetching user orders:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// // 🔹 Get All Orders (Admin)
+// const allOrders = async (req, res) => {
+//   try {
+//     const orders = await orderModel
+//       .find()
+//       .populate("user", "name gmail")
+//       .sort({ createdAt: -1 });
+
+//     res.json({ success: true, orders });
+//   } catch (error) {
+//     console.error("Fetch all orders error:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// // 🔹 Update Order Status (Admin)
+// const updateStatus = async (req, res) => {
+//   try {
+//     const { orderId, status } = req.body;
+
+//     const order = await orderModel.findById(orderId);
+//     if (!order) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Order not found" });
+//     }
+
+//     // ✅ If already cancelled, don't restock again
+//     if (order.orderStatus === "Cancelled" && status === "Cancelled") {
+//       return res.status(400).json({
+//         success: false,
+//         message: "This order is already cancelled.",
+//       });
+//     }
+
+//     // ✅ If changing status to Cancelled, restore stock
+//     if (status === "Cancelled" && order.orderStatus !== "Cancelled") {
+//       for (const item of order.items) {
+//         const product = await ProductModel.findById(item.productId);
+//         if (!product) continue;
+
+//         const variantIndex = product.variants.findIndex(
+//           (v) => v.color === item.color && v.size === item.size
+//         );
+
+//         if (variantIndex !== -1) {
+//           product.variants[variantIndex].stock += item.quantity;
+//           await product.save();
+//         }
+//       }
+//     }
+
+//     // ✅ Update order status
+//     order.orderStatus = status;
+//     await order.save();
+
+//     res.json({
+//       success: true,
+//       message:
+//         status === "Cancelled"
+//           ? "Order cancelled and stock restored."
+//           : "Order status updated successfully.",
+//       order,
+//     });
+//   } catch (error) {
+//     console.error("Update status error:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// //delete order (admin)
+// const deleteOrder = async (req, res) => {
+//   try {
+//     const { orderId } = req.body;
+//     const deleted = await orderModel.findByIdAndDelete(orderId);
+//     if (!deleted) {
+//       return res.json({ success: false, message: "Order not found" });
+//     }
+//     res.json({ success: true, message: "Order deleted successfully" });
+//   } catch (error) {
+//     console.error("Delete order error:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// // 🔹 Cancel Order (User)
+// const cancelOrder = async (req, res) => {
+//   try {
+//     const { orderId } = req.body;
+//     const userId = req.userId;
+
+//     const order = await orderModel.findOne({ _id: orderId, user: userId });
+//     if (!order) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Order not found" });
+//     }
+
+//     if (order.orderStatus === "Cancelled") {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "This order is already cancelled." });
+//     }
+
+//     if (order.orderStatus !== "Pending") {
+//       return res.status(400).json({
+//         success: false,
+//         message: "You can only cancel orders that are still in Pending phase.",
+//       });
+//     }
+//     // ✅ Restore stock for each variant
+//     for (const item of order.items) {
+//       const product = await ProductModel.findById(item.productId);
+//       const variantIndex = product.variants.findIndex(
+//         (v) => v.color === item.color && v.size === item.size
+//       );
+//       if (variantIndex !== -1) {
+//         product.variants[variantIndex].stock += item.quantity;
+//         await product.save();
+//       }
+//     }
+//     // ✅ Update order status
+//     order.orderStatus = "Cancelled";
+//     await order.save();
+
+//     res.json({
+//       success: true,
+//       message: "Order has been cancelled and stock restored.",
+//       order,
+//     });
+//   } catch (error) {
+//     console.error("Cancel order error:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// // 🔹 User - Request Return
+// const requestReturn = async (req, res) => {
+//   try {
+//     const { orderId, reason } = req.body;
+//     const userId = req.userId;
+
+//     const order = await orderModel.findOne({ _id: orderId, user: userId });
+//     if (!order)
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Order not found" });
+
+//     if (order.orderStatus !== "Delivered") {
+//       return res.status(400).json({
+//         success: false,
+//         message: "You can only request a return for Delivered orders.",
+//       });
+//     }
+
+//     if (order.returnRequest.isRequested) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Return already requested for this order.",
+//       });
+//     }
+
+//     order.returnRequest = {
+//       isRequested: true,
+//       reason,
+//       status: "Pending",
+//     };
+//     order.orderStatus = "Return Requested";
+//     await order.save();
+
+//     res.json({
+//       success: true,
+//       message: "Return request submitted successfully.",
+//       order,
+//     });
+//   } catch (error) {
+//     console.error("Return request error:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// // 🔹 Admin - Approve/Reject Return
+// const handleReturnStatus = async (req, res) => {
+//   try {
+//     const { orderId, decision } = req.body; // decision: "Approved" or "Rejected"
+//     const order = await orderModel.findById(orderId);
+
+//     if (!order || !order.returnRequest.isRequested)
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Return request not found" });
+
+//     order.returnRequest.status = decision;
+
+//     if (decision === "Approved") {
+//       order.orderStatus = "Returned";
+
+//       // ✅ Restore product stock
+//       for (const item of order.items) {
+//         const product = await ProductModel.findById(item.productId);
+//         if (!product) continue;
+
+//         const variantIndex = product.variants.findIndex(
+//           (v) => v.color === item.color && v.size === item.size
+//         );
+
+//         if (variantIndex !== -1) {
+//           product.variants[variantIndex].stock += item.quantity;
+//           await product.save();
+//         }
+//       }
+//     } else {
+//       order.orderStatus = "Delivered"; // Return rejected, keep delivered
+//     }
+
+//     await order.save();
+//     res.json({
+//       success: true,
+//       message: `Return ${decision.toLowerCase()} successfully.`,
+//       order,
+//     });
+//   } catch (error) {
+//     console.error("Handle return error:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// export {
+//   placeOrder,
+//   allOrders,
+//   userOrders,
+//   updateStatus,
+//   cancelOrder,
+//   deleteOrder,
+//   requestReturn,
+//   handleReturnStatus,
+// };
+
+
+
+import mongoose from "mongoose";
 import orderModel from "../models/order.model.js";
 import userModel from "../models/user.model.js";
 import ProductModel from "../models/product.model.js";
@@ -5,21 +349,32 @@ import { generateUniqueOrderId } from "../utils/generateUniqueOrderId.js";
 
 // 🔹 Place Order (COD)
 const placeOrder = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const userId = req.userId; // ✅ from auth middleware
     const { items, amount, address } = req.body;
 
-    if (!items || items.length === 0) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 
-    // Generate unique 8-digit orderId
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, message: "Invalid amount" });
+    }
+
+    if (!address) {
+      return res.status(400).json({ success: false, message: "Address is required" });
+    }
+
     const orderId = await generateUniqueOrderId();
 
     // ✅ Validate variant stock before placing order
     for (const item of items) {
-      const product = await ProductModel.findById(item.productId);
+      const product = await ProductModel.findById(item.productId).session(session);
       if (!product) {
+        await session.abortTransaction();
         return res.status(404).json({
           success: false,
           message: `Product not found: ${item.productId}`,
@@ -30,6 +385,7 @@ const placeOrder = async (req, res) => {
         (v) => v.color === item.color && v.size === item.size
       );
       if (!variant) {
+        await session.abortTransaction();
         return res.status(404).json({
           success: false,
           message: `Variant not found for ${product.name} (${item.color}, ${item.size})`,
@@ -37,6 +393,7 @@ const placeOrder = async (req, res) => {
       }
 
       if (variant.stock < item.quantity) {
+        await session.abortTransaction();
         return res.status(400).json({
           success: false,
           message: `Not enough stock for ${product.name} (${item.color}, ${item.size})`,
@@ -46,13 +403,13 @@ const placeOrder = async (req, res) => {
 
     // ✅ Deduct stock from variant
     for (const item of items) {
-      const product = await ProductModel.findById(item.productId);
+      const product = await ProductModel.findById(item.productId).session(session);
       const variantIndex = product.variants.findIndex(
         (v) => v.color === item.color && v.size === item.size
       );
       if (variantIndex !== -1) {
         product.variants[variantIndex].stock -= item.quantity;
-        await product.save();
+        await product.save({ session });
       }
     }
 
@@ -65,14 +422,17 @@ const placeOrder = async (req, res) => {
       paymentMethod: "COD",
       paymentStatus: "Pending",
       orderStatus: "Pending",
-      orderId, // ✅ Save 8-digit orderId
+      orderId,
       date: Date.now(),
     });
 
-    await newOrder.save();
+    await newOrder.save({ session });
 
     // ✅ Clear user's cart
-    await userModel.findByIdAndUpdate(userId, { category: {} });
+    await userModel.findByIdAndUpdate(userId, { category: {} }, { session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(201).json({
       success: true,
@@ -80,8 +440,10 @@ const placeOrder = async (req, res) => {
       order: newOrder,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("Place order error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Failed to place order", error: error.message });
   }
 };
 
@@ -89,6 +451,10 @@ const placeOrder = async (req, res) => {
 const userOrders = async (req, res) => {
   try {
     const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized user" });
+    }
+
     const orders = await orderModel
       .find({ user: userId })
       .populate({ path: "items.productId", select: "name images variants" })
@@ -97,7 +463,7 @@ const userOrders = async (req, res) => {
     res.json({ success: true, orders });
   } catch (error) {
     console.error("Error fetching user orders:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Failed to fetch orders", error: error.message });
   }
 };
 
@@ -112,24 +478,26 @@ const allOrders = async (req, res) => {
     res.json({ success: true, orders });
   } catch (error) {
     console.error("Fetch all orders error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Failed to fetch all orders", error: error.message });
   }
 };
 
 // 🔹 Update Order Status (Admin)
 const updateStatus = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { orderId, status } = req.body;
 
-    const order = await orderModel.findById(orderId);
+    const order = await orderModel.findById(orderId).session(session);
     if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
+      await session.abortTransaction();
+      return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    // ✅ If already cancelled, don't restock again
     if (order.orderStatus === "Cancelled" && status === "Cancelled") {
+      await session.abortTransaction();
       return res.status(400).json({
         success: false,
         message: "This order is already cancelled.",
@@ -139,7 +507,7 @@ const updateStatus = async (req, res) => {
     // ✅ If changing status to Cancelled, restore stock
     if (status === "Cancelled" && order.orderStatus !== "Cancelled") {
       for (const item of order.items) {
-        const product = await ProductModel.findById(item.productId);
+        const product = await ProductModel.findById(item.productId).session(session);
         if (!product) continue;
 
         const variantIndex = product.variants.findIndex(
@@ -148,14 +516,16 @@ const updateStatus = async (req, res) => {
 
         if (variantIndex !== -1) {
           product.variants[variantIndex].stock += item.quantity;
-          await product.save();
+          await product.save({ session });
         }
       }
     }
 
-    // ✅ Update order status
     order.orderStatus = status;
-    await order.save();
+    await order.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.json({
       success: true,
@@ -166,65 +536,78 @@ const updateStatus = async (req, res) => {
       order,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("Update status error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Failed to update order", error: error.message });
   }
 };
 
-//delete order (admin)
+// 🔹 Delete order (admin)
 const deleteOrder = async (req, res) => {
   try {
     const { orderId } = req.body;
+    if (!orderId) {
+      return res.status(400).json({ success: false, message: "Order ID is required" });
+    }
+
     const deleted = await orderModel.findByIdAndDelete(orderId);
     if (!deleted) {
-      return res.json({ success: false, message: "Order not found" });
+      return res.status(404).json({ success: false, message: "Order not found" });
     }
+
     res.json({ success: true, message: "Order deleted successfully" });
   } catch (error) {
     console.error("Delete order error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Failed to delete order", error: error.message });
   }
 };
 
 // 🔹 Cancel Order (User)
 const cancelOrder = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { orderId } = req.body;
     const userId = req.userId;
 
-    const order = await orderModel.findOne({ _id: orderId, user: userId });
+    const order = await orderModel.findOne({ _id: orderId, user: userId }).session(session);
     if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
+      await session.abortTransaction();
+      return res.status(404).json({ success: false, message: "Order not found" });
     }
 
     if (order.orderStatus === "Cancelled") {
-      return res
-        .status(400)
-        .json({ success: false, message: "This order is already cancelled." });
+      await session.abortTransaction();
+      return res.status(400).json({ success: false, message: "This order is already cancelled." });
     }
 
     if (order.orderStatus !== "Pending") {
+      await session.abortTransaction();
       return res.status(400).json({
         success: false,
         message: "You can only cancel orders that are still in Pending phase.",
       });
     }
-    // ✅ Restore stock for each variant
+
     for (const item of order.items) {
-      const product = await ProductModel.findById(item.productId);
+      const product = await ProductModel.findById(item.productId).session(session);
+      if (!product) continue;
       const variantIndex = product.variants.findIndex(
         (v) => v.color === item.color && v.size === item.size
       );
       if (variantIndex !== -1) {
         product.variants[variantIndex].stock += item.quantity;
-        await product.save();
+        await product.save({ session });
       }
     }
-    // ✅ Update order status
+
     order.orderStatus = "Cancelled";
-    await order.save();
+    await order.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.json({
       success: true,
@@ -232,8 +615,10 @@ const cancelOrder = async (req, res) => {
       order,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("Cancel order error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Failed to cancel order", error: error.message });
   }
 };
 
@@ -245,9 +630,7 @@ const requestReturn = async (req, res) => {
 
     const order = await orderModel.findOne({ _id: orderId, user: userId });
     if (!order)
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
+      return res.status(404).json({ success: false, message: "Order not found" });
 
     if (order.orderStatus !== "Delivered") {
       return res.status(400).json({
@@ -278,29 +661,31 @@ const requestReturn = async (req, res) => {
     });
   } catch (error) {
     console.error("Return request error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Failed to submit return request", error: error.message });
   }
 };
 
 // 🔹 Admin - Approve/Reject Return
 const handleReturnStatus = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { orderId, decision } = req.body; // decision: "Approved" or "Rejected"
-    const order = await orderModel.findById(orderId);
+    const order = await orderModel.findById(orderId).session(session);
 
-    if (!order || !order.returnRequest.isRequested)
-      return res
-        .status(404)
-        .json({ success: false, message: "Return request not found" });
+    if (!order || !order.returnRequest.isRequested) {
+      await session.abortTransaction();
+      return res.status(404).json({ success: false, message: "Return request not found" });
+    }
 
     order.returnRequest.status = decision;
 
     if (decision === "Approved") {
       order.orderStatus = "Returned";
 
-      // ✅ Restore product stock
       for (const item of order.items) {
-        const product = await ProductModel.findById(item.productId);
+        const product = await ProductModel.findById(item.productId).session(session);
         if (!product) continue;
 
         const variantIndex = product.variants.findIndex(
@@ -309,22 +694,27 @@ const handleReturnStatus = async (req, res) => {
 
         if (variantIndex !== -1) {
           product.variants[variantIndex].stock += item.quantity;
-          await product.save();
+          await product.save({ session });
         }
       }
     } else {
-      order.orderStatus = "Delivered"; // Return rejected, keep delivered
+      order.orderStatus = "Delivered";
     }
 
-    await order.save();
+    await order.save({ session });
+    await session.commitTransaction();
+    session.endSession();
+
     res.json({
       success: true,
       message: `Return ${decision.toLowerCase()} successfully.`,
       order,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("Handle return error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Failed to handle return request", error: error.message });
   }
 };
 

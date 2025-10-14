@@ -19,6 +19,7 @@ import Breadcrumbs from "./component/Breadcrumb";
 import AllFlashSaleProducts from "./pages/AllFlashSaleProducts";
 import AllTopProducts from "./pages/AllTopProducts";
 import { ToastContainer } from "react-toastify";
+import FishingLoader from "./component/FishingLoader ";
 
 const App = () => {
   return (

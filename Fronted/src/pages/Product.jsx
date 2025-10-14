@@ -5,6 +5,7 @@ import { ShopContext } from "../Context/ShopContext";
 import { toast } from "react-toastify";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import FishingLoader from "../component/FishingLoader ";
 
 const Product = () => {
   const { backendUrl, currency, addtocart, cartitem } = useContext(ShopContext);
@@ -16,6 +17,8 @@ const Product = () => {
   const [selectedColor, setSelectedColor] = useState("");
   const [mainImage, setMainImage] = useState("");
   const [quantity, setQuantity] = useState(1);
+  // Add at the top with other useState
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -59,8 +62,8 @@ const Product = () => {
   const selectedVariant =
     selectedSize && selectedColor
       ? fproduct?.variants.find(
-          (v) => v.size === selectedSize && v.color === selectedColor
-        )
+        (v) => v.size === selectedSize && v.color === selectedColor
+      )
       : null;
 
   const priceVariant = selectedVariant || fproduct?.variants?.[0];
@@ -101,7 +104,7 @@ const Product = () => {
 
   return (
     <div className="max-w-[1250px] mt-3 pt-4 px-4 bg-white">
-      {loading && <p>Loading...</p>}
+      {loading && <FishingLoader />}
       {!loading && !fproduct && <p>Product not found</p>}
       {!loading && fproduct && (
         <div className="grid grid-cols-1 md:grid-cols-2">
@@ -122,11 +125,10 @@ const Product = () => {
                   <div
                     key={img}
                     onClick={() => setMainImage(img)}
-                    className={`w-15 h-15 rounded-lg overflow-hidden cursor-pointer border transition transform hover:scale-105 ${
-                      mainImage === img
-                        ? "border-black ring-2 ring-black"
-                        : "border-gray-300"
-                    }`}
+                    className={`w-15 h-15 rounded-lg overflow-hidden cursor-pointer border transition transform hover:scale-105 ${mainImage === img
+                      ? "border-black ring-2 ring-black"
+                      : "border-gray-300"
+                      }`}
                   >
                     <img
                       src={img}
@@ -159,13 +161,12 @@ const Product = () => {
                     <div key={size} className="flex flex-col items-center">
                       <button
                         onClick={() => setSelectedSize(size)}
-                        className={`px-4 py-2 border rounded-lg transition ${
-                          selectedSize === size
-                            ? "bg-black text-white"
-                            : sizeHasStock
+                        className={`px-4 py-2 border rounded-lg transition ${selectedSize === size
+                          ? "bg-black text-white"
+                          : sizeHasStock
                             ? "bg-white hover:bg-gray-100"
                             : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                        }`}
+                          }`}
                         disabled={!sizeHasStock}
                       >
                         {size}
@@ -195,13 +196,12 @@ const Product = () => {
                     <div key={color} className="flex flex-col items-center">
                       <button
                         onClick={() => setSelectedColor(color)}
-                        className={`px-4 py-2 border rounded-lg transition ${
-                          selectedColor === color
-                            ? "bg-black text-white"
-                            : colorHasStock
+                        className={`px-4 py-2 border rounded-lg transition ${selectedColor === color
+                          ? "bg-black text-white"
+                          : colorHasStock
                             ? "bg-white hover:bg-gray-100"
                             : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                        }`}
+                          }`}
                         disabled={!colorHasStock}
                       >
                         {color}
@@ -240,7 +240,7 @@ const Product = () => {
                 </button>
               </div>
             )}
-            <button
+            {/* <button
               onClick={() => {
                 if (!isVariantSelected) {
                   toast.error("Please select size and color");
@@ -264,17 +264,63 @@ const Product = () => {
                 isMaxInCart ||
                 !isVariantSelected
               }
-              className={`px-6 w-50 py-3 rounded-lg mb-4 transition ${
-                !anyStockAvailable || isOutOfStock || isMaxInCart
+              className={`px-6 w-50 py-3 rounded-lg mb-4 transition ${!anyStockAvailable || isOutOfStock || isMaxInCart
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-black text-white hover:bg-gray-800"
-              }`}
+                }`}
             >
               {!anyStockAvailable || isOutOfStock
                 ? "Out of Stock"
                 : isMaxInCart
-                ? "Added to Cart"
-                : "Add to Cart"}
+                  ? "Added to Cart"
+                  : "Add to Cart"}
+            </button> */}
+
+            {/* // Replace your Add to Cart button with this: */}
+            <button
+              onClick={async () => {
+                if (!isVariantSelected) {
+                  toast.error("Please select size and color");
+                  return;
+                }
+                if (isOutOfStock) {
+                  toast.error("This variant is out of stock");
+                  return;
+                }
+                if (inCartQty + quantity > selectedVariant?.stock) {
+                  toast.error(`Cannot add more than ${selectedVariant.stock} items`);
+                  return;
+                }
+
+                setIsAdding(true); // 🔹 prevent multiple clicks
+                await addtocart(
+                  fproduct._id,
+                  selectedVariant.size,
+                  selectedVariant.color,
+                  quantity
+                );
+                setQuantity(1);
+                setIsAdding(false); // 🔹 re-enable button
+              }}
+              disabled={
+                !anyStockAvailable ||
+                isOutOfStock ||
+                isMaxInCart ||
+                !isVariantSelected ||
+                isAdding
+              }
+              className={`px-6 w-50 py-3 rounded-lg mb-4 transition ${!anyStockAvailable || isOutOfStock || isMaxInCart || isAdding
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-black text-white hover:bg-gray-800"
+                }`}
+            >
+              {isAdding
+                ? "Adding..."
+                : !anyStockAvailable || isOutOfStock
+                  ? "Out of Stock"
+                  : isMaxInCart
+                    ? "Added to Cart"
+                    : "Add to Cart"}
             </button>
             <p className="mb-6 text-gray-700">{fproduct.description}</p>
           </div>
