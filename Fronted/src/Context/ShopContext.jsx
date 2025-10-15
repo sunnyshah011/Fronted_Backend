@@ -642,7 +642,6 @@ const ShopContextProvider = (props) => {
         if (Object.keys(cartdata[itemId]).length === 0) delete cartdata[itemId];
         toast.info("Item removed from cart", {
           className: "custom-toast-center",
-          autoClose: true,
           closeOnClick: false,
           draggable: false, autoClose: 1000
         });
@@ -651,7 +650,6 @@ const ShopContextProvider = (props) => {
         cartdata[itemId][size][color] = quantity;
         toast.success("Cart Updated!!", {
           className: "custom-toast-center",
-          autoClose: true,
           closeOnClick: false,
           draggable: false, autoClose: 1000
         });

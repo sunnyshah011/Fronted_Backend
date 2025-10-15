@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 
 const Placeorder = () => {
   const [payment, setPayment] = useState(false);
+  const [showFullAddress, setShowFullAddress] = useState(false);
   const {
     navigate,
     backendUrl,
@@ -243,96 +244,205 @@ const Placeorder = () => {
   }, []);
 
   return (
-    <div className="p-4 mt-5 flex flex-col md:flex-row gap-8 min-h-[65vh]">
-      {/* Left: Address Form */}
-      <form
-        onSubmit={handleUpdate}
-        className="flex-1 bg-white shadow-sm rounded-xl p-6"
-      >
+    <div className="p-4 flex flex-col md:flex-row gap-8 min-h-[50vh]">
+
+      {/* Left: Address Section */}
+      <div className="flex-1 bg-white shadow-sm rounded-xl p-5">
+        {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Shipping Address</h2>
-          {!isEditing && (
-            <button
-              type="button"
-              onClick={() => setIsEditing(true)}
-              className="text-sm bg-gray-200 px-3 py-1 rounded-lg hover:bg-gray-300"
-            >
-              Edit
-            </button>
+          <h2 className="text-xl sm:text-2xl font-semibold [@media(max-width:325px)]:text-[17px]">
+            Shipping Address
+          </h2>
+
+          {/* Button visible only on mobile */}
+          <button
+            type="button"
+            onClick={() => setShowFullAddress((prev) => !prev)}
+            className="block sm:hidden text-[10px] bg-gray-200 px-3 py-1 rounded-lg hover:bg-gray-300"
+          >
+            {showFullAddress ? "Hide" : "View / Edit"}
+          </button>
+        </div>
+
+        {/* For mobile: show compact or full based on toggle */}
+        <div className="block sm:hidden">
+          {!showFullAddress ? (
+            <div className="space-y-0.5 text-gray-700">
+              <p className="font-medium">{formData.fullName}</p>
+              <p className="text-sm">{formData.phone}</p>
+              <p className="text-sm text-gray-600">
+                {[formData.streetAddress, formData.city, formData.district, formData.province]
+                  .filter(Boolean)
+                  .join(", ")}
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleUpdate}>
+              {[
+                "fullName",
+                "phone",
+                "province",
+                "district",
+                "city",
+                "streetAddress",
+              ].map((field) => (
+                <div className="mb-3" key={field}>
+                  <label className="block mb-1 font-medium text-sm text-gray-700">
+                    {field} *
+                  </label>
+                  {["province", "district", "city"].includes(field) ? (
+                    <select
+                      name={field}
+                      value={formData[field]}
+                      onChange={handleChange}
+                      disabled={!isEditing}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none"
+                      required
+                    >
+                      <option value="">Select {field}</option>
+                      {(field === "province"
+                        ? provinces
+                        : field === "district"
+                          ? districts
+                          : cities
+                      ).map((val) => (
+                        <option key={val._id || val.name} value={val.name}>
+                          {val.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type={field === "phone" ? "tel" : "text"}
+                      name={field}
+                      value={formData[field]}
+                      onChange={handleChange}
+                      disabled={!isEditing}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none"
+                    />
+                  )}
+                </div>
+              ))}
+
+              {isEditing ? (
+                <div className="flex gap-4 mt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg"
+                  >
+                    Update
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="flex-1 bg-gray-200 py-2 rounded-lg"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    className="bg-gray-200 w-full py-3 rounded-lg hover:bg-gray-300"
+                  >
+                    Edit Address
+                  </button>
+                </div>
+              )}
+            </form>
           )}
         </div>
 
-        {[
-          "fullName",
-          "phone",
-          "province",
-          "district",
-          "city",
-          "streetAddress",
-        ].map((field) => (
-          <div className="mb-4" key={field}>
-            <label className="block mb-1 font-medium text-gray-700">
-              {field} *
-            </label>
-            {["province", "district", "city"].includes(field) ? (
-              <select
-                name={field}
-                value={formData[field]}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none"
-              >
-                <option value="">Select {field}</option>
-                {(field === "province"
-                  ? provinces
-                  : field === "district"
-                  ? districts
-                  : cities
-                ).map((val) => (
-                  <option key={val._id || val.name} value={val.name}>
-                    {val.name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type={field === "phone" ? "tel" : "text"}
-                name={field}
-                value={formData[field]}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none"
-              />
-            )}
-          </div>
-        ))}
+        {/* For desktop: always show full form */}
+        <div className="hidden sm:block">
+          <form onSubmit={handleUpdate}>
+            {[
+              "fullName",
+              "phone",
+              "province",
+              "district",
+              "city",
+              "streetAddress",
+            ].map((field) => (
+              <div className="mb-3" key={field}>
+                <label className="block mb-1 font-medium text-sm text-gray-700">
+                  {field} *
+                </label>
+                {["province", "district", "city"].includes(field) ? (
+                  <select
+                    name={field}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none"
+                  >
+                    <option value="">Select {field}</option>
+                    {(field === "province"
+                      ? provinces
+                      : field === "district"
+                        ? districts
+                        : cities
+                    ).map((val) => (
+                      <option key={val._id || val.name} value={val.name}>
+                        {val.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type={field === "phone" ? "tel" : "text"}
+                    name={field}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none"
+                  />
+                )}
+              </div>
+            ))}
 
-        {isEditing && (
-          <div className="flex gap-4 mt-4">
-            <button
-              type="submit"
-              className="flex-1 bg-blue-600 text-white py-2 rounded-lg"
-            >
-              Update
-            </button>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="flex-1 bg-gray-200 py-2 rounded-lg"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-      </form>
+            {isEditing ? (
+              <div className="flex gap-4 mt-4">
+                <button
+                  type="submit"
+                  className="flex-1 bg-blue-600 text-white py-2 rounded-lg"
+                >
+                  Update
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="flex-1 bg-gray-200 py-2 rounded-lg"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="bg-gray-200 w-full py-2 rounded-lg hover:bg-gray-300"
+                >
+                  Edit Address
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
+      </div>
+
+
 
       {/* Right: Cart + Payment */}
-      <div className="flex-1 space-y-6">
+      <div className="flex-1 space-y-4">
         {/* 🔹 Cart Items Preview */}
         {Object.keys(cartitem).length > 0 && (
-          <div className="bg-white shadow-sm rounded-xl p-6">
-            <h2 className="text-xl font-semibold mb-4">Products in Cart</h2>
-            <div className="space-y-3 max-h-64 overflow-y-auto">
+          <div className="bg-white shadow-sm rounded-xl p-6 py-3">
+            <h2 className="text-xl font-semibold mb-3">Products in Cart</h2>
+            <div className="space-y-2 max-h-40 overflow-y-auto">
               {Object.keys(cartitem).map((productId) => {
                 const productCart = cartitem[productId];
                 const product = products.find((p) => p._id === productId);
@@ -361,21 +471,21 @@ const Placeorder = () => {
                         />
                         <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
                           <div className="flex flex-col gap-1 sm:gap-2 flex-wrap">
-                            <p className="text-sm sm:text-base font-medium text-gray-700 truncate max-w-[300px]">
+                            <p className="text-sm sm:text-[13px] font-medium text-gray-700 line-clamp-1">
                               {product.name}
                             </p>
-                            <span className="text-[15px] font-semibold text-gray-900">
+                            <span className="text-[12px] font-semibold text-gray-900">
                               ₹ {variant.price} /-
                             </span>
-                            <span className="px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md">
+                            <span className="px-2 py-0.5 text-[10px] border border-gray-200 bg-gray-50 rounded-md w-fit">
                               Size: {variant.size}
                             </span>
                             {variant.color && (
-                              <span className="px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md">
+                              <span className="px-2 py-0.5 text-[10px] border border-gray-200 bg-gray-50 rounded-md w-fit">
                                 Color: {variant.color}
                               </span>
                             )}
-                            <span className="px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md">
+                            <span className="px-2 py-0.5 text-[10px] border border-gray-200 bg-gray-50 rounded-md w-fit">
                               Qty: {quantity}
                             </span>
                           </div>
@@ -394,14 +504,12 @@ const Placeorder = () => {
           <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
           <div
             onClick={() => setPayment(!payment)}
-            className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${
-              payment ? "border-green-500 bg-green-50" : "border-gray-200"
-            }`}
+            className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${payment ? "border-green-500 bg-green-50" : "border-gray-200"
+              }`}
           >
             <div
-              className={`w-4 h-4 rounded-full border ${
-                payment ? "bg-green-500 border-green-500" : "border-gray-400"
-              }`}
+              className={`w-4 h-4 rounded-full border ${payment ? "bg-green-500 border-green-500" : "border-gray-400"
+                }`}
             ></div>
             <span>Cash on Delivery</span>
           </div>

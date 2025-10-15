@@ -19,7 +19,6 @@ import Breadcrumbs from "./component/Breadcrumb";
 import AllFlashSaleProducts from "./pages/AllFlashSaleProducts";
 import AllTopProducts from "./pages/AllTopProducts";
 import { ToastContainer } from "react-toastify";
-import FishingLoader from "./component/FishingLoader ";
 
 const App = () => {
   return (
@@ -55,25 +54,18 @@ const App = () => {
             <Route path="/collection" element={<Collection />} />
             <Route path="/cart" element={<Cart />} />
 
-            <Route
-              path="/categories/:categorySlug/:productSlug"
-              element={<Product />}
-            />
+            <Route path="/categories/:categorySlug/:productSlug" element={<Product />} />
 
             <Route path="/order" element={<Order />} />
             <Route path="/placeorder" element={<Placeorder />} />
 
             {/* FlashSale and Topproducts pages */}
-            <Route
-              path="/all-flash-sale-products"
-              element={<AllFlashSaleProducts />}
-            />
+            <Route path="/all-flash-sale-products" element={<AllFlashSaleProducts />} />
             <Route path="/all-top-products" element={<AllTopProducts />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-
         <Footer />
       </div>
     </div>
