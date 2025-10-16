@@ -13,11 +13,10 @@ const Main_Category = () => {
   const fetchCategory = async () => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/categories`);
-
       if (data.success) {
         setCategories(data.categories);
       } else if (Array.isArray(data.categories)) {
-        setCategories(data.categories.slice(0, 5));
+        setCategories(data.categories.slice(0, 10));
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -61,7 +60,7 @@ const Main_Category = () => {
                     />
                   </div>
                   <div>
-                    <p className="max-[768px]:text-[12px] text-center max-[768px]:font-medium md:text-[17px] font-normal ">
+                    <p className="max-[768px]:text-[12px] text-center max-[768px]:font-medium md:text-[16px] font-normal ">
                       {" "}
                       {cat.name}{" "}
                     </p>

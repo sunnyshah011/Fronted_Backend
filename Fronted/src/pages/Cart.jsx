@@ -59,7 +59,7 @@ const Cart = () => {
     setLoading(true);
     setTimeout(() => {
       navigate("./placeorder");
-    }, 1500); // redirect after 1.5s
+    }, 1000); // redirect after 1.5s
   };
 
   return (
@@ -69,7 +69,7 @@ const Cart = () => {
       {loading && (
         <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
           <FaFish className="text-blue-500 text-5xl animate-bounce" />
-          <p className="mt-3 text-gray-700 font-medium">Reeling it in...</p>
+          <p className="mt-3 text-gray-700 font-medium"></p>
         </div>
       )}
 

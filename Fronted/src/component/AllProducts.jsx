@@ -14,7 +14,7 @@ const AllProducts = () => {
         if (a.isBestSelling === b.isBestSelling) return 0;
         return a.isBestSelling ? -1 : 1;
       });
-      setAllProducts(sorted);
+      setAllProducts(sorted.slice(0,30));
     }
   }, [products]);
 

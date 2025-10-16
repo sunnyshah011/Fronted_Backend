@@ -6,7 +6,9 @@ import { toast } from "react-toastify";
 
 const Placeorder = () => {
   const [payment, setPayment] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // 🔹 Added for loading animation
   const [showFullAddress, setShowFullAddress] = useState(false);
+
   const {
     navigate,
     backendUrl,
@@ -222,6 +224,7 @@ const Placeorder = () => {
     };
 
     try {
+      setIsLoading(true); // 🔹 Start loading
       const res = await axios.post(`${backendUrl}/api/order/place`, payload, {
         headers: { token },
       });
@@ -236,6 +239,8 @@ const Placeorder = () => {
     } catch (err) {
       console.error(err);
       toast.error("Failed to place order");
+    } finally {
+      setIsLoading(false); // 🔹 Stop loading
     }
   };
 
@@ -245,7 +250,6 @@ const Placeorder = () => {
 
   return (
     <div className="p-4 flex flex-col md:flex-row gap-8 min-h-[50vh]">
-
       {/* Left: Address Section */}
       <div className="flex-1 bg-white shadow-sm rounded-xl p-5">
         {/* Header */}
@@ -271,7 +275,12 @@ const Placeorder = () => {
               <p className="font-medium">{formData.fullName}</p>
               <p className="text-sm">{formData.phone}</p>
               <p className="text-sm text-gray-600">
-                {[formData.streetAddress, formData.city, formData.district, formData.province]
+                {[
+                  formData.streetAddress,
+                  formData.city,
+                  formData.district,
+                  formData.province,
+                ]
                   .filter(Boolean)
                   .join(", ")}
               </p>
@@ -303,8 +312,8 @@ const Placeorder = () => {
                       {(field === "province"
                         ? provinces
                         : field === "district"
-                          ? districts
-                          : cities
+                        ? districts
+                        : cities
                       ).map((val) => (
                         <option key={val._id || val.name} value={val.name}>
                           {val.name}
@@ -382,8 +391,8 @@ const Placeorder = () => {
                     {(field === "province"
                       ? provinces
                       : field === "district"
-                        ? districts
-                        : cities
+                      ? districts
+                      : cities
                     ).map((val) => (
                       <option key={val._id || val.name} value={val.name}>
                         {val.name}
@@ -433,8 +442,6 @@ const Placeorder = () => {
           </form>
         </div>
       </div>
-
-
 
       {/* Right: Cart + Payment */}
       <div className="flex-1 space-y-4">
@@ -504,21 +511,64 @@ const Placeorder = () => {
           <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
           <div
             onClick={() => setPayment(!payment)}
-            className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${payment ? "border-green-500 bg-green-50" : "border-gray-200"
-              }`}
+            className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${
+              payment ? "border-green-500 bg-green-50" : "border-gray-200"
+            }`}
           >
             <div
-              className={`w-4 h-4 rounded-full border ${payment ? "bg-green-500 border-green-500" : "border-gray-400"
-                }`}
+              className={`w-4 h-4 rounded-full border ${
+                payment ? "bg-green-500 border-green-500" : "border-gray-400"
+              }`}
             ></div>
             <span>Cash on Delivery</span>
           </div>
-          <button
+          {/* <button
             onClick={handlePlaceOrder}
             disabled={isModified}
             className="mt-4 w-full py-3 bg-black text-white rounded-lg"
           >
             {isModified ? "Update address first" : "Place Order"}
+          </button> */}
+          <button
+            onClick={handlePlaceOrder}
+            disabled={isModified || isLoading}
+            className={`mt-4 w-full py-3 rounded-lg text-white ${
+              isModified
+                ? "bg-gray-400 cursor-not-allowed"
+                : isLoading
+                ? "bg-gray-700"
+                : "bg-black hover:bg-gray-800"
+            } flex items-center justify-center gap-2`}
+          >
+            {isLoading ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+                Processing...
+              </>
+            ) : isModified ? (
+              "Update address first"
+            ) : (
+              "Place Order"
+            )}
           </button>
         </div>
       </div>
