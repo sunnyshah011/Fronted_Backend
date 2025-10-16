@@ -8,6 +8,7 @@ const Placeorder = () => {
   const [payment, setPayment] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // 🔹 Added for loading animation
   const [showFullAddress, setShowFullAddress] = useState(false);
+  const [addressError, setAddressError] = useState(false);
 
   const {
     navigate,
@@ -146,7 +147,11 @@ const Placeorder = () => {
         }
       );
       if (res.data.success) {
-        toast.success("Address updated!");
+        toast.success("Address updated!", {
+          className: "custom-toast-center",
+          closeOnClick: false,
+          draggable: false, autoClose: 1000
+        });
         setOriginalData(formData);
         setIsModified(false);
         setIsEditing(false);
@@ -160,12 +165,20 @@ const Placeorder = () => {
 
   const handlePlaceOrder = async () => {
     if (!payment) {
-      toast.error("Select payment method");
+      toast.error("Select payment method", {
+        className: "custom-toast-center",
+        closeOnClick: false,
+        draggable: false, autoClose: 1000
+      });
       return;
     }
 
     if (isModified) {
-      toast.warning("Update address first");
+      toast.warning("Update address first", {
+        className: "custom-toast-center",
+        closeOnClick: false,
+        draggable: false, autoClose: 1000
+      });
       return;
     }
 
@@ -189,7 +202,11 @@ const Placeorder = () => {
 
           if (quantity > variant.stock) {
             toast.error(
-              `Not enough stock for ${product.name} (${size} - ${color})`
+              `Not enough stock for ${product.name} (${size} - ${color})`, {
+              className: "custom-toast-center",
+              closeOnClick: false,
+              draggable: false, autoClose: 1000
+            }
             );
             return;
           }
@@ -206,9 +223,35 @@ const Placeorder = () => {
     }
 
     if (items.length === 0) {
-      toast.error("Cart is empty");
+      toast.error("Cart is empty", {
+        className: "custom-toast-center",
+        closeOnClick: false,
+        draggable: false, autoClose: 1000
+      });
       return;
     }
+
+    // ✅ Address validation (add this right here)
+    if (
+      !formData.fullName ||
+      !formData.phone ||
+      !formData.province ||
+      !formData.district ||
+      !formData.city ||
+      !formData.streetAddress
+    ) {
+      setAddressError(true);
+      window.scroll(0, 0)
+      toast.error("Address is Empty", {
+        className: "custom-toast-center",
+        closeOnClick: false,
+        draggable: false, autoClose: 1000
+      });
+      return;
+    } else {
+      setAddressError(false);
+    }
+
 
     const payload = {
       items,
@@ -231,14 +274,26 @@ const Placeorder = () => {
       if (res.data.success) {
         setCartitem({});
         localStorage.setItem("cartItems", JSON.stringify({}));
-        toast.success("Order placed!");
+        toast.success("Order placed!", {
+          className: "custom-toast-center",
+          closeOnClick: false,
+          draggable: false, autoClose: 1000
+        });
         navigate("/order");
       } else {
-        toast.error(res.data.message || "Failed to place order");
+        toast.error(res.data.message || "Failed to place order", {
+          className: "custom-toast-center",
+          closeOnClick: false,
+          draggable: false, autoClose: 1000
+        });
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to place order");
+      toast.error("Failed to place order", {
+        className: "custom-toast-center",
+        closeOnClick: false,
+        draggable: false, autoClose: 1000
+      });
     } finally {
       setIsLoading(false); // 🔹 Stop loading
     }
@@ -254,9 +309,13 @@ const Placeorder = () => {
       <div className="flex-1 bg-white shadow-sm rounded-xl p-5">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl sm:text-2xl font-semibold [@media(max-width:325px)]:text-[17px]">
+          <h2
+            className={`text-xl sm:text-2xl font-semibold [@media(max-width:325px)]:text-[17px] ${addressError ? "text-red-600 animate-pulse" : "text-gray-900"
+              }`}
+          >
             Shipping Address
           </h2>
+
 
           {/* Button visible only on mobile */}
           <button
@@ -312,8 +371,8 @@ const Placeorder = () => {
                       {(field === "province"
                         ? provinces
                         : field === "district"
-                        ? districts
-                        : cities
+                          ? districts
+                          : cities
                       ).map((val) => (
                         <option key={val._id || val.name} value={val.name}>
                           {val.name}
@@ -328,6 +387,7 @@ const Placeorder = () => {
                       onChange={handleChange}
                       disabled={!isEditing}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none"
+                      required
                     />
                   )}
                 </div>
@@ -391,8 +451,8 @@ const Placeorder = () => {
                     {(field === "province"
                       ? provinces
                       : field === "district"
-                      ? districts
-                      : cities
+                        ? districts
+                        : cities
                     ).map((val) => (
                       <option key={val._id || val.name} value={val.name}>
                         {val.name}
@@ -511,14 +571,12 @@ const Placeorder = () => {
           <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
           <div
             onClick={() => setPayment(!payment)}
-            className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${
-              payment ? "border-green-500 bg-green-50" : "border-gray-200"
-            }`}
+            className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${payment ? "border-green-500 bg-green-50" : "border-gray-200"
+              }`}
           >
             <div
-              className={`w-4 h-4 rounded-full border ${
-                payment ? "bg-green-500 border-green-500" : "border-gray-400"
-              }`}
+              className={`w-4 h-4 rounded-full border ${payment ? "bg-green-500 border-green-500" : "border-gray-400"
+                }`}
             ></div>
             <span>Cash on Delivery</span>
           </div>
@@ -532,13 +590,12 @@ const Placeorder = () => {
           <button
             onClick={handlePlaceOrder}
             disabled={isModified || isLoading}
-            className={`mt-4 w-full py-3 rounded-lg text-white ${
-              isModified
-                ? "bg-gray-400 cursor-not-allowed"
-                : isLoading
+            className={`mt-4 w-full py-3 rounded-lg text-white ${isModified
+              ? "bg-gray-400 cursor-not-allowed"
+              : isLoading
                 ? "bg-gray-700"
                 : "bg-black hover:bg-gray-800"
-            } flex items-center justify-center gap-2`}
+              } flex items-center justify-center gap-2`}
           >
             {isLoading ? (
               <>
