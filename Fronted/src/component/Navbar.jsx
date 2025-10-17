@@ -57,6 +57,10 @@ const Navbar = () => {
     localStorage.removeItem("token");
     setToken("");
     setCartitem({});
+    setUserDetails({});
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
   const order = () => {
@@ -107,7 +111,7 @@ const Navbar = () => {
     <header className="fixed top-0 left-0 w-full border-b border-gray-100 bg-white z-50">
       <div className="mx-auto w-full max-w-[1250px] flex items-center justify-between py-4.5 px-4 min-[500px]:px-5 sm:px-[4vw] md:px-[5vw] lg:px-[3vw] font-medium gap-3">
         {/* home icon for navigation */}
-        <div className="flex gap-5 items-center">
+        <div className="flex gap-5 items-center pl-1">
           <Link to="/">
             <img
               src={assets.home}
@@ -120,14 +124,14 @@ const Navbar = () => {
           </Link>
 
           {/* Mobile menu icon */}
-          <div className="justify-end">
+          {/* <div className="justify-end">
             <img
               onClick={openMenu}
               src={assets.menu_icon}
               className="w-5 cursor-pointer min-[850px]:hidden flex-shrink-0"
               alt="Menu"
             />
-          </div>
+          </div> */}
         </div>
 
         {/* Search bar */}
@@ -196,9 +200,8 @@ const Navbar = () => {
               </div>
 
               <div
-                className={`absolute left-[-125px] pt-4 ${
-                  show ? "block" : "hidden"
-                }`}
+                className={`absolute left-[-125px] pt-4 ${show ? "block" : "hidden"
+                  }`}
               >
                 <div className="flex flex-col gap-4 w-50 py-4 px-4 bg-white border border-gray-300 rounded-[12px] text-gray-700">
                   {token ? (
@@ -269,9 +272,8 @@ const Navbar = () => {
           ></div>
         )}
         <aside
-          className={`fixed top-0 left-0 h-full w-64 bg-white z-50 transform ${
-            isOpen ? "translate-x-0" : "-translate-x-full"
-          } transition-transform duration-300 ease-in-out`}
+          className={`fixed top-0 left-0 h-full w-64 bg-white z-50 transform ${isOpen ? "translate-x-0" : "-translate-x-full"
+            } transition-transform duration-300 ease-in-out`}
         >
           <button className="px-3 py-2 text-[17px]" onClick={closeMenu}>
             &larr; Back

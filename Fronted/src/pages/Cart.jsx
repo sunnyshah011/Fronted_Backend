@@ -51,6 +51,18 @@ const Cart = () => {
   };
 
   useEffect(() => {
+    if (loading) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [loading]);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
@@ -69,7 +81,7 @@ const Cart = () => {
       {loading && (
         <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
           <FaFish className="text-blue-500 text-5xl animate-bounce" />
-          <p className="mt-3 text-gray-700 font-medium"></p>
+          <p className="mt-3 text-gray-700 font-medium">Please wait...</p>
         </div>
       )}
 

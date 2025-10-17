@@ -169,6 +169,18 @@ const Collection = () => {
   };
 
   useEffect(() => {
+    if (showFilter) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showFilter]);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
@@ -186,12 +198,11 @@ const Collection = () => {
       <div className="sm:sticky sm:top-20 sm:self-start">
         {/* Sidebar */}
         <div
-          className={`${
-            showFilter
-              ? "fixed top-18 right-0 h-full w-64 bg-white shadow-lg z-50 transform translate-x-0"
-              : "fixed top-18 right-0 h-full w-64 bg-white shadow-lg z-50 transform translate-x-full"
-          } transition-transform duration-300
-           sm:relative sm:top-auto sm:right-auto sm:h-auto sm:w-60 sm:translate-x-0 sm:shadow-none overflow-y-auto pb-100`}
+          className={`${showFilter
+            ? "fixed top-19 right-0 h-full w-64 bg-white shadow-lg z-50 transform translate-x-0"
+            : "fixed top-19 right-0 h-full w-64 bg-white shadow-lg z-50 transform translate-x-full"
+            } transition-transform duration-300
+           sm:relative sm:top-auto sm:right-auto sm:h-auto sm:w-60 sm:translate-x-0 sm:shadow-none overflow-y-auto pb-25`}
         >
           <div className="flex justify-between items-center p-4 border-b sm:hidden">
             <p className="font-medium">Filter</p>
@@ -330,7 +341,7 @@ const Collection = () => {
       {/* Backdrop */}
       {showFilter && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-30 z-40 sm:hidden"
+          className="fixed inset-0 bg-black/40 z-40 sm:hidden"
           onClick={() => setShowFilter(false)}
         ></div>
       )}

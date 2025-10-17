@@ -8,12 +8,20 @@ const Order = () => {
   const [filterStatus, setFilterStatus] = useState("All");
   const scrollRef = useRef(null);
 
-  const SHIPPING_CHARGE = 150; // ✅ fixed shipping charge
+  const SHIPPING_CHARGE = 150;
 
+  // ✅ Modals state
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelOrderId, setCancelOrderId] = useState(null);
+
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnOrderId, setReturnOrderId] = useState(null);
+  const [returnReason, setReturnReason] = useState("");
+
+  // ✅ Load Orders
   const loadOrderData = async () => {
     try {
       if (!token) return;
-
       const response = await axios.post(
         `${backendUrl}/api/order/userorders`,
         {},
@@ -31,7 +39,7 @@ const Order = () => {
             isRequested: false,
             status: "Pending",
             reason: "",
-          }, // ✅ Add this
+          },
           items: order.items.map((item) => ({
             ...item,
             productName: item.productId?.name || "Unknown Product",
@@ -45,6 +53,50 @@ const Order = () => {
     }
   };
 
+  // ✅ Cancel Order API
+  const cancelOrderAPI = async (orderId) => {
+    try {
+      const res = await axios.post(
+        `${backendUrl}/api/order/cancel`,
+        { orderId },
+        { headers: { token } }
+      );
+      if (res.data.success) {
+        setShowCancelModal(false);
+        setCancelOrderId(null);
+        loadOrderData();
+      } else {
+        alert(res.data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to cancel order.");
+    }
+  };
+
+  // ✅ Return Order API
+  const returnOrderAPI = async (orderId, reason) => {
+    try {
+      const res = await axios.post(
+        `${backendUrl}/api/order/return`,
+        { orderId, reason },
+        { headers: { token } }
+      );
+      if (res.data.success) {
+        setShowReturnModal(false);
+        setReturnOrderId(null);
+        setReturnReason("");
+        loadOrderData();
+      } else {
+        alert(res.data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit return request.");
+    }
+  };
+
+  // ✅ Fetch orders on load
   useEffect(() => {
     loadOrderData();
     window.scrollTo(0, 0);
@@ -64,7 +116,7 @@ const Order = () => {
     "Returned",
   ];
 
-  // ✅ drag-to-scroll horizontally
+  // ✅ Drag to scroll horizontally
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
@@ -101,33 +153,40 @@ const Order = () => {
     };
   }, []);
 
-  const cancelOrder = async (orderId) => {
-    if (!window.confirm("Are you sure you want to cancel this order?")) return;
-    try {
-      const response = await axios.post(
-        `${backendUrl}/api/order/cancel`,
-        { orderId },
-        { headers: { token } }
-      );
-      if (response.data.success) {
-        alert("Order cancelled successfully!");
-        loadOrderData();
-        window.location.reload();
-      } else {
-        alert(response.data.message);
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Failed to cancel order. Please try again.");
+  useEffect(() => {
+    if (showCancelModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
-  };
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showCancelModal]);
+
+  useEffect(() => {
+    if (showReturnModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showReturnModal]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="mt-5 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">My Orders</h2>
 
-        {/* Status filter (scrollable horizontally + draggable) */}
+        {/* Status filter */}
         <div
           ref={scrollRef}
           className="flex gap-2 mb-6 overflow-x-auto whitespace-nowrap py-1 cursor-grab active:cursor-grabbing select-none"
@@ -140,11 +199,10 @@ const Order = () => {
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-3 py-1 rounded font-medium flex-shrink-0 ${
-                filterStatus === status
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              } transition`}
+              className={`px-3 py-1 rounded font-medium flex-shrink-0 ${filterStatus === status
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                } transition`}
             >
               {status}
             </button>
@@ -162,7 +220,6 @@ const Order = () => {
                 (sum, item) => sum + item.price * item.quantity,
                 0
               );
-              // const total = subtotal + SHIPPING_CHARGE; // ✅ add shipping charge
 
               return (
                 <div
@@ -189,76 +246,53 @@ const Order = () => {
                     <div className="flex items-center gap-5 max-[630px]:w-full justify-between">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`w-2.5 h-2.5 rounded-full ${
-                            order.status === "Delivered"
-                              ? "bg-green-500"
-                              : order.status === "Pending"
+                          className={`w-2.5 h-2.5 rounded-full ${order.status === "Delivered"
+                            ? "bg-green-500"
+                            : order.status === "Pending"
                               ? "bg-yellow-500"
                               : order.status === "Ready To Ship"
-                              ? "bg-blue-500"
-                              : order.status === "Cancelled"
-                              ? "bg-red-500"
-                              : order.status === "Returned"
-                              ? "bg-pink-500"
-                              : "bg-gray-400"
-                          }`}
+                                ? "bg-blue-500"
+                                : order.status === "Cancelled"
+                                  ? "bg-red-500"
+                                  : order.status === "Returned"
+                                    ? "bg-pink-500"
+                                    : "bg-gray-400"
+                            }`}
                         ></span>
                         <p className="font-medium text-gray-700">
                           {order.status}
                         </p>
                       </div>
 
-                      {/* <button
-                        onClick={loadOrderData}
-                        className="border border-gray-200 px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
-                      >
-                        Track
-                      </button> */}
-
+                      {/* Cancel Button */}
                       {order.status === "Pending" && (
                         <button
-                          onClick={() => cancelOrder(order.orderId)}
+                          onClick={() => {
+                            setCancelOrderId(order.orderId);
+                            setShowCancelModal(true);
+                          }}
                           className="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition"
                         >
                           Cancel
                         </button>
                       )}
 
+                      {/* Return Button */}
                       {order.status === "Delivered" && (
                         <div className="flex flex-col items-center">
                           <button
                             onClick={() => {
-                              const reason = prompt(
-                                "Please enter reason for return (or leave blank to cancel):"
-                              );
-                              if (!reason) return;
-                              axios
-                                .post(
-                                  `${backendUrl}/api/order/return`,
-                                  { orderId: order.orderId, reason },
-                                  { headers: { token } }
-                                )
-                                .then((res) => {
-                                  if (res.data.success) {
-                                    alert("Return request submitted!");
-                                    loadOrderData();
-                                  } else {
-                                    alert(res.data.message);
-                                  }
-                                })
-                                .catch((err) => {
-                                  console.error(err);
-                                  alert("Failed to submit return request.");
-                                });
+                              setReturnOrderId(order.orderId);
+                              setReturnReason("");
+                              setShowReturnModal(true);
                             }}
-                            className={`px-3 py-1 text-sm rounded-md transition ${
-                              order.returnRequest.isRequested
-                                ? order.returnRequest.status === "Approved" ||
-                                  order.returnRequest.status === "Rejected"
-                                  ? "bg-gray-400 text-white cursor-not-allowed"
-                                  : "bg-pink-500 text-white hover:bg-pink-600"
+                            className={`px-3 py-1 text-sm rounded-md transition ${order.returnRequest.isRequested
+                              ? order.returnRequest.status === "Approved" ||
+                                order.returnRequest.status === "Rejected"
+                                ? "bg-gray-400 text-white cursor-not-allowed"
                                 : "bg-pink-500 text-white hover:bg-pink-600"
-                            }`}
+                              : "bg-pink-500 text-white hover:bg-pink-600"
+                              }`}
                             disabled={
                               order.returnRequest.status === "Approved" ||
                               order.returnRequest.status === "Rejected"
@@ -269,7 +303,6 @@ const Order = () => {
                               : "Return"}
                           </button>
 
-                          {/* Show return reason and status */}
                           {order.returnRequest.isRequested && (
                             <p className="text-xs text-gray-700 mt-1">
                               <strong>Status:</strong>{" "}
@@ -309,7 +342,7 @@ const Order = () => {
                     ))}
                   </div>
 
-                  {/* ✅ Total with shipping */}
+                  {/* Total */}
                   <div className="text-right mt-3 text-sm sm:text-base text-gray-700">
                     <p>
                       Subtotal:{" "}
@@ -330,6 +363,89 @@ const Order = () => {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Cancel Modal */}
+        {showCancelModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 bg-opacity-40">
+            <div className="bg-white rounded-xl p-6 w-80 max-w-sm shadow-lg">
+              <h3 className="text-lg font-semibold mb-4">Confirm Cancel</h3>
+              <p className="mb-6">Are you sure you want to cancel this order?</p>
+              <div className="flex justify-end gap-3">
+                <button
+                  className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                  onClick={() => setShowCancelModal(false)}
+                >
+                  No
+                </button>
+                <button
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                  onClick={() => cancelOrderAPI(cancelOrderId)}
+                >
+                  Yes, Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Return Modal */}
+        {showReturnModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 bg-opacity-40">
+            <div className="bg-white rounded-xl p-6 w-80 max-w-sm shadow-lg">
+              <h3 className="text-lg font-semibold mb-4">Return Order</h3>
+
+              <textarea
+                className="w-full border rounded-md p-2 mb-4"
+                placeholder="Enter reason for return..."
+                value={returnReason}
+                onChange={(e) => setReturnReason(e.target.value)}
+              />
+
+              {/* Predefined reasons */}
+              <div className="mb-4">
+                <p className="text-sm font-medium mb-1">Or select a reason:</p>
+                <div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
+                  {[
+                    "Received wrong item",
+                    "Item damaged",
+                    "Better price available",
+                    "No longer needed",
+                  ].map((reason) => (
+                    <button
+                      key={reason}
+                      type="button"
+                      onClick={() => setReturnReason(reason)}
+                      className={`text-left px-2 py-1 border rounded hover:bg-gray-100 transition ${returnReason === reason ? "bg-gray-200 font-semibold" : ""
+                        }`}
+                    >
+                      {reason}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                  onClick={() => setShowReturnModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600"
+                  onClick={() =>
+                    returnOrderAPI(
+                      returnOrderId,
+                      returnReason.trim() || "No reason provided"
+                    )
+                  }
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
