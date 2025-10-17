@@ -12,6 +12,21 @@ const Login = () => {
   const [gmail, setGmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  // Show toast after reload
+  useEffect(() => {
+    const showToast = localStorage.getItem("showLoginToast");
+    if (showToast) {
+      toast.success("You Are Logged In", {
+        className: "custom-toast-center",
+        autoClose: 2000,
+        pauseOnHover: false,
+        closeOnClick: true,
+        hideProgressBar: true,
+      });
+      localStorage.removeItem("showLoginToast");
+    }
+  }, []);
+
   const onsubmithandler = async (e) => {
     e.preventDefault();
 
@@ -22,15 +37,15 @@ const Login = () => {
       });
       if (response.data.success) {
         setToken(response.data.token);
+
         localStorage.setItem("token", response.data.token);
 
-        toast.success("You Are Logged In", {
-          className: "custom-toast-center",
-          autoClose: 1000,
-          pauseOnHover: false,
-          closeOnClick: true,
-          hideProgressBar: true,
-        });
+        // Set flag to show toast after reload
+        localStorage.setItem("showLoginToast", "true");
+
+        // Reload page to update navbar/user info
+        window.location.reload();
+
       } else {
         toast.error(response.data.message);
       }

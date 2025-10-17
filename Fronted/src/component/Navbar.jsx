@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 
 const Navbar = () => {
-  const { setToken, address, token, getcartcount, setCartitem, navigate } =
+  const { setToken, address, setAddress, token, getcartcount, setCartitem, navigate } =
     useContext(ShopContext);
 
   const { backendUrl } = useContext(ShopContext);
@@ -42,26 +42,38 @@ const Navbar = () => {
     fetchCategory();
   }, []);
 
+  useEffect(() => {
+    if (localStorage.getItem("showLogoutToast")) {
+      toast.info("You Are Logged Out!", {
+        className: "custom-toast-center",
+        autoClose: 1000,
+        pauseOnHover: false,
+        closeOnClick: true,
+        hideProgressBar: true,
+      });
+      localStorage.removeItem("showLogoutToast");
+    }
+  }, []);
+
+
   const logout = () => {
     navigate("/");
     window.scrollTo(0, 0);
     setShow(false);
-    // Toast for logout
-    toast.success("Your Are Logout!", {
-      className: "custom-toast-center",
-      autoClose: 1000,
-      pauseOnHover: false,
-      closeOnClick: true,
-      hideProgressBar: true,
-    });
+
+    // Set flag to show toast after reload
+    localStorage.setItem("showLogoutToast", "true");
+
+    // Clear user data
     localStorage.removeItem("token");
     setToken("");
     setCartitem({});
-    setUserDetails({});
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    setAddress({}); // <-- clear user details
+
+    // Reload page
+    window.location.reload();
   };
+
 
   const order = () => {
     navigate("/order");
@@ -107,21 +119,38 @@ const Navbar = () => {
     window.scrollTo(0, 0);
   }, []);
 
+
   return (
-    <header className="fixed top-0 left-0 w-full border-b border-gray-100 bg-white z-50">
+    <header className="fixed top-0 left-0 w-full border-b border-gray-200 bg-white z-50">
       <div className="mx-auto w-full max-w-[1250px] flex items-center justify-between py-4.5 px-4 min-[500px]:px-5 sm:px-[4vw] md:px-[5vw] lg:px-[3vw] font-medium gap-3">
         {/* home icon for navigation */}
-        <div className="flex gap-5 items-center pl-1">
+        <div className="border rounded-[9px] p-1.5 w-10 aspect-square border-gray-400 flex justify-center items-center overflow-visible">
           <Link to="/">
-            <img
-              src={assets.home}
-              className="w-5.5 cursor-pointer flex-shrink-0"
-              alt="H"
-              onClick={() => {
-                window.scrollTo(0, 0);
-              }}
-            />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 30 30"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-house-fish cursor-pointer hover:scale-110 transition-transform duration-200"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              {/* Fish centered inside the house */}
+              <g transform="translate(0 0) scale(1.3)">
+                <path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.47-3.44 6-7 6s-7.56-2.53-8.5-6Z" />
+                <path d="M18 12v.5" />
+                <path d="M16 17.93a9.77 9.77 0 0 1 0-11.86" />
+                <path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .23 6.5-1.24 1.5-1.24 5-.23 6.5C5.58 18.03 7 16 7 13.33" />
+                <path d="M10.46 7.26C10.2 5.88 9.17 4.24 8 3h5.8a2 2 0 0 1 1.98 1.67l.23 1.4" />
+                <path d="m16.01 17.93-.23 1.4A2 2 0 0 1 13.8 21H9.5a5.96 5.96 0 0 0 1.49-3.98" />
+              </g>
+            </svg>
           </Link>
+
 
           {/* Mobile menu icon */}
           {/* <div className="justify-end">
@@ -172,13 +201,29 @@ const Navbar = () => {
         {/* Cart and User icons */}
         <div className="flex items-center justify-center">
           <div className="flex items-center gap-2 min-[350px]:gap-2">
-            <div className="relative border rounded-[9px] p-1.5 w-10 aspect-square border-gray-300 flex justify-center items-center">
+            <div className="relative border rounded-[9px] p-1.5 w-10 aspect-square border-gray-400 flex justify-center items-center">
               <Link to="/cart" className=" flex-shrink-0">
-                <img
+                {/* <img
                   src={assets.cart_icon}
                   className=" w-5 flex-shrink-0"
                   alt="Cart"
-                />
+                /> */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-shopping-cart cursor-pointer hover:scale-110 transition-transform duration-200"
+                >
+                  <circle cx="8" cy="21" r="1" />
+                  <circle cx="19" cy="21" r="1" />
+                  <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                </svg>
               </Link>
               <span className="absolute right-[-8px] top-[-10px] w-5 text-center leading-5 bg-black text-white aspect-square rounded-full text-[8px]">
                 {Number(getcartcount()) || 0}
@@ -186,16 +231,17 @@ const Navbar = () => {
             </div>
 
             <div className="relative flex-shrink-0 ml-1 sm:ml-2" ref={userRef}>
-              <div className="border rounded-[9px] p-1.5 w-10 aspect-square flex border-gray-300 justify-center items-center">
+              <div className="border rounded-[9px] p-1.5 w-10 aspect-square flex border-gray-400 justify-center items-center">
                 <button
                   className="flex gap-2"
                   onClick={() => setShow((pre) => !pre)}
                 >
-                  <img
+                  {/* <img
                     src={assets.profile_icon}
                     className="w-5 cursor-pointer flex-shrink-0"
                     alt="Profile"
-                  />
+                  /> */}
+                  <UserIcon className="h-6 w-6 text-black cursor-pointer hover:scale-110 transition-transform duration-200" />
                 </button>
               </div>
 
@@ -295,7 +341,7 @@ const Navbar = () => {
                   navigate(`/collection?category=${cat.slug}`);
                   closeMenu(); // <-- Close sidebar after navigation
                 }}
-                className="cursor-pointer hover:text-blue-500"
+                className="cursor-pointer hover:text-blue-500 "
               >
                 {cat.name}
               </div>

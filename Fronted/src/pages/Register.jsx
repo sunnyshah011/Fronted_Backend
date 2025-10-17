@@ -18,6 +18,20 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agree, setAgree] = useState(false);
 
+  useEffect(() => {
+    const showToast = localStorage.getItem("showRegisterToast");
+    if (showToast) {
+      toast.success("Account Created Successfully", {
+        className: "custom-toast-center",
+        autoClose: 2000,
+        pauseOnHover: false,
+        closeOnClick: true,
+        hideProgressBar: true,
+      });
+      localStorage.removeItem("showRegisterToast"); // remove flag
+    }
+  }, []);
+
   const onsubmithandler = async (e) => {
     e.preventDefault();
 
@@ -36,16 +50,14 @@ const Register = () => {
       });
 
       if (response.data.success) {
-        navigate("/");
-        toast.success("Account Created Successfully", {
-          className: "custom-toast-center",
-          autoClose: 1000,
-          pauseOnHover: false,
-          closeOnClick: true,
-          hideProgressBar: true,
-        });
         setToken(response.data.token);
         localStorage.setItem("token", response.data.token);
+
+        // Set flag to show toast after reload
+        localStorage.setItem("showRegisterToast", "true");
+
+        // Reload page to update navbar/user info
+        window.location.reload();
       } else {
         toast.error(response.data.message);
       }
