@@ -2,23 +2,16 @@ import { useEffect, useState, useRef, useContext } from "react";
 import { assets } from "../assets/frontend_assets/assets";
 import { NavLink, Link } from "react-router-dom";
 import { ShopContext } from "../Context/ShopContext";
-import { UserIcon, Cog6ToothIcon } from "@heroicons/react/24/outline"; // or /outline
+import { UserIcon } from "@heroicons/react/24/outline"; // or /outline
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline"; // or /outline
 import { HomeIcon } from "@heroicons/react/24/outline"; // Add at the top of your file
-
+import { FaBars, FaTimes } from "react-icons/fa"; // hamburger and close icons
 import { toast } from "react-toastify";
 import axios from "axios";
 
 const Navbar = () => {
-  const {
-    setToken,
-    userDetails,
-    setUserDetails,
-    token,
-    getcartcount,
-    setCartitem,
-    navigate,
-  } = useContext(ShopContext);
+  const { setToken, address, token, getcartcount, setCartitem, navigate } =
+    useContext(ShopContext);
 
   const { backendUrl } = useContext(ShopContext);
   const [categories, setCategories] = useState([]);
@@ -112,7 +105,7 @@ const Navbar = () => {
 
   return (
     <header className="fixed top-0 left-0 w-full border-b border-gray-100 bg-white z-50">
-      <div className="mx-auto w-full max-w-[1250px] flex items-center justify-between py-5 px-4 min-[500px]:px-5 sm:px-[4vw] md:px-[5vw] lg:px-[3vw] font-medium gap-3">
+      <div className="mx-auto w-full max-w-[1250px] flex items-center justify-between py-4.5 px-4 min-[500px]:px-5 sm:px-[4vw] md:px-[5vw] lg:px-[3vw] font-medium gap-3">
         {/* home icon for navigation */}
         <div className="flex gap-5 items-center">
           <Link to="/">
@@ -121,7 +114,7 @@ const Navbar = () => {
               className="w-5.5 cursor-pointer flex-shrink-0"
               alt="H"
               onClick={() => {
-                  window.scrollTo(0, 0);
+                window.scrollTo(0, 0);
               }}
             />
           </Link>
@@ -159,7 +152,7 @@ const Navbar = () => {
                   onClick={() => navigate(`/collection?category=${cat.slug}`)}
                 >
                   <div>
-                    <p className="max-[768px]:text-[12px] text-center max-[768px]:font-medium md:text-[17px] font-normal ">
+                    <p className="max-[768px]:text-[12px] text-center max-[768px]:font-medium md:text-[17px] font-normal cursor-pointer">
                       {" "}
                       {cat.name}{" "}
                     </p>
@@ -175,28 +168,33 @@ const Navbar = () => {
         {/* Cart and User icons */}
         <div className="flex items-center justify-center">
           <div className="flex items-center gap-2 min-[350px]:gap-2">
-            <Link to="/cart" className="relative flex-shrink-0">
-              <img
-                src={assets.cart_icon}
-                className=" w-6 flex-shrink-0"
-                alt="Cart"
-              />
-              <span className="absolute right-[-4px] bottom-[-6px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
+            <div className="relative border rounded-[9px] p-1.5 w-10 aspect-square border-gray-300 flex justify-center items-center">
+              <Link to="/cart" className=" flex-shrink-0">
+                <img
+                  src={assets.cart_icon}
+                  className=" w-5 flex-shrink-0"
+                  alt="Cart"
+                />
+              </Link>
+              <span className="absolute right-[-8px] top-[-10px] w-5 text-center leading-5 bg-black text-white aspect-square rounded-full text-[8px]">
                 {Number(getcartcount()) || 0}
               </span>
-            </Link>
+            </div>
 
-            <div className="relative flex-shrink-0 ml-5 sm:ml-8" ref={userRef}>
-              <button
-                className="flex gap-2"
-                onClick={() => setShow((pre) => !pre)}
-              >
-                <img
-                  src={assets.profile_icon}
-                  className="w-6 cursor-pointer flex-shrink-0"
-                  alt="Profile"
-                />
-              </button>
+            <div className="relative flex-shrink-0 ml-1 sm:ml-2" ref={userRef}>
+              <div className="border rounded-[9px] p-1.5 w-10 aspect-square flex border-gray-300 justify-center items-center">
+                <button
+                  className="flex gap-2"
+                  onClick={() => setShow((pre) => !pre)}
+                >
+                  <img
+                    src={assets.profile_icon}
+                    className="w-5 cursor-pointer flex-shrink-0"
+                    alt="Profile"
+                  />
+                </button>
+              </div>
+
               <div
                 className={`absolute left-[-125px] pt-4 ${
                   show ? "block" : "hidden"
@@ -255,11 +253,9 @@ const Navbar = () => {
             </div>
 
             <div className="text-sm flex flex-col">
-              <div className="text-[13px] ">
-                {userDetails?.name && <p>HI,</p>}
-              </div>
-              <p className="text-[13px] ">
-                {userDetails?.name ? userDetails.name.slice(0, 5) : ""}
+              <div className="text-[12px] ">{address?.name && <p>HI,</p>}</div>
+              <p className="text-[12px] ">
+                {address?.name ? address.name.slice(0, 6) : ""}
               </p>
             </div>
           </div>
@@ -297,7 +293,7 @@ const Navbar = () => {
                   navigate(`/collection?category=${cat.slug}`);
                   closeMenu(); // <-- Close sidebar after navigation
                 }}
-                className="cursor-pointer hover:text-blue-500 "
+                className="cursor-pointer hover:text-blue-500"
               >
                 {cat.name}
               </div>

@@ -591,7 +591,6 @@ const ShopContextProvider = (props) => {
       cartdata[itemId][size][color] = currentQty + quantity;
 
       setCartitem(cartdata);
-      localStorage.setItem("cartItems", JSON.stringify(cartdata));
       toast.success("Product added to cart!", {
         className: "custom-toast-center",
         autoClose: true,
@@ -737,7 +736,6 @@ const ShopContextProvider = (props) => {
   useEffect(() => {
     if (cartDataQuery) {
       setCartitem(cartDataQuery);
-      localStorage.setItem("cartItems", JSON.stringify(cartDataQuery));
     }
   }, [cartDataQuery]);
 
@@ -760,6 +758,8 @@ const ShopContextProvider = (props) => {
   useEffect(() => {
     if (profileData?.address) setAddress(profileData.address);
   }, [profileData]);
+
+  
 
   // -----------------------
   // Load token & cart from localStorage
