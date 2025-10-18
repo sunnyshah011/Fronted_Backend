@@ -9,11 +9,11 @@ const userAddressSchema = new mongoose.Schema(
       unique: true, // <-- Enforce only one address per user
     }, // linked to login user
     name: { type: String, required: true },
-    phone: { type: Number, required: true },
-    province: { type: String, required: true },
-    district: { type: String, required: true },
-    city: { type: String, required: true },
-    street: { type: String, required: true },
+    phone: { type: Number, default: 0 },
+    province: { type: String, default: "" },
+    district: { type: String, default: "" },
+    city: { type: String, default: "" },
+    street: { type: String, default: "" },
   },
   { timestamps: true }
 );

@@ -3,6 +3,7 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import transporter from "../config/nodemailer.js";
+import userAddress from "../models/useraddress.model.js";
 
 //generating token for new user
 const createToken = (id) => {
@@ -55,6 +56,25 @@ const registerUser = async (req, res) => {
 
     const user = await newUser.save();
     const token = createToken(user._id);
+
+    // 🆕 Auto-create address record with name from user model
+    const existingAddress = await userAddress.findOne({ userId: user._id });
+    if (!existingAddress) {
+      const createdAddress = await userAddress.create({
+        userId: user._id,
+        name: user.name,
+        phone: 0,
+        province: "",
+        district: "",
+        city: "",
+        street: "",
+      });
+
+      // 🔗 update user's address reference
+      await userModel.findByIdAndUpdate(user._id, {
+        address: createdAddress._id,
+      });
+    }
 
     //sending welcome email
     const mailOptions = {
@@ -293,7 +313,6 @@ const verifyResetOtp = async (req, res) => {
     return res.json({ success: false, message: error.message });
   }
 };
-
 
 // reset user password
 const resetPassword = async (req, res) => {

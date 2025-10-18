@@ -1,363 +1,3 @@
-// import { createContext, useState, useEffect, useCallback } from "react";
-// import { toast } from "react-toastify";
-// import { useNavigate } from "react-router-dom";
-// import axios from "axios";
-// import { useQuery, useQueryClient } from "@tanstack/react-query";
-
-// const ShopContext = createContext();
-
-// const ShopContextProvider = (props) => {
-//   const currency = "Rs.";
-//   const delivery_fee = 150;
-//   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-//   const navigate = useNavigate();
-//   const queryClient = useQueryClient();
-
-//   // State variables
-//   const [cartitem, setCartitem] = useState({});
-//   const [products, setProducts] = useState([]);
-//   const [token, setToken] = useState(null);
-//   const [address, setAddress] = useState(null);
-
-//   // Loading states
-//   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
-//   const [isLoadingCart, setIsLoadingCart] = useState(false);
-//   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
-
-//   // Centralized error handler
-//   const handleApiError = (error) => {
-//     const message =
-//       error?.response?.data?.message || error.message || "Something went wrong";
-//     toast.error(message, {
-//       position: "top-center",
-//       className: "custom-toast-center",
-//       bodyClassName: "text-sm",
-//       closeOnClick: true,
-//       pauseOnHover: true,
-//       autoClose: 2000,
-//     });
-//   };
-
-//   // -----------------------
-//   // React Query: userDetails
-//   // -----------------------
-//   const { data: userDetails, isLoading: isLoadingUser } = useQuery({
-//     queryKey: ["userDetails", token],
-//     queryFn: async () => {
-//       const res = await axios.post(
-//         backendUrl + "/api/user/user-data",
-//         {},
-//         { headers: { token } }
-//       );
-//       if (!res.data.success) throw new Error("Failed to fetch user data");
-//       return res.data.message;
-//     },
-//     enabled: !!token, // only fetch if token exists
-//     staleTime: 5 * 60 * 1000, // cache 5 minutes
-//     refetchOnWindowFocus: false, // avoid refetch on window focus
-//   });
-
-//   // -----------------------
-//   // Functions
-//   // -----------------------
-//   const updateAddress = useCallback((newAddress) => {
-//     setAddress(newAddress);
-//   }, []);
-
-//   //---------------------------------------------
-//   // ✅ Add to Cart
-//   const addtocart = useCallback(
-//     async (itemId, size, color, quantity = 1) => {
-
-//       if (!size && !color) return toast.error("Select size/color");
-
-//       if (!token) {
-//         const existing = toast.isActive("login-toast");
-
-//         if (existing) {
-//           // 👇 Update the toast with a "blink" effect
-//           toast.update("login-toast", {
-//             render: (
-//               <div className="flex flex-col items-center animate-pulse">
-//                 <p className="mb-2">
-//                   Please login or register to add items to cart!
-//                 </p>
-//                 <button
-//                   onClick={() => {
-//                     navigate("/login");
-//                     toast.dismiss("login-toast");
-//                   }}
-//                   className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
-//                 >
-//                   Go to Login
-//                 </button>
-//               </div>
-//             ),
-//             className: "custom-toast-center", // ✅ apply custom CSS
-//           });
-//         } else {
-//           // 👇 First time show toast
-//           toast.info(
-//             <div className="flex flex-col items-center">
-//               <p className="mb-2">Please login or register to add items to cart!</p>
-//               <button
-//                 onClick={() => {
-//                   navigate("/register");
-//                   toast.dismiss("login-toast");
-//                 }}
-//                 className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
-//               >
-//                 Go to Login
-//               </button>
-//             </div>,
-//             {
-//               toastId: "login-toast",
-//               className: "custom-toast-center", // ✅ apply custom CSS
-//               autoClose: true,
-//               closeOnClick: false,
-//               draggable: false,
-//             }
-//           );
-//         }
-
-//         return;
-//       }
-
-//       const cartdata = structuredClone(cartitem);
-
-//       if (!cartdata[itemId]) cartdata[itemId] = {};
-//       if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
-
-//       cartdata[itemId][size][color] = (cartdata[itemId][size][color] || 0) + quantity;
-
-//       setCartitem(cartdata);
-//       localStorage.setItem("cartItems", JSON.stringify(cartdata));
-//       toast.success("Product added to cart!");
-
-//       // ✅ Call backend if user is logged in
-//       if (token) {
-//         try {
-//           await axios.post(
-//             backendUrl + "/api/cart/add",
-//             { itemId, size, color, quantity },
-//             { headers: { token } }
-//           );
-//         } catch (error) {
-//           handleApiError(error);
-//         }
-//       }
-//     },
-//     [cartitem, token, backendUrl]
-//   );
-
-//   // ✅ Get Cart Count
-//   const getcartcount = useCallback(() => {
-//     let totalcount = 0;
-//     for (const productId in cartitem) {
-//       for (const size in cartitem[productId]) {
-//         for (const color in cartitem[productId][size]) {
-//           totalcount += cartitem[productId][size][color];
-//         }
-//       }
-//     }
-//     return totalcount;
-//   }, [cartitem]);
-
-//   // ✅ Update Quantity
-//   const updateQuantity = useCallback(
-//     async (itemId, size, color, quantity) => {
-//       const cartdata = structuredClone(cartitem);
-//       if (!cartdata[itemId]) return;
-
-//       if (quantity <= 0) {
-//         delete cartdata[itemId][size][color];
-//         if (Object.keys(cartdata[itemId][size]).length === 0) {
-//           delete cartdata[itemId][size];
-//         }
-//         if (Object.keys(cartdata[itemId]).length === 0) {
-//           delete cartdata[itemId];
-//         }
-
-//         toast.info("Item removed from cart", { autoClose: 1000 });
-//       } else {
-//         if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
-//         cartdata[itemId][size][color] = quantity;
-//       }
-
-//       setCartitem(cartdata);
-//       localStorage.setItem("cartItems", JSON.stringify(cartdata));
-
-//       // ✅ Update backend if user is logged in
-//       if (token) {
-//         try {
-//           await axios.post(
-//             backendUrl + "/api/cart/update",
-//             { itemId, size, color, quantity },
-//             { headers: { token } }
-//           );
-//         } catch (error) {
-//           handleApiError(error);
-//         }
-//       }
-//     },
-//     [cartitem, token, backendUrl]
-//   );
-
-//   // ✅ Calculate total amount
-//   const calculatetotalamount = useCallback(() => {
-//     let total = 0;
-//     for (const productId in cartitem) {
-//       const product = products.find((p) => p._id === productId);
-//       if (!product) continue;
-
-//       for (const size in cartitem[productId]) {
-//         for (const color in cartitem[productId][size]) {
-//           const qty = cartitem[productId][size][color];
-//           const variant = product.variants.find(
-//             (v) => v.size === size && v.color === color
-//           );
-//           if (variant) total += variant.price * qty;
-//         }
-//       }
-//     }
-//     return total;
-//   }, [cartitem, products]);
-
-//   //-----------------------------------------------
-
-
-
-//   // Fetching Products
-//   const getProductsData = useCallback(async () => {
-//     setIsLoadingProducts(true);
-//     try {
-//       const response = await axios.get(backendUrl + "/api/product/list");
-//       if (response.data.success) {
-//         setProducts(response.data.products);
-//       } else {
-//         toast.error(response.data.message);
-//       }
-//     } catch (error) {
-//       handleApiError(error);
-//     } finally {
-//       setIsLoadingProducts(false);
-//     }
-//   }, [backendUrl]);
-
-//   const getUserCart = useCallback(
-//     async (token) => {
-//       setIsLoadingCart(true);
-//       try {
-//         const response = await axios.post(
-//           backendUrl + "/api/cart/get",
-//           {},
-//           { headers: { token } }
-//         );
-//         if (response.data.success) {
-//           setCartitem(response.data.cartData || {});
-//           localStorage.setItem(
-//             "cartItems",
-//             JSON.stringify(response.data.cartData || {})
-//           );
-//         }
-//       } catch (error) {
-//         handleApiError(error);
-//       } finally {
-//         setIsLoadingCart(false);
-//       }
-//     },
-//     [backendUrl]
-//   );
-
-//   const getProfileData = useCallback(async () => {
-//     if (!token) return;
-//     setIsLoadingProfile(true);
-//     try {
-//       const response = await axios.post(
-//         backendUrl + "/api/profile/getprofile",
-//         {},
-//         { headers: { token } }
-//       );
-//       if (response.data.success) {
-//         setAddress(response.data.userprofiledet.address || null);
-//       } else {
-//         toast.error("Failed to fetch profile");
-//       }
-//     } catch (error) {
-//       handleApiError(error);
-//     } finally {
-//       setIsLoadingProfile(false);
-//     }
-//   }, [token, backendUrl]);
-
-//   // -----------------------
-//   // Effects
-//   // -----------------------
-//   // Load token & cart from localStorage
-//   useEffect(() => {
-//     const savedToken = localStorage.getItem("token");
-//     const savedCart = localStorage.getItem("cartItems");
-//     if (savedToken) setToken(savedToken);
-//     if (savedCart) setCartitem(JSON.parse(savedCart));
-//   }, []);
-
-//   // Fetch products once
-//   useEffect(() => {
-//     getProductsData();
-//   }, [getProductsData]);
-
-//   // Fetch profile
-//   useEffect(() => {
-//     getProfileData();
-//   }, [getProfileData]);
-
-//   // Fetch cart after login/logout
-//   useEffect(() => {
-//     if (token) getUserCart(token);
-//     else {
-//       setCartitem({});
-//       localStorage.setItem("cartItems", JSON.stringify({}));
-//     }
-//   }, [token, getUserCart]);
-
-//   // -----------------------
-//   // Context value
-//   // -----------------------
-//   const value = {
-//     currency,
-//     delivery_fee,
-//     products,
-//     isLoadingProducts,
-//     cartitem,
-//     isLoadingCart,
-//     addtocart,
-//     getcartcount,
-//     updateQuantity,
-//     calculatetotalamount,
-//     setCartitem,
-//     navigate,
-//     backendUrl,
-//     setToken,
-//     token,
-//     address,
-//     setAddress,
-//     updateAddress,
-//     isLoadingProfile,
-//     userDetails, // reactive via React Query
-//     isLoadingUser,
-//     queryClient, // optionally expose for invalidation
-//   };
-
-//   return (
-//     <ShopContext.Provider value={value}>{props.children}</ShopContext.Provider>
-//   );
-// };
-
-// export default ShopContextProvider;
-// export { ShopContext };
-
-
-
 import { createContext, useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -379,11 +19,6 @@ const ShopContextProvider = (props) => {
   const [token, setToken] = useState(null);
   const [address, setAddress] = useState(null);
 
-  // Loading states
-  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
-  const [isLoadingCart, setIsLoadingCart] = useState(false);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
-
   // Centralized error handler
   const handleApiError = (error) => {
     const message =
@@ -398,9 +33,7 @@ const ShopContextProvider = (props) => {
     });
   };
 
-  // -----------------------
   // React Query: userDetails
-  // -----------------------
   const { data: userDetails, isLoading: isLoadingUser } = useQuery({
     queryKey: ["userDetails", token],
     queryFn: async () => {
@@ -418,99 +51,10 @@ const ShopContextProvider = (props) => {
     onError: (error) => handleApiError(error),
   });
 
-  // -----------------------
   // Functions
-  // -----------------------
   const updateAddress = useCallback((newAddress) => {
     setAddress(newAddress);
   }, []);
-
-  //---------------------------------------------
-  // ✅ Add to Cart
-  // const addtocart = useCallback(
-  //   async (itemId, size, color, quantity = 1) => {
-  //     if (!size && !color) return toast.error("Select size/color");
-
-  //     if (!token) {
-  //       const existing = toast.isActive("login-toast");
-
-  //       if (existing) {
-  //         toast.update("login-toast", {
-  //           render: (
-  //             <div className="flex flex-col items-center animate-pulse">
-  //               <p className="mb-2">
-  //                 Please login or register to add items to cart!
-  //               </p>
-  //               <button
-  //                 onClick={() => {
-  //                   navigate("/login");
-  //                   toast.dismiss("login-toast");
-  //                 }}
-  //                 className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
-  //               >
-  //                 Go to Login
-  //               </button>
-  //             </div>
-  //           ),
-  //           className: "custom-toast-center",
-  //         });
-  //       } else {
-  //         toast.info(
-  //           <div className="flex flex-col items-center">
-  //             <p className="mb-2">Please login or register to add items to cart!</p>
-  //             <button
-  //               onClick={() => {
-  //                 navigate("/register");
-  //                 toast.dismiss("login-toast");
-  //               }}
-  //               className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
-  //             >
-  //               Go to Login
-  //             </button>
-  //           </div>,
-  //           {
-  //             toastId: "login-toast",
-  //             className: "custom-toast-center",
-  //             autoClose: true,
-  //             closeOnClick: false,
-  //             draggable: false,
-  //           }
-  //         );
-  //       }
-
-  //       return;
-  //     }
-
-  //     const cartdata = structuredClone(cartitem);
-  //     if (!cartdata[itemId]) cartdata[itemId] = {};
-  //     if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
-  //     cartdata[itemId][size][color] = (cartdata[itemId][size][color] || 0) + quantity;
-
-  //     setCartitem(cartdata);
-  //     localStorage.setItem("cartItems", JSON.stringify(cartdata));
-  //     toast.success("Product added to cart!", {
-  //       className: "custom-toast-center",
-  //       autoClose: true,
-  //       closeOnClick: false,
-  //       draggable: false,
-  //     });
-
-  //     // ✅ Update backend
-  //     if (token) {
-  //       try {
-  //         await axios.post(
-  //           `${backendUrl}/api/cart/add`,
-  //           { itemId, size, color, quantity },
-  //           { headers: { token } }
-  //         );
-  //         queryClient.invalidateQueries(["cart", token]); // refresh cart query
-  //       } catch (error) {
-  //         handleApiError(error);
-  //       }
-  //     }
-  //   },
-  //   [cartitem, token, backendUrl, navigate, queryClient]
-  // );
 
   const addtocart = useCallback(
     async (itemId, size, color, quantity = 1) => {
@@ -615,7 +159,6 @@ const ShopContextProvider = (props) => {
     [cartitem, products, token, backendUrl, navigate, queryClient]
   );
 
-
   // ✅ Get Cart Count
   const getcartcount = useCallback(() => {
     let totalcount = 0;
@@ -637,12 +180,14 @@ const ShopContextProvider = (props) => {
 
       if (quantity <= 0) {
         delete cartdata[itemId][size][color];
-        if (Object.keys(cartdata[itemId][size]).length === 0) delete cartdata[itemId][size];
+        if (Object.keys(cartdata[itemId][size]).length === 0)
+          delete cartdata[itemId][size];
         if (Object.keys(cartdata[itemId]).length === 0) delete cartdata[itemId];
         toast.info("Item removed from cart", {
           className: "custom-toast-center",
           closeOnClick: false,
-          draggable: false, autoClose: 1000
+          draggable: false,
+          autoClose: 1000,
         });
       } else {
         if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
@@ -650,12 +195,12 @@ const ShopContextProvider = (props) => {
         toast.success("Cart Updated!!", {
           className: "custom-toast-center",
           closeOnClick: false,
-          draggable: false, autoClose: 1000
+          draggable: false,
+          autoClose: 1000,
         });
       }
 
       setCartitem(cartdata);
-      localStorage.setItem("cartItems", JSON.stringify(cartdata));
 
       if (token) {
         try {
@@ -682,7 +227,9 @@ const ShopContextProvider = (props) => {
       for (const size in cartitem[productId]) {
         for (const color in cartitem[productId][size]) {
           const qty = cartitem[productId][size][color];
-          const variant = product.variants.find((v) => v.size === size && v.color === color);
+          const variant = product.variants.find(
+            (v) => v.size === size && v.color === color
+          );
           if (variant) total += variant.price * qty;
         }
       }
@@ -690,14 +237,8 @@ const ShopContextProvider = (props) => {
     return total;
   }, [cartitem, products]);
 
-  //-----------------------------------------------
-  // -----------------------
   // ✅ Fetching Products (TanStack Query)
-  // -----------------------
-  const {
-    data: productsData,
-    isLoading: isLoadingProductsQuery,
-  } = useQuery({
+  const { data: productsData, isLoading: isLoadingProductsQuery } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
       const response = await axios.get(`${backendUrl}/api/product/list`);
@@ -713,9 +254,7 @@ const ShopContextProvider = (props) => {
     if (productsData) setProducts(productsData);
   }, [productsData]);
 
-  // -----------------------
   // ✅ Fetch User Cart
-  // -----------------------
   const {
     data: cartDataQuery,
     isLoading: isLoadingCartQuery,
@@ -724,7 +263,11 @@ const ShopContextProvider = (props) => {
     queryKey: ["cart", token],
     queryFn: async () => {
       if (!token) return {};
-      const response = await axios.post(`${backendUrl}/api/cart/get`, {}, { headers: { token } });
+      const response = await axios.post(
+        `${backendUrl}/api/cart/get`,
+        {},
+        { headers: { token } }
+      );
       if (!response.data.success) throw new Error("Failed to fetch cart");
       return response.data.cartData || {};
     },
@@ -739,14 +282,20 @@ const ShopContextProvider = (props) => {
     }
   }, [cartDataQuery]);
 
-  // -----------------------
   // ✅ Fetch Profile Data
-  // -----------------------
-  const { data: profileData, isLoading: isLoadingProfileQuery, refetch: refetchProfileQuery } = useQuery({
+  const {
+    data: profileData,
+    isLoading: isLoadingProfileQuery,
+    refetch: refetchProfileQuery,
+  } = useQuery({
     queryKey: ["profile", token],
     queryFn: async () => {
       if (!token) return {};
-      const response = await axios.post(`${backendUrl}/api/profile/getprofile`, {}, { headers: { token } });
+      const response = await axios.post(
+        `${backendUrl}/api/profile/getprofile`,
+        {},
+        { headers: { token } }
+      );
       if (!response.data.success) throw new Error("Failed to fetch profile");
       return response.data.userprofiledet || {};
     },
@@ -759,28 +308,19 @@ const ShopContextProvider = (props) => {
     if (profileData?.address) setAddress(profileData.address);
   }, [profileData]);
 
-  
-
-  // -----------------------
   // Load token & cart from localStorage
-  // -----------------------
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
-    const savedCart = localStorage.getItem("cartItems");
     if (savedToken) setToken(savedToken);
-    if (savedCart) setCartitem(JSON.parse(savedCart));
+    else queryClient.clear();
   }, []);
 
-  // -----------------------
   // Context value
-  // -----------------------
   const value = {
     currency,
     delivery_fee,
     products,
-    isLoadingProducts: isLoadingProducts || isLoadingProductsQuery,
     cartitem,
-    isLoadingCart: isLoadingCart || isLoadingCartQuery,
     addtocart,
     getcartcount,
     updateQuantity,
@@ -793,15 +333,19 @@ const ShopContextProvider = (props) => {
     address,
     setAddress,
     updateAddress,
-    isLoadingProfile: isLoadingProfile || isLoadingProfileQuery,
     userDetails,
     isLoadingUser,
     queryClient,
     refetchCartQuery,
     refetchProfileQuery,
+    isLoadingProducts: isLoadingProductsQuery,
+    isLoadingCart: isLoadingCartQuery,
+    isLoadingProfile: isLoadingProfileQuery,
   };
 
-  return <ShopContext.Provider value={value}>{props.children}</ShopContext.Provider>;
+  return (
+    <ShopContext.Provider value={value}>{props.children}</ShopContext.Provider>
+  );
 };
 
 export default ShopContextProvider;

@@ -83,7 +83,7 @@ const Register = () => {
         <h2 className="text-2xl font-bold text-gray-800 mb-2">
           Welcome To FTS
         </h2>
-        <p className="text-gray-600 mb-6">Create New Account</p>
+        <p className="text-gray-600 mb-4">Create New Account</p>
 
         <form onSubmit={onsubmithandler} className="space-y-4">
           <div>
