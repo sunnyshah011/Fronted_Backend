@@ -33,6 +33,18 @@ const ShopContextProvider = (props) => {
     });
   };
 
+  // Add this function inside ShopContextProvider
+  const refreshProductStock = useCallback(async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/api/product/list`);
+      if (response.data.success) {
+        setProducts(response.data.products);
+      }
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [backendUrl]);
+
   // React Query: userDetails
   const { data: userDetails, isLoading: isLoadingUser } = useQuery({
     queryKey: ["userDetails", token],
@@ -254,7 +266,6 @@ const ShopContextProvider = (props) => {
     if (productsData) setProducts(productsData);
   }, [productsData]);
 
-  
   // ✅ Fetch User Cart
   const {
     data: cartDataQuery,
@@ -318,6 +329,7 @@ const ShopContextProvider = (props) => {
 
   // Context value
   const value = {
+    refreshProductStock,
     currency,
     delivery_fee,
     products,

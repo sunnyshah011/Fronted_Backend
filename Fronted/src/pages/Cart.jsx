@@ -12,7 +12,7 @@ const Cart = () => {
 
   const [cartdata, setCartData] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [updatingItem, setUpdatingItem] = useState(null);
 
   // 🔹 Build flat array from nested cart structure
   useEffect(() => {
@@ -35,9 +35,33 @@ const Cart = () => {
     [updateQuantity]
   );
 
-  // 🔹 Optimistic UI update + sync context/backend
-  const handleQuantityChange = (item, newQty) => {
-    // Immediate UI update
+  // // 🔹 Optimistic UI update + sync context/backend
+  // const handleQuantityChange = (item, newQty) => {
+  //   // Immediate UI update
+  //   setCartData((prev) =>
+  //     prev.map((i) =>
+  //       i._id === item._id && i.size === item.size && i.color === item.color
+  //         ? { ...i, quantity: newQty }
+  //         : i
+  //     )
+  //   );
+
+  //   // Trigger backend/context update (debounced)
+  //   debouncedUpdateQuantity(item._id, item.size, item.color, newQty);
+  // };
+
+  const handleQuantityChange = async (item, newQty) => {
+    const key = `${item._id}_${item.size}_${item.color}`;
+    if (updatingItem === key) return; // ignore rapid clicks
+    setUpdatingItem(key);
+
+    const productData = products.find((p) => p._id === item._id);
+    const variant = productData?.variants?.find(
+      (v) => v.size === item.size && v.color === item.color
+    );
+    const maxStock = variant?.stock ?? Infinity;
+    if (newQty > maxStock) newQty = maxStock;
+
     setCartData((prev) =>
       prev.map((i) =>
         i._id === item._id && i.size === item.size && i.color === item.color
@@ -46,8 +70,8 @@ const Cart = () => {
       )
     );
 
-    // Trigger backend/context update (debounced)
-    debouncedUpdateQuantity(item._id, item.size, item.color, newQty);
+    await debouncedUpdateQuantity(item._id, item.size, item.color, newQty);
+    setUpdatingItem(null);
   };
 
   useEffect(() => {
@@ -76,7 +100,6 @@ const Cart = () => {
 
   return (
     <div className="mt-5 px-4">
-
       {/* 🐟 Loader Overlay */}
       {loading && (
         <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
@@ -197,7 +220,6 @@ const Cart = () => {
               >
                 {loading ? "Processing..." : "PROCEED TO CHECKOUT"}
               </button>
-
             </div>
           </div>
         </div>

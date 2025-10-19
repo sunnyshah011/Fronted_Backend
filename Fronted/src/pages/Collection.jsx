@@ -40,37 +40,16 @@ const Collection = () => {
     fetchCategories();
   }, [backendUrl]);
 
-  // useEffect(() => {
-  //   if (!activeCategory) {
-  //     setSubcategories([]);
-  //     setActiveSub(null);
-  //     return;
-  //   }
-
-  //   // reset old subcategory when category changes
-  //   setActiveSub(null);
-
-  //   const fetchSubcategories = async () => {
-  //     try {
-  //       const { data } = await axios.get(
-  //         `${backendUrl}/api/categories/${activeCategory}`
-  //       );
-  //       if (data.success) setSubcategories(data.subcategories);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-  //   fetchSubcategories();
-  // }, [activeCategory, backendUrl]);
-
+  // Reset filters when category changes
   useEffect(() => {
+    setActiveSub(null); // reset subcategory
+    setSelectedColors([]); // reset color filters
+    setSelectedSizes([]); // reset size filters
+
     if (!activeCategory) {
       setSubcategories([]);
-      setActiveSub(null);
-      return; // ✅ Prevent API call when no category
+      return;
     }
-
-    setActiveSub(null);
 
     (async () => {
       try {
@@ -84,6 +63,13 @@ const Collection = () => {
     })();
   }, [activeCategory, backendUrl]);
 
+  // Optional: reset size/color when subcategory changes
+  useEffect(() => {
+    setSelectedColors([]);
+    setSelectedSizes([]);
+  }, [activeSub]);
+
+  
   // Extract unique colors and sizes
   const { allColors, allSizes } = useMemo(() => {
     const colorSet = new Set();
@@ -198,10 +184,11 @@ const Collection = () => {
       <div className="sm:sticky sm:top-20 sm:self-start">
         {/* Sidebar */}
         <div
-          className={`${showFilter
-            ? "fixed top-19 right-0 h-full w-64 bg-white shadow-lg z-50 transform translate-x-0"
-            : "fixed top-19 right-0 h-full w-64 bg-white shadow-lg z-50 transform translate-x-full"
-            } transition-transform duration-300
+          className={`${
+            showFilter
+              ? "fixed top-19 right-0 h-full w-64 bg-white shadow-lg z-50 transform translate-x-0"
+              : "fixed top-19 right-0 h-full w-64 bg-white shadow-lg z-50 transform translate-x-full"
+          } transition-transform duration-300
            sm:relative sm:top-auto sm:right-auto sm:h-auto sm:w-60 sm:translate-x-0 sm:shadow-none overflow-y-auto pb-25`}
         >
           <div className="flex justify-between items-center p-4 border-b sm:hidden">
