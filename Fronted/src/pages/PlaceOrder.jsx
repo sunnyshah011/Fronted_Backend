@@ -108,28 +108,33 @@ const Placeorder = () => {
   };
 
 
-  // ✅ Handle input
   const handleChange = (e) => {
     const { name, value } = e.target;
-    let updatedForm = { ...formData, [name]: value };
+
+    // Prevent leading/only spaces and convert everything safely to string
+    let cleanedValue = String(value || "").replace(/^\s+/, "");
+    if (cleanedValue.trim() === "") cleanedValue = "";
+
+    let updatedForm = { ...formData, [name]: cleanedValue };
 
     if (name === "province") {
       updatedForm.district = "";
       updatedForm.city = "";
       setDistricts([]);
       setCities([]);
-      fetchDistricts(value);
+      fetchDistricts(cleanedValue);
     }
 
     if (name === "district") {
       updatedForm.city = "";
       setCities([]);
-      fetchCities(updatedForm.province, value);
+      fetchCities(updatedForm.province, cleanedValue);
     }
 
     setFormData(updatedForm);
     setIsModified(checkIfModified(updatedForm));
   };
+
 
   // ✅ Reset form
   const handleReset = () => {

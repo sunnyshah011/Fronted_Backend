@@ -94,28 +94,58 @@ const Profile = () => {
     );
   };
 
-  // ✅ Handle input change
+  // // ✅ Handle input change
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   let updatedForm = { ...formData, [name]: value };
+
+  //   if (name === "province") {
+  //     updatedForm.district = "";
+  //     updatedForm.city = "";
+  //     setDistricts([]);
+  //     setCities([]);
+  //     fetchDistricts(value);
+  //   }
+
+  //   if (name === "district") {
+  //     updatedForm.city = "";
+  //     setCities([]);
+  //     fetchCities(updatedForm.province, value);
+  //   }
+
+  //   setFormData(updatedForm);
+  //   setIsModified(checkIfModified(updatedForm));
+  // };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    let updatedForm = { ...formData, [name]: value };
+
+    // Prevent only spaces or leading spaces
+    let cleanedValue = value.replace(/^\s+/, ""); // no leading spaces
+
+    // Prevent entire field being only spaces
+    if (value.trim() === "") cleanedValue = "";
+
+    let updatedForm = { ...formData, [name]: cleanedValue };
 
     if (name === "province") {
       updatedForm.district = "";
       updatedForm.city = "";
       setDistricts([]);
       setCities([]);
-      fetchDistricts(value);
+      fetchDistricts(cleanedValue);
     }
 
     if (name === "district") {
       updatedForm.city = "";
       setCities([]);
-      fetchCities(updatedForm.province, value);
+      fetchCities(updatedForm.province, cleanedValue);
     }
 
     setFormData(updatedForm);
     setIsModified(checkIfModified(updatedForm));
   };
+
 
   // ✅ Reset to original
   const handleReset = () => {
@@ -293,20 +323,19 @@ const Profile = () => {
         <div className="flex flex-col sm:flex-row gap-4 mt-6">
           <button
             type="submit"
-            className={`flex-1 py-3 rounded-lg text-white font-medium transition ${
-              isFirstTime
+            className={`flex-1 py-3 rounded-lg text-white font-medium transition ${isFirstTime
                 ? "bg-blue-600 hover:bg-blue-700"
                 : isModified
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-gray-500 cursor-not-allowed"
-            }`}
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-gray-500 cursor-not-allowed"
+              }`}
             disabled={!isModified && !isFirstTime}
           >
             {isFirstTime
               ? "Add Address"
               : isModified
-              ? "Update Address"
-              : "Saved"}
+                ? "Update Address"
+                : "Saved"}
           </button>
 
           {!isFirstTime && isModified && (
