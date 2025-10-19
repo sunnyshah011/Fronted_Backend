@@ -210,3 +210,72 @@ export const removeProduct = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+/* ----------------------------------------
+   🟢 Get Top Products
+---------------------------------------- */
+export const getTopProducts = async (req, res) => {
+  try {
+    const products = await ProductModel.find({
+      isTopProduct: true,
+      isActive: true,
+    })
+      .populate({
+        path: "subcategory",
+        populate: { path: "category" },
+      })
+      .limit(6);
+
+    res.json({ success: true, products });
+  } catch (error) {
+    console.error("Error fetching top products:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch top products" });
+  }
+};
+
+/* ----------------------------------------
+   🔴 Get Flash Sale Products
+---------------------------------------- */
+export const getFlashSaleProducts = async (req, res) => {
+  try {
+    const products = await ProductModel.find({
+      isFlashSale: true,
+      isActive: true,
+    })
+      .populate({
+        path: "subcategory",
+        populate: { path: "category" },
+      })
+      .limit(6);
+
+    res.json({ success: true, products });
+  } catch (error) {
+    console.error("Error fetching flash sale products:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch flash sale products" });
+  }
+};
+
+export const getTop30Products = async (req, res) => {
+  try {
+    const products = await ProductModel.find()
+      .sort({ isBestSelling: -1, createdAt: -1 }) // best-selling first, then newest
+      .limit(30)
+      .populate({ path: "subcategory", populate: { path: "category" } })
+      .lean();
+
+    res.json({
+      success: true,
+      products,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch top products",
+    });
+  }
+};

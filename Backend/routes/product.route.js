@@ -5,6 +5,9 @@ import {
   getSingleProduct,
   removeProduct,
   updateProduct,
+  getTopProducts,
+  getFlashSaleProducts,
+  getTop30Products,
 } from "../controllers/product.controller.js";
 import upload from "../middleware/multer.middleware.js";
 import adminAuth from "../middleware/adminAuth.middleware.js";
@@ -38,5 +41,10 @@ productRouter.post(
 productRouter.post("/remove", adminAuth, removeProduct);
 productRouter.get("/list", listProducts);
 productRouter.get("/single/:id", getSingleProduct);
+
+// ✅ Product type routes
+productRouter.get("/top-products", getTopProducts);
+productRouter.get("/flash-sale", getFlashSaleProducts);
+productRouter.get("/top-30-products", getTop30Products);
 
 export default productRouter;

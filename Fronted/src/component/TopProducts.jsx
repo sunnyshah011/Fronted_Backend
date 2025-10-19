@@ -1,36 +1,84 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../Context/ShopContext";
+import { Link } from "react-router-dom";
+import axios from "axios";
 import Title from "./Title";
 import Product_Page from "./P_Page_Component";
-import { Link } from "react-router-dom";
+import SkeletonCard from "./SkeletonCard"; // adjust the path if needed
 
 const TopProducts = () => {
-  const { products } = useContext(ShopContext);
-  const [topProduct, setProduct] = useState([]);
+  const { backendUrl } = useContext(ShopContext);
+  const [topProducts, setTopProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (products?.length > 0) {
-      // ✅ filter only products with isTopProduct true
-      const filtered = products.filter((p) => p?.isTopProduct);
-      setProduct(filtered.slice(0, 6)); // take max 6 if needed
-    }
-  }, [products]);
+    if (!backendUrl) return; // wait until backendUrl is available
+
+    const fetchTopProducts = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const res = await axios.get(`${backendUrl}/api/product/top-products`);
+
+        if (!res.data.success) throw new Error(res.data.message);
+        setTopProducts(res.data.products || []);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopProducts();
+  }, [backendUrl]); // 🔹 run when backendUrl becomes available
+
+  if (!backendUrl)
+    return <p className="text-center py-5">Preparing top products...</p>;
+
+  if (loading)
+    return (
+      <div className="w-full px-2 py-1">
+        <Link to="all-top-products">
+          <Title Category="Top Products" More="View" />
+        </Link>
+
+        <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-2 gap-x-2">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <SkeletonCard key={idx} />
+          ))}
+        </div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <p className="text-center text-red-500 py-5">
+        Failed to load top products: {error.message}
+      </p>
+    );
+
+  if (!topProducts || topProducts.length === 0)
+    return (
+      <p className="text-center py-5 text-gray-500">No top products found.</p>
+    );
 
   return (
     <div className="w-full px-2 py-1">
-      <Link to="all-top-products" >
+      <Link to="all-top-products">
         <Title Category="Top Products" More="View" />
       </Link>
 
       <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-2 gap-x-2">
-        {topProduct.map((product) => (
+        {topProducts.map((product) => (
           <Product_Page
-            key={product?._id}
-            categorySlug={product?.subcategory?.category?.slug}
-            productSlug={product?.slug}
-            name={product?.name}
-            price={product?.variants?.[0]?.price}
-            images={product?.images}
+            key={product._id}
+            categorySlug={product.subcategory?.category?.slug}
+            productSlug={product.slug}
+            name={product.name}
+            price={product.variants?.[0]?.price}
+            images={product.images}
           />
         ))}
       </div>
