@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import transporter from "../config/nodemailer.js";
 import userAddress from "../models/useraddress.model.js";
+import fetch from "node-fetch";
+
 
 //generating token for new user
 const createToken = (id) => {
@@ -254,40 +256,107 @@ const getuserdata = async (req, res) => {
   }
 };
 
+// //send password reset otp
+// const sendResetOtp = async (req, res) => {
+//   const { gmail } = req.body || {};
+
+//   if (!gmail) {
+//     return res.json({ success: false, message: "Email is Required" });
+//   }
+
+//   try {
+//     const user = await userModel.findOne({ gmail });
+//     if (!user) {
+//       return res.json({ success: false, message: "User Not Found" });
+//     }
+
+//     const otp = String(Math.floor(100000 + Math.random() * 900000));
+//     user.resetOtp = otp;
+//     user.resetOtpExpireAt = Date.now() + 15 * 60 * 1000;
+
+//     await user.save();
+
+//     const mailOption = {
+//       from: process.env.SENDER_EMAIL,
+//       to: user.gmail,
+//       subject: "Password Reset OTP",
+//       text: `Your OTP for Resetting Your Password - ${otp}.`,
+//     };
+//     await transporter.sendMail(mailOption);
+
+//     return res.json({ success: true, message: "OTP Send To Your Email" });
+//   } catch (error) {
+//     console.log(error);
+//     res.json({ success: false, message: error.massage });
+//   }
+// };
+
+
 //send password reset otp
-const sendResetOtp = async (req, res) => {
+ const sendResetOtp = async (req, res) => {
   const { gmail } = req.body || {};
 
   if (!gmail) {
-    return res.json({ success: false, message: "Email is Required" });
+    return res.json({ success: false, message: "Email is required" });
   }
 
   try {
     const user = await userModel.findOne({ gmail });
     if (!user) {
-      return res.json({ success: false, message: "User Not Found" });
+      return res.json({ success: false, message: "User not found" });
     }
 
     const otp = String(Math.floor(100000 + Math.random() * 900000));
     user.resetOtp = otp;
-    user.resetOtpExpireAt = Date.now() + 15 * 60 * 1000;
-
+    user.resetOtpExpireAt = Date.now() + 15 * 60 * 1000; // 15 mins expiry
     await user.save();
 
-    const mailOption = {
-      from: process.env.SENDER_EMAIL,
-      to: user.gmail,
-      subject: "Password Reset OTP",
-      text: `Your OTP for Resetting Your Password - ${otp}.`,
-    };
-    await transporter.sendMail(mailOption);
+    // Send OTP via Brevo API
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: {
+          name: "FTS", // change to your app name
+          email: process.env.SENDER_EMAIL,
+        },
+        to: [{ email: user.gmail }],
+        subject: "Password Reset OTP",
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <h2>Password Reset Request</h2>
+            <p>Hello ${user.name || ""},</p>
+            <p>Your OTP for resetting your password is:</p>
+            <h3 style="color:#2b6cb0;">${otp}</h3>
+            <p>This OTP is valid for <strong>15 minutes</strong>.</p>
+            <p>If you didn't request this, you can ignore this email.</p>
+          </div>
+        `,
+      }),
+    });
 
-    return res.json({ success: true, message: "OTP Send To Your Email" });
+    const data = await response.json();
+    console.log("Brevo API Response:", data);
+
+    if (response.ok) {
+      res.json({ success: true, message: "OTP sent to your email" });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: "Failed to send OTP email",
+        details: data,
+      });
+    }
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.massage });
+    console.error("Email send error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+
 
 // verify OTP
 const verifyResetOtp = async (req, res) => {
