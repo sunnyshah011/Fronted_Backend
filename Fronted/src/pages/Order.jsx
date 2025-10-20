@@ -461,7 +461,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const Order = () => {
-  const { backendUrl, token, currency,refreshProductStock } = useContext(ShopContext);
+  const { backendUrl, token, currency, refreshProductStock } =
+    useContext(ShopContext);
   const [orders, setOrders] = useState([]);
   const [filterStatus, setFilterStatus] = useState("All");
   const scrollRef = useRef(null);
@@ -533,7 +534,7 @@ const Order = () => {
         setShowCancelModal(false);
         setCancelOrderId(null);
         await loadOrderData(); // ✅ ensures latest data
-        await refreshProductStock();    // refresh product stock
+        await refreshProductStock(); // refresh product stock
       } else {
         toast.error(res.data.message);
       }

@@ -1,10 +1,10 @@
 import { useContext, useState, useEffect, useMemo } from "react";
 import { ShopContext } from "../Context/ShopContext";
-import { assets } from "../assets/frontend_assets/assets";
 import CartTotal from "../component/CartTotal";
 import { Link } from "react-router-dom";
 import debounce from "lodash.debounce";
 import { FaFish } from "react-icons/fa";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 const Cart = () => {
   const { products, currency, cartitem, updateQuantity, navigate } =
@@ -34,21 +34,6 @@ const Cart = () => {
     () => debounce(updateQuantity, 300),
     [updateQuantity]
   );
-
-  // // 🔹 Optimistic UI update + sync context/backend
-  // const handleQuantityChange = (item, newQty) => {
-  //   // Immediate UI update
-  //   setCartData((prev) =>
-  //     prev.map((i) =>
-  //       i._id === item._id && i.size === item.size && i.color === item.color
-  //         ? { ...i, quantity: newQty }
-  //         : i
-  //     )
-  //   );
-
-  //   // Trigger backend/context update (debounced)
-  //   debouncedUpdateQuantity(item._id, item.size, item.color, newQty);
-  // };
 
   const handleQuantityChange = async (item, newQty) => {
     const key = `${item._id}_${item.size}_${item.color}`;
@@ -195,11 +180,9 @@ const Cart = () => {
               </div>
 
               {/* 🔹 Delete Button */}
-              <img
+              <TrashIcon
                 onClick={() => handleQuantityChange(item, 0)}
-                className="w-5 sm:w-6 cursor-pointer hover:opacity-70 transition"
-                src={assets.bin_icon}
-                alt="Remove"
+                className="w-5 h-5 sm:w-6 sm:h-6 cursor-pointer text-red-400 hover:opacity-70 transition"
                 title="Remove item"
               />
             </div>

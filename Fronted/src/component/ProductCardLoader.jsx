@@ -1,5 +1,3 @@
-import React from "react";
-
 const ProductCardLoader = () => {
     return (
         <div className="text-gray-700 cursor-pointer rounded bg-white block shadow-sm hover:shadow-md transition">

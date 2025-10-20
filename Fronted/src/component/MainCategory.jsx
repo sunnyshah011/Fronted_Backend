@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import CategoryLoader from "./CategoryLoader";
 
 const Main_Category = () => {
-  const { categories, loading, isError } = useContext(ShopContext);
+  const { categories, isLoading, isError } = useContext(ShopContext);
   const navigate = useNavigate();
 
   if (isError)
@@ -16,7 +16,7 @@ const Main_Category = () => {
 
   return (
     <div className="bg-white pt-3 pb-1">
-      {loading ? (
+      {isLoading ? (
         <CategoryLoader /> // 👈 show shimmer while fetching
       ) : (
         <>

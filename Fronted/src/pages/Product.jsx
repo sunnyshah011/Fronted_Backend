@@ -6,51 +6,93 @@ import { toast } from "react-toastify";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import FishingLoader from "../component/FishingLoader ";
+import { useQuery } from "@tanstack/react-query";
+
+const fetchProduct = async (backendUrl, categorySlug, productSlug) => {
+  const { data } = await axios.get(
+    `${backendUrl}/api/categories/${categorySlug}/${productSlug}`
+  );
+  if (!data.success) throw new Error("Product not found");
+  return data.product;
+};
 
 const Product = () => {
   const { backendUrl, currency, addtocart, cartitem } = useContext(ShopContext);
   const { categorySlug, productSlug } = useParams();
 
-  const [fproduct, setFProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // const [fproduct, setFProduct] = useState(null);
+  // const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [mainImage, setMainImage] = useState("");
   const [quantity, setQuantity] = useState(1);
-  // Add at the top with other useState
   const [isAdding, setIsAdding] = useState(false);
 
+  // useEffect(() => {
+  //   const fetchProduct = async () => {
+  //     if (!productSlug) return;
+  //     try {
+  //       setLoading(true);
+  //       const { data } = await axios.get(
+  //         `${backendUrl}/api/categories/${categorySlug}/${productSlug}`
+  //       );
+  //       if (data.success) {
+
+  //         setFProduct(data.product);
+
+  //         setMainImage(data.product.images?.[0] || "/placeholder.png");
+
+  //         const sizes  = [...new Set(data.product.variants.map((v) => v.size))];
+  //         const colors = [...new Set(data.product.variants.map((v) => v.color))];
+
+  //         if (sizes.length === 1) setSelectedSize(sizes[0]);
+  //         if (colors.length === 1) setSelectedColor(colors[0]);
+
+  //       } else {
+  //         toast.error("Product not found");
+  //       }
+  //     } catch (error) {
+  //       console.error(error);
+  //       toast.error("Failed to load product");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchProduct();
+  // }, [backendUrl, categorySlug, productSlug]);
+
+  const {
+    data: fproduct,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["product", categorySlug, productSlug],
+    queryFn: async () => {
+      const { data } = await axios.get(
+        `${backendUrl}/api/categories/${categorySlug}/${productSlug}`
+      );
+      if (!data.success) throw new Error("Product not found");
+      return data.product;
+    },
+    enabled: !!backendUrl && !!categorySlug && !!productSlug,
+    staleTime: 1000 * 60 * 5,
+    cacheTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
+  });
+
+  // ✅ Handle default image, size, and color after query returns
   useEffect(() => {
-    const fetchProduct = async () => {
-      if (!productSlug) return;
-      try {
-        setLoading(true);
-        const { data } = await axios.get(
-          `${backendUrl}/api/categories/${categorySlug}/${productSlug}`
-        );
-        if (data.success) {
-          setFProduct(data.product);
-          setMainImage(data.product.images?.[0] || "/placeholder.png");
+    if (!fproduct) return;
 
-          const sizes = [...new Set(data.product.variants.map((v) => v.size))];
-          const colors = [
-            ...new Set(data.product.variants.map((v) => v.color)),
-          ];
+    setMainImage(fproduct.images?.[0] || "/placeholder.png");
 
-          if (sizes.length === 1) setSelectedSize(sizes[0]);
-          if (colors.length === 1) setSelectedColor(colors[0]);
-        } else {
-          toast.error("Product not found");
-        }
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to load product");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProduct();
-  }, [backendUrl, categorySlug, productSlug]);
+    const sizes = [...new Set(fproduct.variants.map((v) => v.size))];
+    const colors = [...new Set(fproduct.variants.map((v) => v.color))];
+
+    if (sizes.length === 1) setSelectedSize(sizes[0]);
+    if (colors.length === 1) setSelectedColor(colors[0]);
+  }, [fproduct]);
 
   const allSizes = fproduct
     ? [...new Set(fproduct.variants.map((v) => v.size))]
@@ -62,8 +104,8 @@ const Product = () => {
   const selectedVariant =
     selectedSize && selectedColor
       ? fproduct?.variants.find(
-        (v) => v.size === selectedSize && v.color === selectedColor
-      )
+          (v) => v.size === selectedSize && v.color === selectedColor
+        )
       : null;
 
   const priceVariant = selectedVariant || fproduct?.variants?.[0];
@@ -104,10 +146,16 @@ const Product = () => {
 
   return (
     <div className="max-w-[1250px] mt-3 pt-4 px-4 bg-white">
-      {loading && <FishingLoader />}
-      {!loading && !fproduct && <p>Product not found</p>}
-      {!loading && fproduct && (
-        <div className="grid grid-cols-1 md:grid-cols-2">
+      {isLoading && <FishingLoader />}
+      {isError && (
+        <p className="text-center py-5 text-red-500">
+          Failed to load product: {error.message}
+        </p>
+      )}
+      {!isLoading && !isError && !fproduct && (
+        <p className="text-center py-5 text-gray-500">Product not found</p>
+      )}
+      {fproduct && ( <div className="grid grid-cols-1 md:grid-cols-2">
           {/* LEFT IMAGES */}
           <div className="w-full flex flex-col items-center">
             <div className="w-full max-w-[500px] aspect-square bg-white overflow-hidden rounded-xl mb-2 flex items-center justify-center shadow">
@@ -125,10 +173,11 @@ const Product = () => {
                   <div
                     key={img}
                     onClick={() => setMainImage(img)}
-                    className={`w-15 h-15 rounded-lg overflow-hidden cursor-pointer border transition transform hover:scale-105 ${mainImage === img
-                      ? "border-black ring-2 ring-black"
-                      : "border-gray-300"
-                      }`}
+                    className={`w-15 h-15 rounded-lg overflow-hidden cursor-pointer border transition transform hover:scale-105 ${
+                      mainImage === img
+                        ? "border-black ring-2 ring-black"
+                        : "border-gray-300"
+                    }`}
                   >
                     <img
                       src={img}
@@ -161,12 +210,13 @@ const Product = () => {
                     <div key={size} className="flex flex-col items-center">
                       <button
                         onClick={() => setSelectedSize(size)}
-                        className={`px-4 py-2 border rounded-lg transition ${selectedSize === size
-                          ? "bg-black text-white"
-                          : sizeHasStock
+                        className={`px-4 py-2 border rounded-lg transition ${
+                          selectedSize === size
+                            ? "bg-black text-white"
+                            : sizeHasStock
                             ? "bg-white hover:bg-gray-100"
                             : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                          }`}
+                        }`}
                         disabled={!sizeHasStock}
                       >
                         {size}
@@ -196,19 +246,17 @@ const Product = () => {
                     <div key={color} className="flex flex-col items-center">
                       <button
                         onClick={() => setSelectedColor(color)}
-                        className={`px-4 py-2 border rounded-lg transition ${selectedColor === color
-                          ? "bg-black text-white"
-                          : colorHasStock
+                        className={`px-4 py-2 border rounded-lg transition ${
+                          selectedColor === color
+                            ? "bg-black text-white"
+                            : colorHasStock
                             ? "bg-white hover:bg-gray-100"
                             : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                          }`}
+                        }`}
                         disabled={!colorHasStock}
                       >
                         {color}
                       </button>
-                      {/* {!colorHasStock && (
-                        <p className="text-xs text-red-500 mt-1">Out of stock</p>
-                      )} */}
                     </div>
                   );
                 })}
@@ -240,42 +288,6 @@ const Product = () => {
                 </button>
               </div>
             )}
-            {/* <button
-              onClick={() => {
-                if (!isVariantSelected) {
-                  toast.error("Please select size and color");
-                  return;
-                }
-                if (isOutOfStock) {
-                  toast.error("This variant is out of stock");
-                  return;
-                }
-                addtocart(
-                  fproduct._id,
-                  selectedVariant.size,
-                  selectedVariant.color,
-                  quantity
-                );
-                setQuantity(1);
-              }}
-              disabled={
-                !anyStockAvailable ||
-                isOutOfStock ||
-                isMaxInCart ||
-                !isVariantSelected
-              }
-              className={`px-6 w-50 py-3 rounded-lg mb-4 transition ${!anyStockAvailable || isOutOfStock || isMaxInCart
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-black text-white hover:bg-gray-800"
-                }`}
-            >
-              {!anyStockAvailable || isOutOfStock
-                ? "Out of Stock"
-                : isMaxInCart
-                  ? "Added to Cart"
-                  : "Add to Cart"}
-            </button> */}
-
             {/* // Replace your Add to Cart button with this: */}
             <button
               onClick={async () => {
@@ -288,7 +300,9 @@ const Product = () => {
                   return;
                 }
                 if (inCartQty + quantity > selectedVariant?.stock) {
-                  toast.error(`Cannot add more than ${selectedVariant.stock} items`);
+                  toast.error(
+                    `Cannot add more than ${selectedVariant.stock} items`
+                  );
                   return;
                 }
 
@@ -309,18 +323,19 @@ const Product = () => {
                 !isVariantSelected ||
                 isAdding
               }
-              className={`px-6 w-50 py-3 rounded-lg mb-4 transition ${!anyStockAvailable || isOutOfStock || isMaxInCart || isAdding
+              className={`px-6 w-50 py-3 rounded-lg mb-4 transition ${
+                !anyStockAvailable || isOutOfStock || isMaxInCart || isAdding
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-black text-white hover:bg-gray-800"
-                }`}
+              }`}
             >
               {isAdding
                 ? "Adding..."
                 : !anyStockAvailable || isOutOfStock
-                  ? "Out of Stock"
-                  : isMaxInCart
-                    ? "Added to Cart"
-                    : "Add to Cart"}
+                ? "Out of Stock"
+                : isMaxInCart
+                ? "Added to Cart"
+                : "Add to Cart"}
             </button>
             <p className="mb-6 text-gray-700">{fproduct.description}</p>
           </div>

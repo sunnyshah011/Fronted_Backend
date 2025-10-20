@@ -1,13 +1,9 @@
 import { useEffect, useState, useRef, useContext } from "react";
-import { assets } from "../assets/frontend_assets/assets";
-import { NavLink, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ShopContext } from "../Context/ShopContext";
 import { UserIcon } from "@heroicons/react/24/outline"; // or /outline
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline"; // or /outline
-import { HomeIcon } from "@heroicons/react/24/outline"; // Add at the top of your file
-import { FaBars, FaTimes } from "react-icons/fa"; // hamburger and close icons
 import { toast } from "react-toastify";
-import axios from "axios";
 
 const Navbar = () => {
   const {
@@ -21,11 +17,8 @@ const Navbar = () => {
     navigate,
   } = useContext(ShopContext);
 
-  const { backendUrl } = useContext(ShopContext);
-
   const [isOpen, setIsOpen] = useState(false);
   const [show, setShow] = useState(false);
-  // const [search, setSearch] = useState("");
 
   const userRef = useRef(null);
 

@@ -1,47 +1,132 @@
-import { useContext, useEffect, useState } from "react";
+// import { useContext, useEffect, useState } from "react";
+// import { ShopContext } from "../Context/ShopContext";
+// import Title from "./Title";
+// import Product_Page from "./P_Page_Component";
+// import { Link } from "react-router-dom";
+// import axios from "axios";
+// import SkeletonCard from "./SkeletonCard"; // adjust the path if needed
+
+// const FlashSale = () => {
+//   const { backendUrl } = useContext(ShopContext);
+//   const [flashProducts, setFlashProducts] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+
+//   useEffect(() => {
+//     if (!backendUrl) return; // wait until backendUrl exists
+
+//     const fetchFlashSaleProducts = async () => {
+//       setLoading(true);
+//       setError(null);
+
+//       try {
+//         const res = await axios.get(`${backendUrl}/api/product/flash-sale`);
+
+//         if (!res.data.success) throw new Error(res.data.message);
+//         setFlashProducts(res.data.products || []);
+//       } catch (err) {
+//         setError(err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchFlashSaleProducts();
+//   }, [backendUrl]);
+
+//   if (!backendUrl)
+//     return <p className="text-center py-5">Preparing flash sale products...</p>;
+//   if (loading)
+//     return (
+//       <div className="w-full px-2 py-1">
+//         <Link to="all-top-products">
+//           <Title Category="FlashSale" More="View" />
+//         </Link>
+
+//         <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-2 gap-x-2">
+//           {Array.from({ length: 6 }).map((_, idx) => (
+//             <SkeletonCard key={idx} />
+//           ))}
+//         </div>
+//       </div>
+//     );
+//   if (error)
+//     return (
+//       <p className="text-center text-red-500 py-5">
+//         Failed to load flash sale products: {error.message}
+//       </p>
+//     );
+//   if (!flashProducts || flashProducts.length === 0)
+//     return (
+//       <p className="text-center py-5 text-gray-500">
+//         No flash sale products found.
+//       </p>
+//     );
+
+//   return (
+//     <div className="w-full px-2 py-1">
+//       <Link to="/all-flash-sale-products">
+//         <Title Category="FlashSale" More="View" />
+//       </Link>
+
+//       <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-2 gap-x-2">
+//         {flashProducts.map((product) => (
+//           <Product_Page
+//             key={product._id}
+//             categorySlug={product.subcategory?.category?.slug}
+//             productSlug={product.slug}
+//             name={product.name}
+//             price={product.variants?.[0]?.price}
+//             images={product.images}
+//           />
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default FlashSale;
+
+import { useContext } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import Title from "./Title";
 import Product_Page from "./P_Page_Component";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 import SkeletonCard from "./SkeletonCard"; // adjust the path if needed
+import axios from "axios";
 
+const fetchFlashSaleProducts = async (backendUrl) => {
+  const res = await axios.get(`${backendUrl}/api/product/flash-sale`);
+  if (!res.data.success) throw new Error(res.data.message);
+  return res.data.products || [];
+};
 
 const FlashSale = () => {
   const { backendUrl } = useContext(ShopContext);
-  const [flashProducts, setFlashProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (!backendUrl) return; // wait until backendUrl exists
-
-    const fetchFlashSaleProducts = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const res = await axios.get(`${backendUrl}/api/product/flash-sale`);
-
-        if (!res.data.success) throw new Error(res.data.message);
-        setFlashProducts(res.data.products || []);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFlashSaleProducts();
-  }, [backendUrl]);
+  const {
+    data: flashProducts = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["flashSaleProducts"],
+    queryFn: () => fetchFlashSaleProducts(backendUrl),
+    enabled: !!backendUrl, // only fetch if backendUrl exists
+    staleTime: 1000 * 60 * 5, // cache for 5 minutes
+    cacheTime: 1000 * 60 * 30, // keep cache for 30 minutes
+    refetchOnWindowFocus: false, // prevent unnecessary refetch
+  });
 
   if (!backendUrl)
     return <p className="text-center py-5">Preparing flash sale products...</p>;
-  if (loading)
+
+  if (isLoading)
     return (
       <div className="w-full px-2 py-1">
         <Link to="all-top-products">
-          <Title Category="Top Products" More="View" />
+          <Title Category="FlashSale" More="View" />
         </Link>
 
         <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-2 gap-x-2">
@@ -51,12 +136,14 @@ const FlashSale = () => {
         </div>
       </div>
     );
-  if (error)
+
+  if (isError)
     return (
       <p className="text-center text-red-500 py-5">
         Failed to load flash sale products: {error.message}
       </p>
     );
+
   if (!flashProducts || flashProducts.length === 0)
     return (
       <p className="text-center py-5 text-gray-500">

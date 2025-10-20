@@ -11,7 +11,7 @@ const CategoryLoader = () => {
 
       {/* Category Grid shimmer */}
       <div className="container mx-auto px-3 grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-3">
-        {Array.from({ length: 10 }).map((_, i) => (
+        {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex flex-col items-center gap-2">
             {/* Circle / Image placeholder */}
             <div className="w-[60px] h-[60px] md:w-[80px] md:h-[80px] bg-gray-200 rounded-full shimmer"></div>

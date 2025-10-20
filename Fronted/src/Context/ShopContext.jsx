@@ -70,7 +70,7 @@ const ShopContextProvider = (props) => {
 
   const {
     data: categories = [],
-    loading,
+    isLoading,
     isError,
   } = useQuery({
     queryKey: ["categories"],
@@ -378,7 +378,7 @@ const ShopContextProvider = (props) => {
   // Context value
   const value = {
     isError,
-    loading,
+    isLoading,
     categories,
     refreshProductStock,
     currency,

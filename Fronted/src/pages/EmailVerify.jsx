@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { ShopContext } from "../Context/ShopContext";
-import { useState, useRef,useEffect } from "react";
+import { useState, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 

@@ -1,4 +1,3 @@
-import { assets } from "../assets/frontend_assets/assets";
 import { IoIosArrowForward } from "react-icons/io";
 
 const Menubar = ({ Category, More }) => {
