@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { assets } from "../assets/frontend_assets/assets";
 
-const banners = [assets.banner1, assets.banner2]; // Add all your banners here
+const banners = [ assets.banner2]; // Add all your banners here
 
 const HeroCarousel = () => {
   const [current, setCurrent] = useState(0);
@@ -74,7 +74,7 @@ const HeroCarousel = () => {
         ))}
 
         {/* Dots */}
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2">
+        {/* <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2">
           {banners.map((_, idx) => (
             <span
               key={idx}
@@ -84,7 +84,7 @@ const HeroCarousel = () => {
               }`}
             ></span>
           ))}
-        </div>
+        </div> */}
       </div>
     </section>
   );

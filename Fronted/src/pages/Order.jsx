@@ -459,13 +459,15 @@ import { useContext, useEffect, useState, useRef } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
+
 
 const Order = () => {
-  const { backendUrl, token, currency, refreshProductStock } =
-    useContext(ShopContext);
+  const { backendUrl, token, currency } = useContext(ShopContext);
   const [orders, setOrders] = useState([]);
   const [filterStatus, setFilterStatus] = useState("All");
   const scrollRef = useRef(null);
+  const queryClient = useQueryClient(); // add this near top
 
   const SHIPPING_CHARGE = 150;
 
@@ -534,7 +536,7 @@ const Order = () => {
         setShowCancelModal(false);
         setCancelOrderId(null);
         await loadOrderData(); // ✅ ensures latest data
-        await refreshProductStock(); // refresh product stock
+        await queryClient.refetchQueries(["products"], { exact: true }); // ✅ refetch React Query products
       } else {
         toast.error(res.data.message);
       }
@@ -562,6 +564,7 @@ const Order = () => {
         setReturnOrderId(null);
         setReturnReason("");
         await loadOrderData(); // ✅ ensures latest data
+        await queryClient.refetchQueries(["products"], { exact: true }); // ✅ refetch React Query products
       } else {
         toast.error(res.data.message);
       }
@@ -668,11 +671,10 @@ const Order = () => {
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-3 py-1 rounded font-medium flex-shrink-0 ${
-                filterStatus === status
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              } transition`}
+              className={`px-3 py-1 rounded font-medium flex-shrink-0 ${filterStatus === status
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                } transition`}
             >
               {status}
             </button>
@@ -716,19 +718,18 @@ const Order = () => {
                     <div className="flex items-center gap-5 max-[630px]:w-full justify-between">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`w-2.5 h-2.5 rounded-full ${
-                            order.status === "Delivered"
-                              ? "bg-green-500"
-                              : order.status === "Pending"
+                          className={`w-2.5 h-2.5 rounded-full ${order.status === "Delivered"
+                            ? "bg-green-500"
+                            : order.status === "Pending"
                               ? "bg-yellow-500"
                               : order.status === "Ready To Ship"
-                              ? "bg-blue-500"
-                              : order.status === "Cancelled"
-                              ? "bg-red-500"
-                              : order.status === "Returned"
-                              ? "bg-pink-500"
-                              : "bg-gray-400"
-                          }`}
+                                ? "bg-blue-500"
+                                : order.status === "Cancelled"
+                                  ? "bg-red-500"
+                                  : order.status === "Returned"
+                                    ? "bg-pink-500"
+                                    : "bg-gray-400"
+                            }`}
                         ></span>
                         <p className="font-medium text-gray-700">
                           {order.status}
@@ -759,14 +760,13 @@ const Order = () => {
                               setReturnReason("");
                               setShowReturnModal(true);
                             }}
-                            className={`px-3 py-1 text-sm rounded-md transition ${
-                              order.returnRequest.isRequested
-                                ? order.returnRequest.status === "Approved" ||
-                                  order.returnRequest.status === "Rejected"
-                                  ? "bg-gray-400 text-white cursor-not-allowed"
-                                  : "bg-pink-500 text-white hover:bg-pink-600"
+                            className={`px-3 py-1 text-sm rounded-md transition ${order.returnRequest.isRequested
+                              ? order.returnRequest.status === "Approved" ||
+                                order.returnRequest.status === "Rejected"
+                                ? "bg-gray-400 text-white cursor-not-allowed"
                                 : "bg-pink-500 text-white hover:bg-pink-600"
-                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                              : "bg-pink-500 text-white hover:bg-pink-600"
+                              } disabled:opacity-50 disabled:cursor-not-allowed`}
                           >
                             {order.returnRequest.isRequested
                               ? `Return ${order.returnRequest.status}`
@@ -892,11 +892,10 @@ const Order = () => {
                       type="button"
                       disabled={loadingAction}
                       onClick={() => setReturnReason(reason)}
-                      className={`text-left px-2 py-1 border rounded hover:bg-gray-100 transition ${
-                        returnReason === reason
-                          ? "bg-gray-200 font-semibold"
-                          : ""
-                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      className={`text-left px-2 py-1 border rounded hover:bg-gray-100 transition ${returnReason === reason
+                        ? "bg-gray-200 font-semibold"
+                        : ""
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {reason}
                     </button>

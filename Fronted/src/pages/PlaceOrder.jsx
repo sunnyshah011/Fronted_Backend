@@ -306,28 +306,23 @@ const Placeorder = () => {
       });
       if (res.data.success) {
         setCartitem({});
-        localStorage.setItem("cartItems", JSON.stringify({}));
         toast.success("Order placed!", {
           className: "custom-toast-center",
           autoClose: 1000,
         });
-        
+
         // ✅ Refetch product stock for all ordered items
-        items.forEach((item) => {
+        for (const item of items) {
           const product = products.find((p) => p._id === item.productId);
-          if (!product) return;
+          if (!product) continue;
 
           const categorySlug = product.subcategory?.category?.slug;
           const productSlug = product.slug;
 
           if (categorySlug && productSlug) {
-            queryClient.invalidateQueries([
-              "product",
-              categorySlug,
-              productSlug,
-            ]);
+            await queryClient.refetchQueries(["product", categorySlug, productSlug]);
           }
-        });
+        }
 
         navigate("/order");
       } else {
@@ -356,9 +351,8 @@ const Placeorder = () => {
       {/* ✅ Left: Address Section (updated like Profile) */}
       <div className="flex-1 bg-white shadow-sm rounded-xl p-5">
         <h2
-          className={`text-xl sm:text-2xl font-semibold mb-6 ${
-            addressError ? "text-red-600 animate-pulse" : "text-gray-900"
-          }`}
+          className={`text-xl sm:text-2xl font-semibold mb-6 ${addressError ? "text-red-600 animate-pulse" : "text-gray-900"
+            }`}
         >
           Shipping Address
         </h2>
@@ -430,20 +424,19 @@ const Placeorder = () => {
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
             <button
               type="submit"
-              className={`flex-1 py-3 rounded-lg text-white font-medium transition ${
-                isFirstTime
+              className={`flex-1 py-3 rounded-lg text-white font-medium transition ${isFirstTime
                   ? "bg-blue-600 hover:bg-blue-700"
                   : isModified
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-gray-500 cursor-not-allowed"
-              }`}
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-gray-500 cursor-not-allowed"
+                }`}
               disabled={!isModified && !isFirstTime}
             >
               {isFirstTime
                 ? "Add Address"
                 : isModified
-                ? "Update Address"
-                : "Saved"}
+                  ? "Update Address"
+                  : "Saved"}
             </button>
 
             {!isFirstTime && isModified && (
@@ -527,14 +520,12 @@ const Placeorder = () => {
           <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
           <div
             onClick={() => setPayment(!payment)}
-            className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${
-              payment ? "border-green-500 bg-green-50" : "border-gray-200"
-            }`}
+            className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${payment ? "border-green-500 bg-green-50" : "border-gray-200"
+              }`}
           >
             <div
-              className={`w-4 h-4 rounded-full border ${
-                payment ? "bg-green-500 border-green-500" : "border-gray-400"
-              }`}
+              className={`w-4 h-4 rounded-full border ${payment ? "bg-green-500 border-green-500" : "border-gray-400"
+                }`}
             ></div>
             <span>Cash on Delivery</span>
           </div>
@@ -542,13 +533,12 @@ const Placeorder = () => {
           <button
             onClick={handlePlaceOrder}
             disabled={isModified || isLoading}
-            className={`mt-4 w-full py-3 rounded-lg text-white ${
-              isModified
+            className={`mt-4 w-full py-3 rounded-lg text-white ${isModified
                 ? "bg-gray-400 cursor-not-allowed"
                 : isLoading
-                ? "bg-gray-700"
-                : "bg-black hover:bg-gray-800"
-            } flex items-center justify-center gap-2`}
+                  ? "bg-gray-700"
+                  : "bg-black hover:bg-gray-800"
+              } flex items-center justify-center gap-2`}
           >
             {isLoading ? (
               <>

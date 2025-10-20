@@ -19,9 +19,6 @@ const ShopContextProvider = (props) => {
   const [token, setToken] = useState(null);
   const [address, setAddress] = useState(null);
 
-  // const [categories, setCategories] = useState([]);
-  // const [loading, setLoading] = useState(true); // 👈 added
-
   // Centralized error handler
   const handleApiError = (error) => {
     const message =
@@ -35,25 +32,6 @@ const ShopContextProvider = (props) => {
       autoClose: 2000,
     });
   };
-
-  // const fetchCategory = async () => {
-  //   try {
-  //     const { data } = await axios.get(`${backendUrl}/api/categories`);
-  //     if (data.success) {
-  //       setCategories(data.categories.slice(0, 5));
-  //     } else if (Array.isArray(data.categories)) {
-  //       setCategories(data.categories.slice(0, 5));
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching categories:", error);
-  //   } finally {
-  //     setLoading(false); // 👈 always stop loading
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchCategory();
-  // }, []);
 
   const fetchCategories = async (backendUrl) => {
     try {
@@ -81,17 +59,6 @@ const ShopContextProvider = (props) => {
     retry: 1,
   });
 
-  // Add this function inside ShopContextProvider
-  const refreshProductStock = useCallback(async () => {
-    try {
-      const response = await axios.get(`${backendUrl}/api/product/list`);
-      if (response.data.success) {
-        setProducts(response.data.products);
-      }
-    } catch (error) {
-      handleApiError(error);
-    }
-  }, [backendUrl]);
 
   // React Query: userDetails
   const { data: userDetails, isLoading: isLoadingUser } = useQuery({
@@ -380,7 +347,6 @@ const ShopContextProvider = (props) => {
     isError,
     isLoading,
     categories,
-    refreshProductStock,
     currency,
     delivery_fee,
     products,

@@ -19,47 +19,11 @@ const fetchProduct = async (backendUrl, categorySlug, productSlug) => {
 const Product = () => {
   const { backendUrl, currency, addtocart, cartitem } = useContext(ShopContext);
   const { categorySlug, productSlug } = useParams();
-
-  // const [fproduct, setFProduct] = useState(null);
-  // const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [mainImage, setMainImage] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
-
-  // useEffect(() => {
-  //   const fetchProduct = async () => {
-  //     if (!productSlug) return;
-  //     try {
-  //       setLoading(true);
-  //       const { data } = await axios.get(
-  //         `${backendUrl}/api/categories/${categorySlug}/${productSlug}`
-  //       );
-  //       if (data.success) {
-
-  //         setFProduct(data.product);
-
-  //         setMainImage(data.product.images?.[0] || "/placeholder.png");
-
-  //         const sizes  = [...new Set(data.product.variants.map((v) => v.size))];
-  //         const colors = [...new Set(data.product.variants.map((v) => v.color))];
-
-  //         if (sizes.length === 1) setSelectedSize(sizes[0]);
-  //         if (colors.length === 1) setSelectedColor(colors[0]);
-
-  //       } else {
-  //         toast.error("Product not found");
-  //       }
-  //     } catch (error) {
-  //       console.error(error);
-  //       toast.error("Failed to load product");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchProduct();
-  // }, [backendUrl, categorySlug, productSlug]);
 
   const {
     data: fproduct,
