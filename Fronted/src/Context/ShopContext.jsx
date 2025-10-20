@@ -19,6 +19,9 @@ const ShopContextProvider = (props) => {
   const [token, setToken] = useState(null);
   const [address, setAddress] = useState(null);
 
+  // const [categories, setCategories] = useState([]);
+  // const [loading, setLoading] = useState(true); // 👈 added
+
   // Centralized error handler
   const handleApiError = (error) => {
     const message =
@@ -32,6 +35,51 @@ const ShopContextProvider = (props) => {
       autoClose: 2000,
     });
   };
+
+  // const fetchCategory = async () => {
+  //   try {
+  //     const { data } = await axios.get(`${backendUrl}/api/categories`);
+  //     if (data.success) {
+  //       setCategories(data.categories.slice(0, 5));
+  //     } else if (Array.isArray(data.categories)) {
+  //       setCategories(data.categories.slice(0, 5));
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching categories:", error);
+  //   } finally {
+  //     setLoading(false); // 👈 always stop loading
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchCategory();
+  // }, []);
+
+  const fetchCategories = async (backendUrl) => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/categories`);
+      if (Array.isArray(data.categories)) {
+        return data.categories.slice(0, 5); // same as your previous logic
+      }
+      return [];
+    } catch (error) {
+      console.error("Error fetching categories:");
+      return [];
+    }
+  };
+
+  const {
+    data: categories = [],
+    loading,
+    isError,
+  } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => fetchCategories(backendUrl),
+    staleTime: 1000 * 60 * 10,
+    cacheTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
 
   // Add this function inside ShopContextProvider
   const refreshProductStock = useCallback(async () => {
@@ -329,6 +377,9 @@ const ShopContextProvider = (props) => {
 
   // Context value
   const value = {
+    isError,
+    loading,
+    categories,
     refreshProductStock,
     currency,
     delivery_fee,

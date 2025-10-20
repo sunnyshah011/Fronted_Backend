@@ -21,10 +21,7 @@ categoryRouter.delete("/:id", adminAuth, deleteCategory);
 categoryRouter.get("/", getCategories); // gives all category
 
 // Category details + subcategories
-categoryRouter.get("/:slug", getCategoryDetails); // subcategory with its product rod -> lucana -> lucana force 6ft 
-
-// Subcategory details + products
-// categoryRouter.get("/:categorySlug/:subSlug", getSubcategoryDetails);
+categoryRouter.get("/:slug", getCategoryDetails); // subcategory with its product rod -> lucana -> lucana force 6ft
 
 // Product details inside subcategory
 categoryRouter.get("/:categorySlug/:productSlug", getProductDetails);

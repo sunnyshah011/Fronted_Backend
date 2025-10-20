@@ -5,19 +5,6 @@ import { v2 as cloudinary } from "cloudinary";
 import slugify from "slugify";
 import mongoose from "mongoose";
 
-// Create category
-// export const createCategory = async (req, res) => {
-//   try {
-//     const { name } = req.body;
-//     const slug = slugify(name, { lower: true });
-//     const category = new CategoryModel({ name, slug });
-//     await category.save();
-//     res.status(201).json(category);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
 export const createCategory = async (req, res) => {
   try {
     const { name } = req.body;
@@ -47,7 +34,7 @@ export const createCategory = async (req, res) => {
     const uploadResult = await cloudinary.uploader.upload(req.file.path, {
       resource_type: "image",
       folder: "categories",
-      format: "webp",   // ✅ convert to WebP like in products
+      format: "webp", // ✅ convert to WebP like in products
       quality: "auto",
       fetch_format: "auto",
     });
@@ -72,9 +59,6 @@ export const createCategory = async (req, res) => {
   }
 };
 
-
-
-
 // Get all categories
 export const getCategories = async (req, res) => {
   try {
@@ -84,24 +68,6 @@ export const getCategories = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
-
-
-// // Update category
-// export const updateCategory = async (req, res) => {
-//   try {
-//     const { name } = req.body;
-//     const slug = slugify(name, { lower: true });
-//     const updated = await CategoryModel.findByIdAndUpdate(
-//       req.params.id,
-//       { name, slug },
-//       { new: true }
-//     );
-//     res.json(updated);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-// Update category
 
 export const updateCategory = async (req, res) => {
   try {
@@ -141,10 +107,6 @@ export const updateCategory = async (req, res) => {
   }
 };
 
-
-
-
-
 // Delete category
 export const deleteCategory = async (req, res) => {
   try {
@@ -183,7 +145,6 @@ export const getSubcategories = async (req, res) => {
   }
 };
 
-
 // Update subcategory
 export const updateSubcategory = async (req, res) => {
   try {
@@ -210,7 +171,6 @@ export const deleteSubcategory = async (req, res) => {
   }
 };
 
-
 export const getSubcategoriesByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
@@ -224,8 +184,6 @@ export const getSubcategoriesByCategory = async (req, res) => {
   }
 };
 
-
-
 // ---------------------- NEW ROUTES ----------------------
 
 // Get category details + subcategories + products
@@ -233,9 +191,12 @@ export const getCategoryDetails = async (req, res) => {
   try {
     const { slug } = req.params;
     const category = await CategoryModel.findOne({ slug });
-    if (!category) return res.json({ success: false, message: "Category not found" });
+    if (!category)
+      return res.json({ success: false, message: "Category not found" });
 
-    const subcategories = await SubCategoryModel.find({ category: category._id });
+    const subcategories = await SubCategoryModel.find({
+      category: category._id,
+    });
     const products = await ProductModel.find({ category: category._id });
 
     res.json({ success: true, category, subcategories, products });
@@ -273,16 +234,18 @@ export const getCategoryDetails = async (req, res) => {
 export const getProductDetails = async (req, res) => {
   try {
     const { categorySlug, productSlug } = req.params;
-    
+
     const category = await CategoryModel.findOne({ slug: categorySlug });
-    if (!category) return res.json({ success: false, message: "Category not found" });
+    if (!category)
+      return res.json({ success: false, message: "Category not found" });
 
     const product = await ProductModel.findOne({
       slug: productSlug,
       category: category._id,
     });
 
-    if (!product) return res.json({ success: false, message: "Product not found" });
+    if (!product)
+      return res.json({ success: false, message: "Product not found" });
 
     res.json({ success: true, product });
   } catch (err) {

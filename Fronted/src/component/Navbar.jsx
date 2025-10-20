@@ -10,37 +10,24 @@ import { toast } from "react-toastify";
 import axios from "axios";
 
 const Navbar = () => {
-  const { setToken, address, setAddress, token, getcartcount, setCartitem, navigate } =
-    useContext(ShopContext);
+  const {
+    setToken,
+    categories,
+    address,
+    setAddress,
+    token,
+    getcartcount,
+    setCartitem,
+    navigate,
+  } = useContext(ShopContext);
 
   const { backendUrl } = useContext(ShopContext);
-  const [categories, setCategories] = useState([]);
-  const [mobilecategories, setmobileCategories] = useState([]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [show, setShow] = useState(false);
   // const [search, setSearch] = useState("");
 
   const userRef = useRef(null);
-
-  const fetchCategory = async () => {
-    try {
-      const { data } = await axios.get(`${backendUrl}/api/categories`);
-
-      if (data.success) {
-        setCategories(data.categories.slice(0, 7));
-        setmobileCategories(data.categories);
-      } else if (Array.isArray(data.categories)) {
-        setCategories(data.categories.slice(0, 5));
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategory();
-  }, []);
 
   useEffect(() => {
     if (localStorage.getItem("showLogoutToast")) {
@@ -54,7 +41,6 @@ const Navbar = () => {
       localStorage.removeItem("showLogoutToast");
     }
   }, []);
-
 
   const logout = () => {
     navigate("/");
@@ -73,7 +59,6 @@ const Navbar = () => {
     // Reload page
     window.location.reload();
   };
-
 
   const order = () => {
     navigate("/order");
@@ -119,7 +104,6 @@ const Navbar = () => {
     window.scrollTo(0, 0);
   }, []);
 
-
   return (
     <header className="fixed top-0 left-0 w-full border-b border-gray-200 bg-white z-50">
       <div className="mx-auto w-full max-w-[1250px] flex items-center justify-between py-4.5 px-4 min-[500px]:px-5 sm:px-[4vw] md:px-[5vw] lg:px-[3vw] font-medium gap-3">
@@ -150,7 +134,6 @@ const Navbar = () => {
               </g>
             </svg>
           </Link>
-
 
           {/* Mobile menu icon */}
           {/* <div className="justify-end">
@@ -246,8 +229,9 @@ const Navbar = () => {
               </div>
 
               <div
-                className={`absolute left-[-125px] pt-4 ${show ? "block" : "hidden"
-                  }`}
+                className={`absolute left-[-125px] pt-4 ${
+                  show ? "block" : "hidden"
+                }`}
               >
                 <div className="flex flex-col gap-4 w-50 py-4 px-4 bg-white border border-gray-300 rounded-[12px] text-gray-700">
                   {token ? (
@@ -310,7 +294,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile sidebar overlay */}
+        {/* Mobile sidebar overlay
         {isOpen && (
           <div
             className="fixed inset-0 bg-black bg-opacity-40 z-40 transition-transform duration-400 ease-linear"
@@ -331,7 +315,7 @@ const Navbar = () => {
               onClick={closeMenu}
               className="hover:text-blue-500 flex gap-3 items-center"
             >
-              <HomeIcon className="h-5 w-5" /> {/* Home icon */}
+              <HomeIcon className="h-5 w-5" /> {/* Home icon
               <p className="text-[17px]">Home</p>
             </NavLink>
             {mobilecategories.map((cat) => (
@@ -346,8 +330,8 @@ const Navbar = () => {
                 {cat.name}
               </div>
             ))}
-          </nav>
-        </aside>
+          </nav> */}
+        {/* </aside> */}
       </div>
     </header>
   );
