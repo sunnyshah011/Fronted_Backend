@@ -300,6 +300,10 @@ const Register = () => {
     }
   };
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="mt-5 flex items-center justify-center bg-gray-100 px-4">
       {loading && (
@@ -405,11 +409,10 @@ const Register = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 text-white rounded-md transition ${
-              loading
+            className={`w-full py-3 text-white rounded-md transition ${loading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-700"
-            }`}
+              }`}
           >
             {loading ? "Creating Account..." : "Sign Up"}
           </button>

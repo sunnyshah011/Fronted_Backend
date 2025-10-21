@@ -125,7 +125,7 @@ const Product = () => {
             <div className="w-full max-w-[500px] aspect-square bg-white overflow-hidden rounded-xl mb-2 flex items-center justify-center shadow">
               <Zoom>
                 <img
-                  src={mainImage}
+                  src={mainImage || null}
                   alt={fproduct.name}
                   className="max-w-full max-h-full object-contain"
                 />
