@@ -205,7 +205,6 @@ const Placeorder = () => {
     if (!payment) {
       toast.error("Select payment method", {
         className: "custom-toast-center",
-        autoClose: false,
         draggable: false,
         autoClose: 1000,
       });

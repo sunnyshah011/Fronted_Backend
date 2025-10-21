@@ -65,7 +65,7 @@ const HeroCarousel = () => {
             key={index}
             src={banner}
             alt={`banner-${index}`}
-            className={`w-full h-auto object-contain rounded transition-opacity duration-700 ${
+            className={`w-full h-auto object-contain sm:rounded-2xl rounded-[8px] transition-opacity duration-700 ${
               index === current
                 ? "opacity-100"
                 : "opacity-0 absolute top-0 left-0"
