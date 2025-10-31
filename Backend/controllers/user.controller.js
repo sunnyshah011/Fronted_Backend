@@ -6,7 +6,6 @@ import transporter from "../config/nodemailer.js";
 import userAddress from "../models/useraddress.model.js";
 import fetch from "node-fetch";
 
-
 //generating token for new user
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET);
@@ -79,14 +78,38 @@ const registerUser = async (req, res) => {
     }
 
     //sending welcome email
-    const mailOptions = {
-      from: process.env.SENDER_EMAIL,
-      to: gmail,
-      subject: "WELCOME TO FISHING TACKLE STORE",
-      text: `welcome to fishing tackle store website. your account has been created email ${gmail} `,
-    };
+    // const mailOptions = {
+    //   from: process.env.SENDER_EMAIL,
+    //   to: gmail,
+    //   subject: "WELCOME TO FISHING TACKLE STORE",
+    //   text: `welcome to fishing tackle store website. your account has been created email ${gmail} `,
+    // };
 
-    await transporter.sendMail(mailOptions);
+    // await transporter.sendMail(mailOptions);
+
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: {
+          name: "FTS",
+          email: process.env.SENDER_EMAIL,
+        },
+        to: [{ email: gmail }],
+        subject: "Welcome to Fishing Tackle Store 🎣",
+        htmlContent: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2>Welcome, ${name}!</h2>
+        <p>Thank you for joining <strong>Fishing Tackle Store</strong>.</p>
+        <p>Your account has been successfully created with email: <strong>${gmail}</strong>.</p>
+        <p>We’re excited to have you onboard. Tight lines! 🎣</p>
+      </div>
+    `,
+      }),
+    });
 
     res.json({
       success: true,
@@ -256,6 +279,31 @@ const getuserdata = async (req, res) => {
   }
 };
 
+// verify OTP
+const verifyResetOtp = async (req, res) => {
+  const { gmail, otp } = req.body || {};
+
+  if (!gmail || !otp) {
+    return res.json({ success: false, message: "Email and OTP are required" });
+  }
+
+  try {
+    const user = await userModel.findOne({ gmail });
+    if (!user) return res.json({ success: false, message: "User not found" });
+
+    if (user.resetOtp !== otp)
+      return res.json({ success: false, message: "Invalid OTP" });
+
+    if (user.resetOtpExpireAt < Date.now())
+      return res.json({ success: false, message: "OTP expired" });
+
+    return res.json({ success: true, message: "OTP verified" });
+  } catch (error) {
+    console.log(error);
+    return res.json({ success: false, message: error.message });
+  }
+};
+
 // //send password reset otp
 // const sendResetOtp = async (req, res) => {
 //   const { gmail } = req.body || {};
@@ -291,9 +339,8 @@ const getuserdata = async (req, res) => {
 //   }
 // };
 
-
 //send password reset otp
- const sendResetOtp = async (req, res) => {
+const sendResetOtp = async (req, res) => {
   const { gmail } = req.body || {};
 
   if (!gmail) {
@@ -353,33 +400,6 @@ const getuserdata = async (req, res) => {
   } catch (error) {
     console.error("Email send error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
-
-
-// verify OTP
-const verifyResetOtp = async (req, res) => {
-  const { gmail, otp } = req.body || {};
-
-  if (!gmail || !otp) {
-    return res.json({ success: false, message: "Email and OTP are required" });
-  }
-
-  try {
-    const user = await userModel.findOne({ gmail });
-    if (!user) return res.json({ success: false, message: "User not found" });
-
-    if (user.resetOtp !== otp)
-      return res.json({ success: false, message: "Invalid OTP" });
-
-    if (user.resetOtpExpireAt < Date.now())
-      return res.json({ success: false, message: "OTP expired" });
-
-    return res.json({ success: true, message: "OTP verified" });
-  } catch (error) {
-    console.log(error);
-    return res.json({ success: false, message: error.message });
   }
 };
 
