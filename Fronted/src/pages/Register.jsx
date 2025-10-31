@@ -307,7 +307,7 @@ const Register = () => {
   return (
     <div className="mt-5 flex items-center justify-center bg-gray-100 px-4">
       {loading && (
-        <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="absolute inset-0 flex items-center justify-center z-50">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
