@@ -25,6 +25,10 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.get("/health", (req, res) => {
+  res.status(200).send("Ok");
+});
+
 //api endpoints
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
