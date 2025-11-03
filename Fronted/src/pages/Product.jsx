@@ -17,7 +17,7 @@ const fetchProduct = async (backendUrl, categorySlug, productSlug) => {
 };
 
 const Product = () => {
-  const { backendUrl, currency, addtocart, cartitem } = useContext(ShopContext);
+  const { backendUrl, currency, addtocart, cartitem, token } = useContext(ShopContext);
   const { categorySlug, productSlug } = useParams();
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
@@ -119,7 +119,8 @@ const Product = () => {
       {!isLoading && !isError && !fproduct && (
         <p className="text-center py-5 text-gray-500">Product not found</p>
       )}
-      {fproduct && ( <div className="grid grid-cols-1 md:grid-cols-2">
+      {fproduct && (
+        <div className="grid grid-cols-1 md:grid-cols-2">
           {/* LEFT IMAGES */}
           <div className="w-full flex flex-col items-center">
             <div className="w-full max-w-[500px] aspect-square bg-white overflow-hidden rounded-xl mb-2 flex items-center justify-center shadow">
@@ -255,6 +256,18 @@ const Product = () => {
             {/* // Replace your Add to Cart button with this: */}
             <button
               onClick={async () => {
+
+                // 1️⃣ Check login first
+                if (!token) {
+                  await addtocart(
+                    fproduct._id,
+                    selectedVariant?.size,
+                    selectedVariant?.color,
+                    quantity
+                  );
+                  return; // prevent further execution
+                }
+
                 if (!isVariantSelected) {
                   toast.error("Please select size and color");
                   return;
@@ -284,7 +297,7 @@ const Product = () => {
                 !anyStockAvailable ||
                 isOutOfStock ||
                 isMaxInCart ||
-                !isVariantSelected ||
+                // !isVariantSelected ||
                 isAdding
               }
               className={`px-6 w-50 py-3 rounded-lg mb-4 transition ${

@@ -420,8 +420,6 @@ const ShopContextProvider = (props) => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/categories`);
       if (Array.isArray(data.categories)) {
-        console.log("Backend URL:", backendUrl);
-        console.log("Categories:", data.categories.slice(0, 5));
         return data.categories.slice(0, 5);
       }
       return [];
@@ -478,7 +476,8 @@ const ShopContextProvider = (props) => {
 
   const addtocart = useCallback(
     async (itemId, size, color, quantity = 1) => {
-      if (!size && !color) return toast.error("Select size/color");
+
+     
 
       if (!token) {
         const existing = toast.isActive("login-toast");
@@ -532,6 +531,8 @@ const ShopContextProvider = (props) => {
         return;
       }
 
+       if (!size && !color) return toast.error("Select size & color");
+
       const cartdata = structuredClone(cartitem);
       const currentQty = cartdata[itemId]?.[size]?.[color] || 0;
 
@@ -574,6 +575,8 @@ const ShopContextProvider = (props) => {
     [cartitem, products, token, backendUrl, navigate, queryClient]
   );
 
+
+  
   const getcartcount = useCallback(() => {
     let totalcount = 0;
     for (const productId in cartitem) {
