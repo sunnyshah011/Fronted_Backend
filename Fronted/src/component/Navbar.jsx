@@ -4,6 +4,8 @@ import { ShopContext } from "../Context/ShopContext";
 import { UserIcon } from "@heroicons/react/24/outline"; // or /outline
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline"; // or /outline
 import { toast } from "react-toastify";
+import { UserPlusIcon } from "@heroicons/react/24/outline";
+
 
 const Navbar = () => {
   const {
@@ -222,26 +224,26 @@ const Navbar = () => {
               </div>
 
               <div
-                className={`absolute left-[-125px] pt-4 ${
+                className={`absolute left-[-160px] pt-5 ${
                   show ? "block" : "hidden"
                 }`}
               >
-                <div className="flex flex-col gap-4 w-55 py-5.5 px-5 bg-white border border-gray-300 rounded-[12px] text-gray-700">
+                <div className="flex flex-col gap-4 w-60 py-5 px-5 bg-white border border-gray-300 rounded-[12px] text-gray-700">
                   {token ? (
-                    <div className="flex flex-col gap-5.5 pl-2.5">
+                    <div className="flex flex-col gap-5">
                       <p
                         onClick={myprofile}
                         className="cursor-pointer hover:text-black flex gap-3"
                       >
-                        <UserIcon className="h-6.5 w-6.5 text-gray-700" />
-                        <span className="text-[17px]">My Profile</span>
+                        <UserIcon className="h-6 w-6 text-gray-700" />
+                        <span className="text-[16px]">My Profile</span>
                       </p>
                       <p
                         onClick={order}
                         className="cursor-pointer hover:text-black flex gap-3"
                       >
-                        <ClipboardDocumentListIcon className="h-6.5 w-6.5 text-gray-700" />
-                        <span className="text-[17px]">My Orders</span>
+                        <ClipboardDocumentListIcon className="h-6 w-6 text-gray-700" />
+                        <span className="text-[16px]">My Orders</span>
                       </p>
                       {/* <p
                         onClick={account}
@@ -254,12 +256,12 @@ const Navbar = () => {
                         onClick={logout}
                         className="cursor-pointer hover:text-black flex gap-3"
                       >
-                        <i className="ri-logout-box-r-line text-[22px] pl-0.5"></i>
-                        <span className="text-[17px]">Logout</span>
+                        <i className="ri-logout-box-r-line text-[20px] pl-0.5"></i>
+                        <span className="text-[16px]">Logout</span>
                       </p>
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-6">
                       <Link onClick={() => setShow(false)} to="/login">
                         <p className="cursor-pointer hover:text-black flex gap-3">
                           <ClipboardDocumentListIcon className="h-6 w-6 text-gray-700 items-center" />
@@ -268,7 +270,7 @@ const Navbar = () => {
                       </Link>
                       <Link onClick={() => setShow(false)} to="/register">
                         <p className="cursor-pointer hover:text-black flex gap-3 items-center">
-                          <i className="ri-logout-box-r-line text-xl"></i>
+                           <UserPlusIcon className="h-6 w-6 text-black" />
                           <span className="text-[15px]">Register</span>
                         </p>
                       </Link>
