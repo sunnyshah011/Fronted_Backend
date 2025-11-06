@@ -31,7 +31,7 @@ const Main_Category = () => {
           </div>
 
           {categories.length > 0 ? (
-            <div className="container mx-auto px-3 my-3 grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-3">
+            <div className="container mx-auto px-4 lg:px-15 my-5 grid grid-cols-3 md:grid-cols-6 lg:grid-cols-6 lg:gap-20 md:gap-10 gap-5">
               {categories.map((cat) => (
                 <div
                   key={cat._id}
@@ -45,7 +45,7 @@ const Main_Category = () => {
                     />
                   </div>
                   <div>
-                    <p className="max-[768px]:text-[12px] text-center max-[768px]:font-medium md:text-[16px] font-normal ">
+                    <p className="max-[768px]:text-[12px] text-center max-[768px]:font-medium md:text-[17px] font-normal pt-3 ">
                       {" "}
                       {cat.name}{" "}
                     </p>

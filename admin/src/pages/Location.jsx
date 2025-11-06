@@ -99,26 +99,59 @@ const Location = ({ token }) => {
   };
 
   /* ---------------- DELETE ---------------- */
+  // const deleteItem = async (type, name) => {
+  //   if (type === "province") {
+  //     await axios.delete(`${BackendUrl}/api/location/province/${name}`, {
+  //       headers: { token },
+  //     });
+  //     fetchProvinces();
+  //   } else if (type === "district") {
+  //     await axios.delete(
+  //       `${BackendUrl}/api/location/${selectedProvince}/district/${name}`,
+  //       { headers: { token } }
+  //     );
+  //     fetchDistricts(selectedProvince);
+  //   } else if (type === "city") {
+  //     await axios.delete(
+  //       `${BackendUrl}/api/location/${selectedProvince}/${selectedDistrict}/city/${name}`,
+  //       { headers: { token } }
+  //     );
+  //     fetchCities(selectedProvince, selectedDistrict);
+  //   }
+  // };
+  /* ---------------- DELETE ---------------- */
   const deleteItem = async (type, name) => {
-    if (type === "province") {
-      await axios.delete(`${BackendUrl}/api/location/province/${name}`, {
-        headers: { token },
-      });
-      fetchProvinces();
-    } else if (type === "district") {
-      await axios.delete(
-        `${BackendUrl}/api/location/${selectedProvince}/district/${name}`,
-        { headers: { token } }
-      );
-      fetchDistricts(selectedProvince);
-    } else if (type === "city") {
-      await axios.delete(
-        `${BackendUrl}/api/location/${selectedProvince}/${selectedDistrict}/city/${name}`,
-        { headers: { token } }
-      );
-      fetchCities(selectedProvince, selectedDistrict);
+    // 🔔 Ask for confirmation before deleting
+    const confirmDelete = window.confirm(
+      `⚠️ Are you sure you want to delete this ${type}? This action cannot be undone.`
+    );
+
+    if (!confirmDelete) return; // stop if user cancels
+
+    try {
+      if (type === "province") {
+        await axios.delete(`${BackendUrl}/api/location/province/${name}`, {
+          headers: { token },
+        });
+        fetchProvinces();
+      } else if (type === "district") {
+        await axios.delete(
+          `${BackendUrl}/api/location/${selectedProvince}/district/${name}`,
+          { headers: { token } }
+        );
+        fetchDistricts(selectedProvince);
+      } else if (type === "city") {
+        await axios.delete(
+          `${BackendUrl}/api/location/${selectedProvince}/${selectedDistrict}/city/${name}`,
+          { headers: { token } }
+        );
+        fetchCities(selectedProvince, selectedDistrict);
+      }
+    } catch (error) {
+      console.error("Error deleting item:", error);
     }
   };
+
 
   // load provinces first
   useEffect(() => {

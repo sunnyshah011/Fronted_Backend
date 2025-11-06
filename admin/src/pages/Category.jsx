@@ -204,12 +204,12 @@ export default function CategoryManager({ token }) {
                     >
                       Edit
                     </button>
-                    <button
+                    {/* <button
                       onClick={() => handleDeleteCategory(c._id)}
                       className="text-red-500"
                     >
                       Delete
-                    </button>
+                    </button> */}
                   </div>
                 </>
               )}
@@ -260,12 +260,12 @@ export default function CategoryManager({ token }) {
                       >
                         Edit
                       </button>
-                      <button
+                      {/* <button
                         onClick={() => handleDeleteSubcategory(sc._id)}
                         className="text-red-500"
                       >
                         Delete
-                      </button>
+                      </button> */}
                     </div>
                   </>
                 )}

@@ -420,7 +420,7 @@ const ShopContextProvider = (props) => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/categories`);
       if (Array.isArray(data.categories)) {
-        return data.categories.slice(0, 5);
+        return data.categories.slice(0, 10);
       }
       return [];
     } catch (error) {
