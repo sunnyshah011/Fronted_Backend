@@ -7,6 +7,9 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import FishingLoader from "../component/FishingLoader ";
 import { useQuery } from "@tanstack/react-query";
+import { Fancybox } from "@fancyapps/ui";
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
+
 
 const fetchProduct = async (backendUrl, categorySlug, productSlug) => {
   const { data } = await axios.get(
@@ -68,8 +71,8 @@ const Product = () => {
   const selectedVariant =
     selectedSize && selectedColor
       ? fproduct?.variants.find(
-          (v) => v.size === selectedSize && v.color === selectedColor
-        )
+        (v) => v.size === selectedSize && v.color === selectedColor
+      )
       : null;
 
   const priceVariant = selectedVariant || fproduct?.variants?.[0];
@@ -108,6 +111,23 @@ const Product = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  useEffect(() => {
+    Fancybox.bind("[data-fancybox='gallery']", {
+      Toolbar: false,
+      Thumbs: {
+        autoStart: true,
+      },
+      zoom: true,
+      animated: true,
+      dragToClose: true,
+    });
+
+    return () => {
+      Fancybox.destroy();
+    };
+  }, [fproduct, mainImage]);
+
+
   return (
     <div className="max-w-[1250px] mt-3 pt-4 px-4 bg-white">
       {isLoading && <FishingLoader />}
@@ -122,7 +142,7 @@ const Product = () => {
       {fproduct && (
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* LEFT IMAGES */}
-          <div className="w-full flex flex-col items-center">
+          {/* <div className="w-full flex flex-col items-center">
             <div className="w-full max-w-[500px] aspect-square bg-white overflow-hidden rounded-xl mb-2 flex items-center justify-center shadow">
               <Zoom>
                 <img
@@ -153,7 +173,49 @@ const Product = () => {
                 ))}
               </div>
             )}
+          </div> */}
+
+          {/* LEFT IMAGES */}
+          <div className="w-full flex flex-col items-center">
+            <div
+              className="w-full max-w-[500px] aspect-square bg-white overflow-hidden rounded-xl mb-2 flex items-center justify-center shadow"
+            >
+              <a
+                data-fancybox="gallery"
+                href={mainImage || "/placeholder.png"}
+              // data-caption={fproduct.name}
+              >
+                <img
+                  src={mainImage || "/placeholder.png"}
+                  alt={fproduct.name}
+                  className="max-w-full max-h-full object-contain cursor-zoom-in"
+                />
+              </a>
+            </div>
+
+            {/* // Thumbnail Images */}
+            {fproduct.images?.length > 1 && (
+              <div className="flex gap-3 flex-wrap justify-center">
+                {fproduct.images.map((img) => (
+                  <div
+                    key={img}
+                    onClick={() => setMainImage(img)}
+                    className={`w-15 h-15 rounded-lg overflow-hidden cursor-pointer border transition transform hover:scale-105 ${mainImage === img
+                      ? "border-black ring-2 ring-black"
+                      : "border-gray-300"
+                      }`}
+                  >
+                    <img
+                      src={img}
+                      alt="Thumbnail"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
 
           {/* RIGHT INFO */}
           <div className="flex flex-col pr-5">
@@ -175,13 +237,12 @@ const Product = () => {
                     <div key={size} className="flex flex-col items-center">
                       <button
                         onClick={() => setSelectedSize(size)}
-                        className={`px-4 py-2 border rounded-lg transition ${
-                          selectedSize === size
-                            ? "bg-black text-white"
-                            : sizeHasStock
+                        className={`px-4 py-2 border rounded-lg transition ${selectedSize === size
+                          ? "bg-black text-white"
+                          : sizeHasStock
                             ? "bg-white hover:bg-gray-100"
                             : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                        }`}
+                          }`}
                         disabled={!sizeHasStock}
                       >
                         {size}
@@ -211,13 +272,12 @@ const Product = () => {
                     <div key={color} className="flex flex-col items-center">
                       <button
                         onClick={() => setSelectedColor(color)}
-                        className={`px-4 py-2 border rounded-lg transition ${
-                          selectedColor === color
-                            ? "bg-black text-white"
-                            : colorHasStock
+                        className={`px-4 py-2 border rounded-lg transition ${selectedColor === color
+                          ? "bg-black text-white"
+                          : colorHasStock
                             ? "bg-white hover:bg-gray-100"
                             : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                        }`}
+                          }`}
                         disabled={!colorHasStock}
                       >
                         {color}
@@ -300,19 +360,18 @@ const Product = () => {
                 // !isVariantSelected ||
                 isAdding
               }
-              className={`px-6 w-50 py-3 rounded-lg mb-4 transition ${
-                !anyStockAvailable || isOutOfStock || isMaxInCart || isAdding
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-black text-white hover:bg-gray-800"
-              }`}
+              className={`px-6 w-50 py-3 rounded-lg mb-4 transition ${!anyStockAvailable || isOutOfStock || isMaxInCart || isAdding
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-black text-white hover:bg-gray-800"
+                }`}
             >
               {isAdding
                 ? "Adding..."
                 : !anyStockAvailable || isOutOfStock
-                ? "Out of Stock"
-                : isMaxInCart
-                ? "Added to Cart"
-                : "Add to Cart"}
+                  ? "Out of Stock"
+                  : isMaxInCart
+                    ? "Added to Cart"
+                    : "Add to Cart"}
             </button>
             <p className="mb-6 text-gray-700">{fproduct.description}</p>
           </div>
