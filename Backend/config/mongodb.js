@@ -19,3 +19,23 @@ export default connectDB;
 
 //  mongoose.connection.on("connected", () => { console.log("DB CONNECTED")});
 //  await mongoose.connect(`${process.env.MONGODB_URI}/ecommerce`);
+
+
+// import mongoose from "mongoose";
+
+// const connectDB = async () => {
+//   try {
+//     const connectionInstance = await mongoose.connect(process.env.MONGODB_URI, {
+//       useNewUrlParser: true,
+//       useUnifiedTopology: true,
+//     });
+//     console.log(
+//       `MONGODB CONNECTED!! DB HOST: ${connectionInstance.connection.host}`
+//     );
+//   } catch (error) {
+//     console.log("MONGODB CONNECTION ERROR :: " + error);
+//     process.exit(1);
+//   }
+// };
+
+// export default connectDB;
