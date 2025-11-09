@@ -14,12 +14,20 @@ export const addProduct = async (req, res) => {
       isTopProduct,
       isBestSelling,
       isFlashSale,
+      deliveryCharge, // ✅ added
     } = req.body;
 
     if (!name || !subcategory) {
       return res
         .status(400)
         .json({ success: false, message: "Name and subcategory required" });
+    }
+
+    if (deliveryCharge && Number(deliveryCharge) < 150) {
+      return res.status(400).json({
+        success: false,
+        message: "Delivery charge must be at least Rs.150",
+      });
     }
 
     // Prevent duplicate product by slug
@@ -80,6 +88,7 @@ export const addProduct = async (req, res) => {
       isTopProduct: isTopProduct === "true" || isTopProduct === true,
       isBestSelling: isBestSelling === "true" || isBestSelling === true,
       isFlashSale: isFlashSale === "true" || isFlashSale === true,
+      deliveryCharge: deliveryCharge ? Number(deliveryCharge) : 150, // ✅ enforce default
     };
 
     const product = new ProductModel(productData);

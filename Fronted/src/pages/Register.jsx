@@ -312,8 +312,11 @@ const Register = () => {
         </div>
       )}
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
-          Welcome To FTS
+        <h2 className="text-[15px] text-gray-800">
+          Welcome To,
+        </h2>
+        <h2 className="text-2xl  text-gray-800 mb-2">
+          Fishing Tackle Store🎣
         </h2>
         <p className="text-gray-600 mb-4">Create New Account</p>
 

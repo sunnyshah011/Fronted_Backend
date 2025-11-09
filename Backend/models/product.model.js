@@ -35,6 +35,13 @@ const productSchema = new mongoose.Schema(
     isTopProduct: { type: Boolean, default: false },
     isBestSelling: { type: Boolean, default: false },
     isFlashSale: { type: Boolean, default: false },
+
+    // 🚚 Delivery charge for each product
+    deliveryCharge: {
+      type: Number,
+      default: 150,
+      min: [150, "Delivery charge must be at least Rs.150"],
+    },
   },
   { timestamps: true }
 );

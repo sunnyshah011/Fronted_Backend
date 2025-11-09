@@ -20,8 +20,25 @@ const AddProduct = ({ token }) => {
   const [isBestSelling, setIsBestSelling] = useState(false);
   const [isFlashSale, setIsFlashSale] = useState(false);
 
+  //delivery charge for each product
+  const [deliveryCharge, setDeliveryCharge] = useState(150);
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    const value = Number(e.target.value);
+    setDeliveryCharge(value);
+
+    if (value < 150) {
+      setError("Delivery charge must be at least Rs.150");
+    } else {
+      setError("");
+    }
+  };
+
   // Variants
-  const [variants, setVariants] = useState([{ color: "", size: "", stock: 0, price: 0 }]);
+  const [variants, setVariants] = useState([
+    { color: "", size: "", stock: 0, price: 0 },
+  ]);
 
   // Loading state
   const [loading, setLoading] = useState(false);
@@ -39,7 +56,9 @@ const AddProduct = ({ token }) => {
   // Fetch subcategories
   const loadSubcategories = async (categoryId) => {
     try {
-      const res = await axios.get(`${BackendUrl}/api/subcategories/category/${categoryId}`);
+      const res = await axios.get(
+        `${BackendUrl}/api/subcategories/category/${categoryId}`
+      );
       setSubcategories(res.data.subcategories || []);
     } catch (err) {
       console.error(err);
@@ -72,7 +91,11 @@ const AddProduct = ({ token }) => {
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           canvas.toBlob(
             (blob) => {
-              resolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".webp"), { type: "image/webp" }));
+              resolve(
+                new File([blob], file.name.replace(/\.[^/.]+$/, ".webp"), {
+                  type: "image/webp",
+                })
+              );
             },
             "image/webp",
             0.8
@@ -98,11 +121,14 @@ const AddProduct = ({ token }) => {
   };
 
   // Variants handlers
-  const addVariant = () => setVariants([...variants, { color: "", size: "", stock: 0, price: 0 }]);
-  const removeVariant = (index) => setVariants(variants.filter((_, i) => i !== index));
+  const addVariant = () =>
+    setVariants([...variants, { color: "", size: "", stock: 0, price: 0 }]);
+  const removeVariant = (index) =>
+    setVariants(variants.filter((_, i) => i !== index));
   const handleVariantChange = (index, key, value) => {
     const newVariants = [...variants];
-    newVariants[index][key] = key === "stock" || key === "price" ? Number(value) : value;
+    newVariants[index][key] =
+      key === "stock" || key === "price" ? Number(value) : value;
     setVariants(newVariants);
   };
 
@@ -111,6 +137,8 @@ const AddProduct = ({ token }) => {
     e.preventDefault();
     if (loading) return; // prevent double submit
     if (!selectedSubcategory) return toast.error("Select a subcategory");
+    if (deliveryCharge < 150)
+      return toast.error("Delivery charge must be at least Rs.150");
 
     setLoading(true);
 
@@ -122,14 +150,20 @@ const AddProduct = ({ token }) => {
     formData.append("isTopProduct", isTopProduct);
     formData.append("isBestSelling", isBestSelling);
     formData.append("isFlashSale", isFlashSale);
+    formData.append("deliveryCharge", Number(deliveryCharge));
 
-    ["image1", "image2", "image3", "image4"].forEach((f) => images[f] && formData.append(f, images[f]));
+
+    ["image1", "image2", "image3", "image4"].forEach(
+      (f) => images[f] && formData.append(f, images[f])
+    );
 
     // Optimistic UI toast
     toast.success("Product added! Uploading images...");
 
     try {
-      await axios.post(`${BackendUrl}/api/product/add`, formData, { headers: { token } });
+      await axios.post(`${BackendUrl}/api/product/add`, formData, {
+        headers: { token },
+      });
 
       // Reset form after upload
       setName("");
@@ -142,6 +176,7 @@ const AddProduct = ({ token }) => {
       setIsTopProduct(false);
       setIsBestSelling(false);
       setIsFlashSale(false);
+      setDeliveryCharge(150);
     } catch (err) {
       console.error(err);
       toast.error("Failed to add product");
@@ -179,14 +214,18 @@ const AddProduct = ({ token }) => {
           />
 
           <div>
-            <p className="font-medium mb-2">Variants (Color / Size / Stock / Price)</p>
+            <p className="font-medium mb-2">
+              Variants (Color / Size / Stock / Price)
+            </p>
             {variants.map((v, i) => (
               <div key={i} className="gap-2 mb-2 items-center">
                 <input
                   type="text"
                   placeholder="Color"
                   value={v.color}
-                  onChange={(e) => handleVariantChange(i, "color", e.target.value)}
+                  onChange={(e) =>
+                    handleVariantChange(i, "color", e.target.value)
+                  }
                   className="border rounded-lg p-2 flex-1"
                   required
                 />
@@ -194,7 +233,9 @@ const AddProduct = ({ token }) => {
                   type="text"
                   placeholder="Size"
                   value={v.size}
-                  onChange={(e) => handleVariantChange(i, "size", e.target.value)}
+                  onChange={(e) =>
+                    handleVariantChange(i, "size", e.target.value)
+                  }
                   className="border rounded-lg p-2 flex-1"
                   required
                 />
@@ -202,7 +243,9 @@ const AddProduct = ({ token }) => {
                   type="number"
                   placeholder="Stock"
                   value={v.stock}
-                  onChange={(e) => handleVariantChange(i, "stock", e.target.value)}
+                  onChange={(e) =>
+                    handleVariantChange(i, "stock", e.target.value)
+                  }
                   className="border rounded-lg p-2 flex-1"
                   required
                 />
@@ -210,14 +253,28 @@ const AddProduct = ({ token }) => {
                   type="number"
                   placeholder="Price"
                   value={v.price}
-                  onChange={(e) => handleVariantChange(i, "price", e.target.value)}
+                  onChange={(e) =>
+                    handleVariantChange(i, "price", e.target.value)
+                  }
                   className="border rounded-lg p-2 flex-1"
                   required
                 />
-                <button type="button" onClick={() => removeVariant(i)} className="text-red-500">❌</button>
+                <button
+                  type="button"
+                  onClick={() => removeVariant(i)}
+                  className="text-red-500"
+                >
+                  ❌
+                </button>
               </div>
             ))}
-            <button type="button" onClick={addVariant} className="text-green-600 mt-2">➕ Add Variant</button>
+            <button
+              type="button"
+              onClick={addVariant}
+              className="text-green-600 mt-2"
+            >
+              ➕ Add Variant
+            </button>
           </div>
 
           <div className="mt-4">
@@ -229,7 +286,9 @@ const AddProduct = ({ token }) => {
             >
               <option value="">Select Category</option>
               {categories.map((c) => (
-                <option key={c._id} value={c._id}>{c.name}</option>
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
               ))}
             </select>
 
@@ -241,7 +300,9 @@ const AddProduct = ({ token }) => {
             >
               <option value="">Select Subcategory</option>
               {subcategories.map((sub) => (
-                <option key={sub._id} value={sub._id}>{sub.name}</option>
+                <option key={sub._id} value={sub._id}>
+                  {sub.name}
+                </option>
               ))}
             </select>
           </div>
@@ -254,9 +315,17 @@ const AddProduct = ({ token }) => {
           <h2 className="text-lg font-semibold mb-4">Upload Images</h2>
           {["image1", "image2", "image3", "image4"].map((f) => (
             <div key={f} className="mb-4">
-              <input type="file" onChange={(e) => handleImageChange(e, f)} className="w-full" />
+              <input
+                type="file"
+                onChange={(e) => handleImageChange(e, f)}
+                className="w-full"
+              />
               {imagePreviews[f] && (
-                <img src={imagePreviews[f]} alt="preview" className="mt-2 w-28 h-28 object-cover rounded-lg border" />
+                <img
+                  src={imagePreviews[f]}
+                  alt="preview"
+                  className="mt-2 w-28 h-28 object-cover rounded-lg border"
+                />
               )}
             </div>
           ))}
@@ -266,25 +335,61 @@ const AddProduct = ({ token }) => {
           <h2 className="text-lg font-semibold mb-4">Product Flags</h2>
           <div className="flex flex-col gap-2">
             <label className="flex items-center gap-2">
-              <input type="checkbox" checked={isTopProduct} onChange={(e) => setIsTopProduct(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={isTopProduct}
+                onChange={(e) => setIsTopProduct(e.target.checked)}
+              />
               Top Product
             </label>
             <label className="flex items-center gap-2">
-              <input type="checkbox" checked={isBestSelling} onChange={(e) => setIsBestSelling(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={isBestSelling}
+                onChange={(e) => setIsBestSelling(e.target.checked)}
+              />
               Best Selling
             </label>
             <label className="flex items-center gap-2">
-              <input type="checkbox" checked={isFlashSale} onChange={(e) => setIsFlashSale(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={isFlashSale}
+                onChange={(e) => setIsFlashSale(e.target.checked)}
+              />
               Flash Sale
             </label>
           </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow p-6">
+          <h2 className="text-lg font-semibold">
+            Product Delivery Charge{" "}
+            <span className="text-sm pl-2 font-medium text-emerald-600">
+              Default Charge - Rs.150/-
+            </span>
+          </h2>
+
+          <input
+            type="number"
+            min={150}
+            value={deliveryCharge}
+            onChange={handleChange}
+            className={`border rounded-lg p-2 flex-1 ${
+              error ? "border-red-500" : "border-gray-300"
+            }`}
+            required
+          />
+
+          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         </div>
 
         <div className="flex justify-end">
           <button
             type="submit"
             disabled={loading}
-            className={`bg-green-600 text-white px-6 py-2 rounded-xl shadow hover:bg-green-700 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`bg-green-600 text-white px-6 py-2 rounded-xl shadow hover:bg-green-700 ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             {loading ? "Adding..." : "Add Product"}
           </button>
