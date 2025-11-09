@@ -26,7 +26,7 @@ const Placeorder = () => {
 
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
-  const [cities, setCities] = useState([]);
+  // const [cities, setCities] = useState([]);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -64,17 +64,17 @@ const Placeorder = () => {
     }
   };
 
-  const fetchCities = async (province, district) => {
-    if (!province || !district) return;
-    try {
-      const res = await axios.get(
-        `${backendUrl}/api/location/${province}/${district}/cities`
-      );
-      setCities(res.data.cities || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // const fetchCities = async (province, district) => {
+  //   if (!province || !district) return;
+  //   try {
+  //     const res = await axios.get(
+  //       `${backendUrl}/api/location/${province}/${district}/cities`
+  //     );
+  //     setCities(res.data.cities || []);
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
   // ✅ Load address if exists
   useEffect(() => {
@@ -94,8 +94,8 @@ const Placeorder = () => {
       setIsModified(false);
 
       if (address.province) fetchDistricts(address.province);
-      if (address.province && address.district)
-        fetchCities(address.province, address.district);
+      // if (address.province && address.district)
+      //   fetchCities(address.province, address.district);
     }
   }, [address]);
 
@@ -126,14 +126,14 @@ const Placeorder = () => {
       updatedForm.district = "";
       updatedForm.city = "";
       setDistricts([]);
-      setCities([]);
+      // setCities([]);
       fetchDistricts(cleanedValue);
     }
 
     if (name === "district") {
       updatedForm.city = "";
-      setCities([]);
-      fetchCities(updatedForm.province, cleanedValue);
+      // setCities([]);
+      // fetchCities(updatedForm.province, cleanedValue);
     }
 
     setFormData(updatedForm);
@@ -362,7 +362,7 @@ const Placeorder = () => {
             { label: "Full Name", name: "fullName", type: "text" },
             { label: "Phone", name: "phone", type: "tel" },
           ].map(({ label, name, type }) => (
-            <div className="mb-2" key={name}>
+            <div className="mb-3" key={name}>
               <label className="block text-sm mb-1 font-medium text-gray-700">
                 {label} *
               </label>
@@ -381,9 +381,9 @@ const Placeorder = () => {
           {[
             { label: "Province", name: "province", options: provinces },
             { label: "District", name: "district", options: districts },
-            { label: "City", name: "city", options: cities },
+            // { label: "City", name: "city", options: cities },
           ].map(({ label, name, options }) => (
-            <div className="mb-2" key={name}>
+            <div className="mb-3" key={name}>
               <label className="block  text-sm mb-1 font-medium text-gray-700">
                 {label} *
               </label>
@@ -403,6 +403,22 @@ const Placeorder = () => {
               </select>
             </div>
           ))}
+
+          {/* ✅ City input instead of dropdown */}
+          <div className="mb-3">
+            <label className="block text-sm mb-1 font-medium text-gray-700">
+              City/Municipality *
+            </label>
+            <input
+              type="text"
+              name="city"
+              value={formData.city || ""}
+              onChange={handleChange}
+              placeholder="Enter your city"
+              className="w-full bg-white border border-gray-300 pl-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
 
           {/* Street */}
           <div className="mb-2">
@@ -424,10 +440,10 @@ const Placeorder = () => {
             <button
               type="submit"
               className={`flex-1 py-3 rounded-lg text-white font-medium transition ${isFirstTime
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : isModified
-                    ? "bg-green-600 hover:bg-green-700"
-                    : "bg-gray-500 cursor-not-allowed"
+                ? "bg-blue-600 hover:bg-blue-700"
+                : isModified
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-gray-500 cursor-not-allowed"
                 }`}
               disabled={!isModified && !isFirstTime}
             >
@@ -533,10 +549,10 @@ const Placeorder = () => {
             onClick={handlePlaceOrder}
             disabled={isModified || isLoading}
             className={`mt-4 w-full py-3 rounded-lg text-white ${isModified
-                ? "bg-gray-400 cursor-not-allowed"
-                : isLoading
-                  ? "bg-gray-700"
-                  : "bg-black hover:bg-gray-800"
+              ? "bg-gray-400 cursor-not-allowed"
+              : isLoading
+                ? "bg-gray-700"
+                : "bg-black hover:bg-gray-800"
               } flex items-center justify-center gap-2`}
           >
             {isLoading ? (
