@@ -36,11 +36,11 @@ const App = () => {
       />
 
       {/* Wrapper that limits width */}
-      <div className="flex flex-col flex-grow mx-auto w-full max-w-[1250px] ">
+      <div className="flex flex-col grow mx-auto w-full max-w-[1250px] ">
         <Navbar />
         <Breadcrumbs />
 
-        <main className="flex-grow">
+        <main className="grow">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />

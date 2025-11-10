@@ -85,7 +85,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-300 mt-8 pt-4 text-center text-sm text-gray-400">
+      <div className="border-t border-gray-300 mt-8 pt-4 px-6 text-center text-sm text-gray-400">
         © {new Date().getFullYear()} Fishing Tackle Store. All Rights Reserved. | Privacy Policy
       </div>
     </footer>
