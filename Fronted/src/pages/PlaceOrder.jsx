@@ -599,7 +599,6 @@ import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
-import mockData from "../assets/mockPaymentMethods";
 
 const Placeorder = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -611,17 +610,6 @@ const Placeorder = () => {
   const [paymentTwo, setPaymentTwo] = useState(false);
   const [selectedOnlineMethod, setSelectedOnlineMethod] = useState(null);
 
-  useEffect(() => {
-    const fetchMockPaymentMethods = async () => {
-      try {
-        setPaymentMethods(mockData.methods);
-      } catch (err) {
-        console.error("Error loading mock payment methods:", err);
-      }
-    };
-
-    fetchMockPaymentMethods();
-  }, []); // 👈 only once
 
   const {
     navigate,
@@ -635,6 +623,31 @@ const Placeorder = () => {
     delivery_fee,
     products,
   } = useContext(ShopContext);
+
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      try {
+        const res = await axios.get(`${backendUrl}/api/paymentmethod`);
+        if (res.data.success) {
+          setPaymentMethods(res.data.methods || []);
+        } else {
+          toast.error("Failed to load payment methods", {
+            className: "custom-toast-center",
+            autoClose: 1000,
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching payment methods:", err);
+        toast.error("Error fetching payment methods", {
+          className: "custom-toast-center",
+          autoClose: 1000,
+        });
+      }
+    };
+
+    fetchPaymentMethods();
+  }, [backendUrl]);
+
 
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -965,9 +978,8 @@ const Placeorder = () => {
       {/* ✅ Left: Address Section (updated like Profile) */}
       <div className="flex-1 bg-white shadow-sm rounded-xl p-5">
         <h2
-          className={`text-xl sm:text-2xl font-semibold mb-6 ${
-            addressError ? "text-red-600 animate-pulse" : "text-gray-900"
-          }`}
+          className={`text-xl sm:text-2xl font-semibold mb-6 ${addressError ? "text-red-600 animate-pulse" : "text-gray-900"
+            }`}
         >
           Shipping Address
         </h2>
@@ -1055,20 +1067,19 @@ const Placeorder = () => {
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
             <button
               type="submit"
-              className={`flex-1 py-3 rounded-lg text-white font-medium transition ${
-                isFirstTime
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : isModified
+              className={`flex-1 py-3 rounded-lg text-white font-medium transition ${isFirstTime
+                ? "bg-blue-600 hover:bg-blue-700"
+                : isModified
                   ? "bg-green-600 hover:bg-green-700"
                   : "bg-gray-500 cursor-not-allowed"
-              }`}
+                }`}
               disabled={!isModified && !isFirstTime}
             >
               {isFirstTime
                 ? "Add Address"
                 : isModified
-                ? "Update Address"
-                : "Saved"}
+                  ? "Update Address"
+                  : "Saved"}
             </button>
 
             {!isFirstTime && isModified && (
@@ -1160,16 +1171,14 @@ const Placeorder = () => {
                 setPaymentTwo(false);
                 setSelectedOnlineMethod(null);
               }}
-              className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${
-                paymentOne ? "border-green-500 bg-green-50" : "border-gray-200"
-              }`}
+              className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${paymentOne ? "border-green-500 bg-green-50" : "border-gray-200"
+                }`}
             >
               <div
-                className={`w-4 h-4 rounded-full border ${
-                  paymentOne
-                    ? "bg-green-500 border-green-500"
-                    : "border-gray-400"
-                }`}
+                className={`w-4 h-4 rounded-full border ${paymentOne
+                  ? "bg-green-500 border-green-500"
+                  : "border-gray-400"
+                  }`}
               ></div>
               <span>Cash on Delivery</span>
             </div>
@@ -1180,14 +1189,12 @@ const Placeorder = () => {
                 setPaymentTwo(!paymentTwo);
                 setPaymentOne(false);
               }}
-              className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${
-                paymentTwo ? "border-blue-500 bg-blue-50" : "border-gray-200"
-              }`}
+              className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${paymentTwo ? "border-blue-500 bg-blue-50" : "border-gray-200"
+                }`}
             >
               <div
-                className={`w-4 h-4 rounded-full border ${
-                  paymentTwo ? "bg-blue-500 border-blue-500" : "border-gray-400"
-                }`}
+                className={`w-4 h-4 rounded-full border ${paymentTwo ? "bg-blue-500 border-blue-500" : "border-gray-400"
+                  }`}
               ></div>
               <span>Online Payment</span>
             </div>
@@ -1204,17 +1211,26 @@ const Placeorder = () => {
                     <div
                       key={method._id}
                       onClick={() => setSelectedOnlineMethod(method._id)}
-                      className={`border p-3 rounded-lg cursor-pointer flex items-center gap-4 transition ${
-                        selectedOnlineMethod === method._id
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200"
-                      }`}
+                      className={`border p-3 rounded-lg cursor-pointer flex items-center gap-4 transition ${selectedOnlineMethod === method._id
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200"
+                        }`}
                     >
-                      <img
+                      {/* <img
                         src={method.image}
                         alt={method.name}
                         className="w-12 h-12 rounded-md object-contain border"
+                      /> */}
+                      <img
+                        src={
+                          method.image?.startsWith("http")
+                            ? method.image
+                            : `${backendUrl.replace("/api", "")}/${method.image}`
+                        }
+                        alt={method.name}
+                        className="w-12 h-12 rounded-md object-contain border"
                       />
+
                       <div className="flex flex-col">
                         <span className="font-medium text-gray-800">
                           {method.name}
@@ -1236,13 +1252,12 @@ const Placeorder = () => {
           <button
             onClick={handlePlaceOrder}
             disabled={isModified || isLoading}
-            className={`mt-4 w-full py-3 rounded-lg text-white ${
-              isModified
-                ? "bg-gray-400 cursor-not-allowed"
-                : isLoading
+            className={`mt-4 w-full py-3 rounded-lg text-white ${isModified
+              ? "bg-gray-400 cursor-not-allowed"
+              : isLoading
                 ? "bg-gray-700"
                 : "bg-black hover:bg-gray-800"
-            } flex items-center justify-center gap-2`}
+              } flex items-center justify-center gap-2`}
           >
             {isLoading ? (
               <>
