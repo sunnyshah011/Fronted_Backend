@@ -12,6 +12,7 @@ import orderRouter from "./routes/order.route.js";
 import locationrRouter from "./routes/location.route.js";
 import categoryRouter from "./routes/category.route.js";
 import subCategoryRouter from "./routes/subcategory.route.js";
+import paymentMethods from "./routes/paymentMethods.route.js";
 
 //App Config
 const app = express();
@@ -38,6 +39,7 @@ app.use("/api/order", orderRouter);
 app.use("/api/location", locationrRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/subcategories", subCategoryRouter);
+app.use("/api/paymentmethods", paymentMethods);
 
 app.listen(port, () => {
   console.log("server started on :: ", port);

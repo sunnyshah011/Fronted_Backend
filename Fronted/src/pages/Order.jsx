@@ -671,7 +671,7 @@ const Order = () => {
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-3 py-1 rounded font-medium flex-shrink-0 ${filterStatus === status
+              className={`px-3 py-1 rounded font-medium shrink-0 ${filterStatus === status
                 ? "bg-blue-500 text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 } transition`}

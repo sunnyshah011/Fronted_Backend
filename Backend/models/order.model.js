@@ -29,9 +29,14 @@ const orderSchema = new mongoose.Schema(
       city: { type: String, required: true },
       streetAddress: { type: String, required: true },
     },
+
     paymentMethod: { type: String, required: true },
-    paymentStatus: { type: String, default: "Pending" },
-    orderStatus: { type: String, default: "Processing" },
+    // 🆕 proof of payment uploaded by user
+    paymentProof: { type: String, default: "" }, // URL of uploaded screenshot
+    
+    paymentStatus: { type: String, default: "" },
+
+    orderStatus: { type: String, default: "" },
 
     // 🆕 Return information
     returnRequest: {
