@@ -606,10 +606,16 @@ const Placeorder = () => {
   const queryClient = useQueryClient();
 
   const [paymentMethods, setPaymentMethods] = useState([]);
-  const [paymentOne, setPaymentOne] = useState(true);
+  const [paymentOne, setPaymentOne] = useState(false);
   const [paymentTwo, setPaymentTwo] = useState(false);
   const [selectedOnlineMethod, setSelectedOnlineMethod] = useState(null);
 
+  const [qrView, setQrView] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [copied, setCopied] = useState(null);
+  // At the top of your component (with other useState)
+  const [copiedId, setCopiedId] = useState(null);
 
   const {
     navigate,
@@ -627,7 +633,7 @@ const Placeorder = () => {
   useEffect(() => {
     const fetchPaymentMethods = async () => {
       try {
-        const res = await axios.get(`${backendUrl}/api/paymentmethod`);
+        const res = await axios.get(`${backendUrl}/api/paymentmethods`);
         if (res.data.success) {
           setPaymentMethods(res.data.methods || []);
         } else {
@@ -647,7 +653,6 @@ const Placeorder = () => {
 
     fetchPaymentMethods();
   }, [backendUrl]);
-
 
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -843,6 +848,18 @@ const Placeorder = () => {
       return;
     }
 
+    if (paymentTwo && !selectedOnlineMethod) {
+      toast.warn(
+        "Please select an online payment method (eSewa, Khalti, etc.)"
+      );
+      return;
+    }
+
+    // find selected online payment method
+    const selectedMethod = paymentMethods.find(
+      (m) => m._id === selectedOnlineMethod
+    );
+
     const items = [];
     for (const productId in cartitem) {
       const productCart = cartitem[productId];
@@ -920,6 +937,10 @@ const Placeorder = () => {
         city: formData.city,
         streetAddress: formData.streetAddress,
       },
+      paymentMethod: paymentOne
+        ? "Cash On Delivery"
+        : selectedMethod?.name || "Online",
+      paymentMethodId: selectedOnlineMethod || null,
     };
 
     try {
@@ -978,8 +999,9 @@ const Placeorder = () => {
       {/* ✅ Left: Address Section (updated like Profile) */}
       <div className="flex-1 bg-white shadow-sm rounded-xl p-5">
         <h2
-          className={`text-xl sm:text-2xl font-semibold mb-6 ${addressError ? "text-red-600 animate-pulse" : "text-gray-900"
-            }`}
+          className={`text-xl sm:text-2xl font-semibold mb-6 ${
+            addressError ? "text-red-600 animate-pulse" : "text-gray-900"
+          }`}
         >
           Shipping Address
         </h2>
@@ -1067,19 +1089,20 @@ const Placeorder = () => {
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
             <button
               type="submit"
-              className={`flex-1 py-3 rounded-lg text-white font-medium transition ${isFirstTime
-                ? "bg-blue-600 hover:bg-blue-700"
-                : isModified
+              className={`flex-1 py-3 rounded-lg text-white font-medium transition ${
+                isFirstTime
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : isModified
                   ? "bg-green-600 hover:bg-green-700"
                   : "bg-gray-500 cursor-not-allowed"
-                }`}
+              }`}
               disabled={!isModified && !isFirstTime}
             >
               {isFirstTime
                 ? "Add Address"
                 : isModified
-                  ? "Update Address"
-                  : "Saved"}
+                ? "Update Address"
+                : "Saved"}
             </button>
 
             {!isFirstTime && isModified && (
@@ -1171,14 +1194,16 @@ const Placeorder = () => {
                 setPaymentTwo(false);
                 setSelectedOnlineMethod(null);
               }}
-              className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${paymentOne ? "border-green-500 bg-green-50" : "border-gray-200"
-                }`}
+              className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${
+                paymentOne ? "border-green-500 bg-green-50" : "border-gray-200"
+              }`}
             >
               <div
-                className={`w-4 h-4 rounded-full border ${paymentOne
-                  ? "bg-green-500 border-green-500"
-                  : "border-gray-400"
-                  }`}
+                className={`w-4 h-4 rounded-full border ${
+                  paymentOne
+                    ? "bg-green-500 border-green-500"
+                    : "border-gray-400"
+                }`}
               ></div>
               <span>Cash on Delivery</span>
             </div>
@@ -1189,75 +1214,174 @@ const Placeorder = () => {
                 setPaymentTwo(!paymentTwo);
                 setPaymentOne(false);
               }}
-              className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${paymentTwo ? "border-blue-500 bg-blue-50" : "border-gray-200"
-                }`}
+              className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${
+                paymentTwo ? "border-blue-500 bg-blue-50" : "border-gray-200"
+              }`}
             >
               <div
-                className={`w-4 h-4 rounded-full border ${paymentTwo ? "bg-blue-500 border-blue-500" : "border-gray-400"
-                  }`}
+                className={`w-4 h-4 rounded-full border ${
+                  paymentTwo ? "bg-blue-500 border-blue-500" : "border-gray-400"
+                }`}
               ></div>
               <span>Online Payment</span>
             </div>
 
             {/* ✅ Fetch & show mock payment methods */}
             {paymentTwo && (
-              <div className="ml-6 mt-2 flex flex-col gap-3">
+              <div className="ml-4 mt-2 flex flex-col gap-3">
                 {isLoading ? (
                   <p className="text-gray-500 text-sm italic">
                     Loading payment methods...
                   </p>
                 ) : (
-                  paymentMethods.map((method) => (
-                    <div
-                      key={method._id}
-                      onClick={() => setSelectedOnlineMethod(method._id)}
-                      className={`border p-3 rounded-lg cursor-pointer flex items-center gap-4 transition ${selectedOnlineMethod === method._id
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200"
-                        }`}
-                    >
-                      {/* <img
-                        src={method.image}
-                        alt={method.name}
-                        className="w-12 h-12 rounded-md object-contain border"
-                      /> */}
-                      <img
-                        src={
-                          method.image?.startsWith("http")
-                            ? method.image
-                            : `${backendUrl.replace("/api", "")}/${method.image}`
-                        }
-                        alt={method.name}
-                        className="w-12 h-12 rounded-md object-contain border"
-                      />
+                  paymentMethods.map((method) => {
+                    const imgUrl = method.image?.startsWith("http")
+                      ? method.image
+                      : `${backendUrl.replace("/api", "")}/${method.image}`;
 
-                      <div className="flex flex-col">
-                        <span className="font-medium text-gray-800">
-                          {method.name}
-                        </span>
-                        {method.details && (
-                          <span className="text-sm text-gray-600">
-                            {method.details}
+                    return (
+                      <div
+                        key={method._id}
+                        onClick={() => setSelectedOnlineMethod(method._id)}
+                        className={`border p-3 rounded-lg cursor-pointer flex flex-row items-center gap-4 transition relative ${
+                          selectedOnlineMethod === method._id
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200"
+                        }`}
+                      >
+                        {/* QR Image on the left */}
+                        <img
+                          src={imgUrl}
+                          alt={method.name}
+                          className="w-20 h-20 rounded-md object-contain border"
+                        />
+
+                        {/* Text content on the right */}
+                        <div className="flex flex-col gap-1 flex-1">
+                          {/* Name */}
+                          <span className="font-medium text-gray-800">
+                            {method.name}
                           </span>
-                        )}
+
+                          {/* Account Number with copy button */}
+                          {method.accountNumber && (
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <span className="truncate">
+                                {method.accountNumber}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard.writeText(
+                                    method.accountNumber
+                                  );
+                                  setCopiedId(method._id);
+                                  setTimeout(() => setCopiedId(null), 1500);
+                                }}
+                                className="text-blue-600 hover:underline"
+                              >
+                                {copiedId === method._id ? "Copied!" : "Copy"}
+                              </button>
+                            </div>
+                          )}
+
+                          {/* View QR button */}
+                          {method.image && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setQrView(imgUrl);
+                                setIsModalOpen(true);
+                                document.body.style.overflow = "hidden"; // disable scroll
+                              }}
+                              className="text-blue-600 hover:underline text-sm mt-1"
+                            >
+                              View QR
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             )}
           </div>
 
+          {/* QR Code Modal */}
+          {isModalOpen && qrView && (
+            <div
+              onClick={() => {
+                setQrView(null);
+                setIsModalOpen(false);
+                document.body.style.overflow = "auto";
+              }}
+              className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 cursor-pointer"
+            >
+              <div
+                className="relative bg-white p-4 rounded-xl shadow-xl"
+                onClick={(e) => e.stopPropagation()} // prevent close when clicking inside
+              >
+                <img
+                  src={qrView}
+                  alt="QR Code"
+                  className="max-w-[70vw] max-h-[80vh] rounded-lg object-contain"
+                />
+                <div className="flex justify-center gap-4 mt-3">
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation(); // prevent modal close
+                      try {
+                        const response = await fetch(qrView, { mode: "cors" });
+                        const blob = await response.blob();
+                        const url = URL.createObjectURL(blob);
+
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = "qr-code.jpg";
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        URL.revokeObjectURL(url);
+                        toast.success("Image saved!", { autoClose: 1000 });
+                      } catch (err) {
+                        console.error("Failed to download image:", err);
+                        toast.error("Failed to save image", {
+                          autoClose: 1000,
+                        });
+                      }
+                    }}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                  >
+                    Save Image
+                  </button>
+                  <button
+                    onClick={() => {
+                      setQrView(null);
+                      setIsModalOpen(false);
+                      document.body.style.overflow = "auto";
+                    }}
+                    className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ✅ Place Order Button */}
           <button
             onClick={handlePlaceOrder}
             disabled={isModified || isLoading}
-            className={`mt-4 w-full py-3 rounded-lg text-white ${isModified
-              ? "bg-gray-400 cursor-not-allowed"
-              : isLoading
+            className={`mt-4 w-full py-3 rounded-lg text-white ${
+              isModified
+                ? "bg-gray-400 cursor-not-allowed"
+                : isLoading
                 ? "bg-gray-700"
                 : "bg-black hover:bg-gray-800"
-              } flex items-center justify-center gap-2`}
+            } flex items-center justify-center gap-2`}
           >
             {isLoading ? (
               <>

@@ -339,8 +339,6 @@
 //   handleReturnStatus,
 // };
 
-
-
 import mongoose from "mongoose";
 import orderModel from "../models/order.model.js";
 import userModel from "../models/user.model.js";
@@ -354,25 +352,31 @@ const placeOrder = async (req, res) => {
 
   try {
     const userId = req.userId; // ✅ from auth middleware
-    const { items, amount, address } = req.body;
+    const { items, amount, address, paymentMethod, paymentMethodId } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 
     if (!amount || amount <= 0) {
-      return res.status(400).json({ success: false, message: "Invalid amount" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid amount" });
     }
 
     if (!address) {
-      return res.status(400).json({ success: false, message: "Address is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Address is required" });
     }
 
     const orderId = await generateUniqueOrderId();
 
     // ✅ Validate variant stock before placing order
     for (const item of items) {
-      const product = await ProductModel.findById(item.productId).session(session);
+      const product = await ProductModel.findById(item.productId).session(
+        session
+      );
       if (!product) {
         await session.abortTransaction();
         return res.status(404).json({
@@ -403,7 +407,9 @@ const placeOrder = async (req, res) => {
 
     // ✅ Deduct stock from variant
     for (const item of items) {
-      const product = await ProductModel.findById(item.productId).session(session);
+      const product = await ProductModel.findById(item.productId).session(
+        session
+      );
       const variantIndex = product.variants.findIndex(
         (v) => v.color === item.color && v.size === item.size
       );
@@ -419,7 +425,8 @@ const placeOrder = async (req, res) => {
       items,
       amount,
       address,
-      paymentMethod: "COD",
+      paymentMethod: paymentMethod || "Cash On Delivery",
+      paymentMethodId: paymentMethodId || null,
       paymentStatus: "Pending",
       orderStatus: "Pending",
       orderId,
@@ -443,7 +450,13 @@ const placeOrder = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Place order error:", error);
-    res.status(500).json({ success: false, message: "Failed to place order", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to place order",
+        error: error.message,
+      });
   }
 };
 
@@ -452,7 +465,9 @@ const userOrders = async (req, res) => {
   try {
     const userId = req.userId;
     if (!userId) {
-      return res.status(401).json({ success: false, message: "Unauthorized user" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized user" });
     }
 
     const orders = await orderModel
@@ -463,7 +478,13 @@ const userOrders = async (req, res) => {
     res.json({ success: true, orders });
   } catch (error) {
     console.error("Error fetching user orders:", error);
-    res.status(500).json({ success: false, message: "Failed to fetch orders", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to fetch orders",
+        error: error.message,
+      });
   }
 };
 
@@ -478,7 +499,13 @@ const allOrders = async (req, res) => {
     res.json({ success: true, orders });
   } catch (error) {
     console.error("Fetch all orders error:", error);
-    res.status(500).json({ success: false, message: "Failed to fetch all orders", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to fetch all orders",
+        error: error.message,
+      });
   }
 };
 
@@ -493,7 +520,9 @@ const updateStatus = async (req, res) => {
     const order = await orderModel.findById(orderId).session(session);
     if (!order) {
       await session.abortTransaction();
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
     if (order.orderStatus === "Cancelled" && status === "Cancelled") {
@@ -507,7 +536,9 @@ const updateStatus = async (req, res) => {
     // ✅ If changing status to Cancelled, restore stock
     if (status === "Cancelled" && order.orderStatus !== "Cancelled") {
       for (const item of order.items) {
-        const product = await ProductModel.findById(item.productId).session(session);
+        const product = await ProductModel.findById(item.productId).session(
+          session
+        );
         if (!product) continue;
 
         const variantIndex = product.variants.findIndex(
@@ -539,7 +570,13 @@ const updateStatus = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Update status error:", error);
-    res.status(500).json({ success: false, message: "Failed to update order", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to update order",
+        error: error.message,
+      });
   }
 };
 
@@ -548,18 +585,28 @@ const deleteOrder = async (req, res) => {
   try {
     const { orderId } = req.body;
     if (!orderId) {
-      return res.status(400).json({ success: false, message: "Order ID is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Order ID is required" });
     }
 
     const deleted = await orderModel.findByIdAndDelete(orderId);
     if (!deleted) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
     res.json({ success: true, message: "Order deleted successfully" });
   } catch (error) {
     console.error("Delete order error:", error);
-    res.status(500).json({ success: false, message: "Failed to delete order", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to delete order",
+        error: error.message,
+      });
   }
 };
 
@@ -572,15 +619,21 @@ const cancelOrder = async (req, res) => {
     const { orderId } = req.body;
     const userId = req.userId;
 
-    const order = await orderModel.findOne({ _id: orderId, user: userId }).session(session);
+    const order = await orderModel
+      .findOne({ _id: orderId, user: userId })
+      .session(session);
     if (!order) {
       await session.abortTransaction();
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
     if (order.orderStatus === "Cancelled") {
       await session.abortTransaction();
-      return res.status(400).json({ success: false, message: "This order is already cancelled." });
+      return res
+        .status(400)
+        .json({ success: false, message: "This order is already cancelled." });
     }
 
     if (order.orderStatus !== "Pending") {
@@ -592,7 +645,9 @@ const cancelOrder = async (req, res) => {
     }
 
     for (const item of order.items) {
-      const product = await ProductModel.findById(item.productId).session(session);
+      const product = await ProductModel.findById(item.productId).session(
+        session
+      );
       if (!product) continue;
       const variantIndex = product.variants.findIndex(
         (v) => v.color === item.color && v.size === item.size
@@ -618,7 +673,13 @@ const cancelOrder = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Cancel order error:", error);
-    res.status(500).json({ success: false, message: "Failed to cancel order", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to cancel order",
+        error: error.message,
+      });
   }
 };
 
@@ -630,7 +691,9 @@ const requestReturn = async (req, res) => {
 
     const order = await orderModel.findOne({ _id: orderId, user: userId });
     if (!order)
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
 
     if (order.orderStatus !== "Delivered") {
       return res.status(400).json({
@@ -661,7 +724,13 @@ const requestReturn = async (req, res) => {
     });
   } catch (error) {
     console.error("Return request error:", error);
-    res.status(500).json({ success: false, message: "Failed to submit return request", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to submit return request",
+        error: error.message,
+      });
   }
 };
 
@@ -676,7 +745,9 @@ const handleReturnStatus = async (req, res) => {
 
     if (!order || !order.returnRequest.isRequested) {
       await session.abortTransaction();
-      return res.status(404).json({ success: false, message: "Return request not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Return request not found" });
     }
 
     order.returnRequest.status = decision;
@@ -685,7 +756,9 @@ const handleReturnStatus = async (req, res) => {
       order.orderStatus = "Returned";
 
       for (const item of order.items) {
-        const product = await ProductModel.findById(item.productId).session(session);
+        const product = await ProductModel.findById(item.productId).session(
+          session
+        );
         if (!product) continue;
 
         const variantIndex = product.variants.findIndex(
@@ -714,7 +787,13 @@ const handleReturnStatus = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Handle return error:", error);
-    res.status(500).json({ success: false, message: "Failed to handle return request", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to handle return request",
+        error: error.message,
+      });
   }
 };
 

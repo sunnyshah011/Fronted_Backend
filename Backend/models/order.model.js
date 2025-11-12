@@ -32,8 +32,16 @@ const orderSchema = new mongoose.Schema(
 
     paymentMethod: { type: String, required: true },
     // 🆕 proof of payment uploaded by user
+
+    // 🆕 store selected online payment method reference
+    paymentMethodId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PaymentMethod",
+      default: null,
+    },
+
     paymentProof: { type: String, default: "" }, // URL of uploaded screenshot
-    
+
     paymentStatus: { type: String, default: "" },
 
     orderStatus: { type: String, default: "" },
