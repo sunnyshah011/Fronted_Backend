@@ -1818,7 +1818,7 @@ const Placeorder = () => {
   // ──────────────── RENDER SECTIONS ────────────────
 
   const AddressSection = (
-    <div className="flex-1 bg-white shadow-sm rounded-xl p-5 md:h-[70vh]">
+    <div className="flex-1 bg-white shadow-sm rounded-xl p-5">
       <h2
         className={`text-xl sm:text-2xl font-semibold mb-6 ${
           addressError ? "text-red-600 animate-pulse" : "text-gray-900"
@@ -2035,7 +2035,7 @@ const Placeorder = () => {
             }`}
           >
             <div
-              className={`w-4 h-4 rounded-full border ${
+              className={`min-w-4.5 min-h-4.5 rounded-full border ${
                 paymentOne ? "bg-green-500 border-green-500" : "border-gray-400"
               }`}
             ></div>
@@ -2059,7 +2059,7 @@ const Placeorder = () => {
             }`}
           >
             <div
-              className={`w-4 h-4 rounded-full border ${
+              className={`min-w-4.5 min-h-4.5 rounded-full border ${
                 paymentTwo ? "bg-blue-500 border-blue-500" : "border-gray-400"
               }`}
             ></div>
