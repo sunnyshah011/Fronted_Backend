@@ -997,7 +997,7 @@ const Placeorder = () => {
   return (
     <div className="p-4 flex flex-col md:flex-row gap-8 min-h-[50vh]">
       {/* ✅ Left: Address Section (updated like Profile) */}
-      <div className="flex-1 bg-white shadow-sm rounded-xl p-5">
+      <div className="flex-1 bg-white shadow-sm rounded-xl p-5 md:h-[70vh] ">
         <h2
           className={`text-xl sm:text-2xl font-semibold mb-6 ${
             addressError ? "text-red-600 animate-pulse" : "text-gray-900"
@@ -1013,7 +1013,7 @@ const Placeorder = () => {
             { label: "Phone", name: "phone", type: "tel" },
           ].map(({ label, name, type }) => (
             <div className="mb-3" key={name}>
-              <label className="block text-sm mb-1 font-medium text-gray-700">
+              <label className="block text-sm mb-3 font-medium text-gray-700">
                 {label} *
               </label>
               <input
@@ -1034,7 +1034,7 @@ const Placeorder = () => {
             // { label: "City", name: "city", options: cities },
           ].map(({ label, name, options }) => (
             <div className="mb-3" key={name}>
-              <label className="block  text-sm mb-1 font-medium text-gray-700">
+              <label className="block  text-sm mb-3 font-medium text-gray-700">
                 {label} *
               </label>
               <select
@@ -1199,13 +1199,19 @@ const Placeorder = () => {
               }`}
             >
               <div
-                className={`w-4 h-4 rounded-full border ${
+                className={` min-w-4.5 min-h-4.5 rounded-full border ${
                   paymentOne
                     ? "bg-green-500 border-green-500"
                     : "border-gray-400"
                 }`}
               ></div>
-              <span>Cash on Delivery</span>
+              <div>
+                <span className="text-[18px] md:text-[19px]">Cash on Delivery</span>
+                <p className="text-[11px] md:text-[12px] text-red-800">
+                  Note: You have to Pay 150/- Advance payment which is Courier
+                  Charge.
+                </p>
+              </div>
             </div>
 
             {/* Online Payment */}
@@ -1219,7 +1225,7 @@ const Placeorder = () => {
               }`}
             >
               <div
-                className={`w-4 h-4 rounded-full border ${
+                className={` min-w-4.5 min-h-4.5 rounded-full border ${
                   paymentTwo ? "bg-blue-500 border-blue-500" : "border-gray-400"
                 }`}
               ></div>
@@ -1228,7 +1234,7 @@ const Placeorder = () => {
 
             {/* ✅ Fetch & show mock payment methods */}
             {paymentTwo && (
-              <div className="ml-4 mt-2 flex flex-col gap-3">
+              <div className="ml-3 mt-1 flex max-[1250px]:flex-col gap-2">
                 {isLoading ? (
                   <p className="text-gray-500 text-sm italic">
                     Loading payment methods...
@@ -1243,7 +1249,7 @@ const Placeorder = () => {
                       <div
                         key={method._id}
                         onClick={() => setSelectedOnlineMethod(method._id)}
-                        className={`border p-3 rounded-lg cursor-pointer flex flex-row items-center gap-4 transition relative ${
+                        className={`border p-2 rounded-lg cursor-pointer flex flex-row items-center gap-4 transition relative ${
                           selectedOnlineMethod === method._id
                             ? "border-blue-500 bg-blue-50"
                             : "border-gray-200"
@@ -1253,11 +1259,11 @@ const Placeorder = () => {
                         <img
                           src={imgUrl}
                           alt={method.name}
-                          className="w-20 h-20 rounded-md object-contain border"
+                          className="w-15 h-15 rounded-md object-contain border border-gray-400"
                         />
 
                         {/* Text content on the right */}
-                        <div className="flex flex-col gap-1 flex-1">
+                        <div className="flex flex-col items-start gap-1 flex-1 pr-3">
                           {/* Name */}
                           <span className="font-medium text-gray-800">
                             {method.name}
@@ -1278,7 +1284,7 @@ const Placeorder = () => {
                                   setCopiedId(method._id);
                                   setTimeout(() => setCopiedId(null), 1500);
                                 }}
-                                className="text-blue-600 hover:underline"
+                                className="text-blue-600 hover:underline pl-1"
                               >
                                 {copiedId === method._id ? "Copied!" : "Copy"}
                               </button>
