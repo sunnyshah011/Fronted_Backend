@@ -504,6 +504,29 @@ const allOrders = async (req, res) => {
   }
 };
 
+// // User: Get single order details
+// const getSingleOrder = async (req, res) => {
+//   try {
+//     const orderId = req.params.id;
+//     console.log();
+
+//     const orders = await orderModel
+//       .findOne({
+//         _id: orderId,
+//         userId: req.user._id,
+//       })
+//       .populate("items.productId");
+//     if (!orders)
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Order not found" });
+//     res.json({ success: true, orders });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
+
 // 🔹 Update Order Status (Admin)
 const updateStatus = async (req, res) => {
   const session = await mongoose.startSession();
@@ -785,6 +808,7 @@ const handleReturnStatus = async (req, res) => {
 export {
   placeOrder,
   allOrders,
+  // getSingleOrder,
   userOrders,
   updateStatus,
   cancelOrder,

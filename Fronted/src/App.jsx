@@ -19,6 +19,7 @@ import Breadcrumbs from "./component/Breadcrumb";
 import AllFlashSaleProducts from "./pages/AllFlashSaleProducts";
 import AllTopProducts from "./pages/AllTopProducts";
 import { ToastContainer } from "react-toastify";
+// import OrderDetails from "./pages/OrderDetailPage";
 
 const App = () => {
   return (
@@ -57,6 +58,7 @@ const App = () => {
             <Route path="/categories/:categorySlug/:productSlug" element={<Product />} />
 
             <Route path="/order" element={<Order />} />
+            {/* <Route path="/orders/:orderId" element={<OrderDetails />} /> */}
             <Route path="/placeorder" element={<Placeorder />} />
 
             {/* FlashSale and Topproducts pages */}

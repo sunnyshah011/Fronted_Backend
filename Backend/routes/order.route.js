@@ -2,6 +2,7 @@ import express from "express";
 import {
   placeOrder,
   allOrders,
+  // getSingleOrder,
   userOrders,
   updateStatus,
   cancelOrder,
@@ -17,6 +18,8 @@ const orderRouter = express.Router();
 // Admin routes
 orderRouter.post("/status", adminAuth, updateStatus);
 orderRouter.post("/list", adminAuth, allOrders);
+
+// orderRouter.post("/:id", authUser, getSingleOrder);
 
 // User routes
 orderRouter.post("/place", authUser, placeOrder);
