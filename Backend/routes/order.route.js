@@ -2,7 +2,7 @@ import express from "express";
 import {
   placeOrder,
   allOrders,
-  // getSingleOrder,
+  getSingleOrder,
   userOrders,
   updateStatus,
   cancelOrder,
@@ -19,11 +19,11 @@ const orderRouter = express.Router();
 orderRouter.post("/status", adminAuth, updateStatus);
 orderRouter.post("/list", adminAuth, allOrders);
 
-// orderRouter.post("/:id", authUser, getSingleOrder);
 
 // User routes
 orderRouter.post("/place", authUser, placeOrder);
 orderRouter.post("/userorders", authUser, userOrders);
+
 
 //deleter order
 orderRouter.post("/delete", authUser, deleteOrder);
@@ -35,5 +35,8 @@ orderRouter.post("/return", authUser, requestReturn);
 
 // Admin: Handle return decision
 orderRouter.post("/return/handle", adminAuth, handleReturnStatus);
+
+
+orderRouter.post("/:id", authUser, getSingleOrder);
 
 export default orderRouter;

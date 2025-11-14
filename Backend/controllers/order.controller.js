@@ -504,28 +504,7 @@ const allOrders = async (req, res) => {
   }
 };
 
-// // User: Get single order details
-// const getSingleOrder = async (req, res) => {
-//   try {
-//     const orderId = req.params.id;
-//     console.log();
 
-//     const orders = await orderModel
-//       .findOne({
-//         _id: orderId,
-//         userId: req.user._id,
-//       })
-//       .populate("items.productId");
-//     if (!orders)
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Order not found" });
-//     res.json({ success: true, orders });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// };
 
 // 🔹 Update Order Status (Admin)
 const updateStatus = async (req, res) => {
@@ -805,10 +784,39 @@ const handleReturnStatus = async (req, res) => {
   }
 };
 
+// User: Get single order details
+const getSingleOrder = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    const orders = await orderModel
+      .findOne({
+        _id: orderId,
+        user: new mongoose.Types.ObjectId(req.userId)
+      })
+      .populate("items.productId");
+
+    console.log("OrderId:", orderId);
+    console.log("UserId:", req.userId);
+
+    if (!orders) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    res.json({ success: true, order: orders }); // singular
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
 export {
   placeOrder,
   allOrders,
-  // getSingleOrder,
+  getSingleOrder,
   userOrders,
   updateStatus,
   cancelOrder,
