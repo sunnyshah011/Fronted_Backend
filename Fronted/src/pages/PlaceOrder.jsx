@@ -1671,7 +1671,7 @@ const Placeorder = () => {
 
     if (paymentTwo && !selectedOnlineMethod) {
       toast.warn(
-        "Please select an online payment method (eSewa, Khalti, etc.)"
+        "Please select an online payment method (eSewa, Bank-Transfer, etc.)"
       );
       return;
     }
@@ -1758,9 +1758,10 @@ const Placeorder = () => {
         city: formData.city,
         streetAddress: formData.streetAddress,
       },
-      paymentMethod: paymentOne
-        ? "Cash On Delivery"
-        : selectedMethod?.name || "Online",
+      // paymentMethod: paymentOne
+      //   ? "Cash On Delivery"
+      //   : selectedMethod?.name || "Online",
+      paymentMethod: selectedMethod?.name,
       paymentMethodId: selectedOnlineMethod || null,
     };
 
@@ -2021,14 +2022,17 @@ const Placeorder = () => {
       {/* Payment Method Section */}
       <div className="bg-white shadow-sm rounded-xl p-6">
         <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
-
         <div className="flex flex-col gap-2">
           {/* Cash on Delivery */}
           <div
             onClick={() => {
-              setPaymentOne(true);
+              setPaymentOne(!paymentOne);
               setPaymentTwo(false);
-              setSelectedOnlineMethod(null);
+              // Automatically select the first COD method
+              if (paymentMethods.length > 0) {
+                setSelectedOnlineMethod(paymentMethods[0]._id);
+              }
+              // setSelectedOnlineMethod(null);
             }}
             className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${
               paymentOne ? "border-green-500 bg-green-50" : "border-gray-200"
@@ -2041,12 +2045,86 @@ const Placeorder = () => {
             ></div>
             <div>
               <span className="text-[18px]">Cash on Delivery</span>
-              <p className="text-[11px] text-red-800">
-                Note: You have to Pay 150/- Advance payment which is Courier
-                Charge.
+              <p className="text-[10px] text-red-800">
+                Note: You have to pay Rs. 150 in advance for the courier charge.
+                You can pay the remaining amount after you receive your package.
               </p>
             </div>
           </div>
+          {/* COD payment methods (same UI as Online Payment) */}
+          {paymentOne && (
+            <div className="ml-3 mt-1 flex max-[1250px]:flex-col gap-2">
+              {isLoading ? (
+                <p className="text-gray-500 text-sm italic">
+                  Loading payment methods...
+                </p>
+              ) : (
+                paymentMethods.slice(0, 1).map((method) => {
+                  const imgUrl = method.image?.startsWith("http")
+                    ? method.image
+                    : `${backendUrl.replace("/api", "")}/${method.image}`;
+
+                  return (
+                    <div
+                      key={method._id}
+                      onClick={() => setSelectedOnlineMethod(method._id)}
+                      className={`border p-2 rounded-lg cursor-pointer flex flex-row items-center gap-4 transition relative ${
+                        selectedOnlineMethod === method._id
+                          ? "border-green-500 bg-green-50"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      <img
+                        src={imgUrl}
+                        alt={method.name}
+                        className="w-15 h-15 rounded-md object-contain border border-gray-400"
+                      />
+
+                      <div className="flex flex-col items-start gap-1 flex-1 pr-3">
+                        <span className="font-medium text-gray-800">
+                          {method.name}
+                        </span>
+
+                        {method.accountNumber && (
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <span className="truncate">
+                              {method.accountNumber}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(
+                                  method.accountNumber
+                                );
+                                setCopiedId(method._id);
+                                setTimeout(() => setCopiedId(null), 1500);
+                              }}
+                              className="text-blue-600 hover:underline pl-1"
+                            >
+                              {copiedId === method._id ? "Copied!" : "Copy"}
+                            </button>
+                          </div>
+                        )}
+                        {method.image && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setQrView(imgUrl);
+                              setIsModalOpen(true);
+                              document.body.style.overflow = "hidden";
+                            }}
+                            className="text-blue-600 hover:underline text-sm mt-1"
+                          >
+                            View QR
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
 
           {/* Online Payment */}
           <div
@@ -2065,7 +2143,6 @@ const Placeorder = () => {
             ></div>
             <span>Online Payment</span>
           </div>
-
           {/* Online payment methods */}
           {paymentTwo && (
             <div className="ml-3 mt-1 flex max-[1250px]:flex-col gap-2">
@@ -2074,7 +2151,7 @@ const Placeorder = () => {
                   Loading payment methods...
                 </p>
               ) : (
-                paymentMethods.map((method) => {
+                paymentMethods.slice(1, 3).map((method) => {
                   const imgUrl = method.image?.startsWith("http")
                     ? method.image
                     : `${backendUrl.replace("/api", "")}/${method.image}`;

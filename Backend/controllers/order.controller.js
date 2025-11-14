@@ -450,13 +450,11 @@ const placeOrder = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Place order error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to place order",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to place order",
+      error: error.message,
+    });
   }
 };
 
@@ -478,13 +476,11 @@ const userOrders = async (req, res) => {
     res.json({ success: true, orders });
   } catch (error) {
     console.error("Error fetching user orders:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch orders",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+      error: error.message,
+    });
   }
 };
 
@@ -494,18 +490,17 @@ const allOrders = async (req, res) => {
     const orders = await orderModel
       .find()
       .populate("user", "name gmail")
+      .populate({ path: "items.productId", select: "name images variants" }) // add this
       .sort({ createdAt: -1 });
 
     res.json({ success: true, orders });
   } catch (error) {
     console.error("Fetch all orders error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch all orders",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch all orders",
+      error: error.message,
+    });
   }
 };
 
@@ -570,13 +565,11 @@ const updateStatus = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Update status error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to update order",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update order",
+      error: error.message,
+    });
   }
 };
 
@@ -600,13 +593,11 @@ const deleteOrder = async (req, res) => {
     res.json({ success: true, message: "Order deleted successfully" });
   } catch (error) {
     console.error("Delete order error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to delete order",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete order",
+      error: error.message,
+    });
   }
 };
 
@@ -673,13 +664,11 @@ const cancelOrder = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Cancel order error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to cancel order",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to cancel order",
+      error: error.message,
+    });
   }
 };
 
@@ -724,13 +713,11 @@ const requestReturn = async (req, res) => {
     });
   } catch (error) {
     console.error("Return request error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to submit return request",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to submit return request",
+      error: error.message,
+    });
   }
 };
 
@@ -787,13 +774,11 @@ const handleReturnStatus = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Handle return error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to handle return request",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to handle return request",
+      error: error.message,
+    });
   }
 };
 
