@@ -575,15 +575,15 @@ const OrderDetails = () => {
           {order.items.map((item, i) => (
             <div
               key={i}
-              className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 border-b pb-3 last:border-b-0"
+              className="flex items-center gap-3 sm:gap-4 border-b pb-3 last:border-b-0"
             >
               <img
                 src={item.productImage}
                 alt={item.productName}
-                className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md border"
+                className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md border border-gray-400"
               />
               <div className="flex-1">
-                <p className="font-semibold text-sm md:text-base">
+                <p className="font-semibold text-xs md:text-base">
                   {item.productName}
                 </p>
                 <p className="text-gray-600 text-sm md:text-base">
