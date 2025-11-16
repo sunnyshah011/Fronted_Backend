@@ -344,6 +344,7 @@ import orderModel from "../models/order.model.js";
 import userModel from "../models/user.model.js";
 import ProductModel from "../models/product.model.js";
 import { generateUniqueOrderId } from "../utils/generateUniqueOrderId.js";
+import { v2 as cloudinary } from "cloudinary";
 
 // 🔹 Place Order (COD)
 const placeOrder = async (req, res) => {
@@ -503,8 +504,6 @@ const allOrders = async (req, res) => {
     });
   }
 };
-
-
 
 // 🔹 Update Order Status (Admin)
 const updateStatus = async (req, res) => {
@@ -792,12 +791,9 @@ const getSingleOrder = async (req, res) => {
     const orders = await orderModel
       .findOne({
         _id: orderId,
-        user: new mongoose.Types.ObjectId(req.userId)
+        user: new mongoose.Types.ObjectId(req.userId),
       })
       .populate("items.productId");
-
-    console.log("OrderId:", orderId);
-    console.log("UserId:", req.userId);
 
     if (!orders) {
       return res
@@ -812,11 +808,135 @@ const getSingleOrder = async (req, res) => {
   }
 };
 
+// const userpaymentproof = async (req, res) => {
+//   try {
+//     const { _id } = req.body;
+
+//     if (!_id)
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "Order ID is required" });
+
+//     if (!req.file)
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "Image is required" });
+
+//     // Upload to Cloudinary
+//     const uploadedImage = await cloudinary.uploader.upload(req.file.path, {
+//       resource_type: "image",
+//       format: "webp",
+//       quality: "auto",
+//     });
+
+//     // Update order with proof URL
+//     const updatedOrder = await orderModel.findByIdAndUpdate(
+//       { _id },
+//       {
+//         paymentProof: uploadedImage.secure_url,
+//         paymentStatus: "Submitted",
+//       },
+//       { new: true }
+//     );
+
+//     if (!updatedOrder)
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Order not found" });
+
+//     return res.json({
+//       success: true,
+//       message: "Payment proof uploaded",
+//       order: updatedOrder,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// Upload or Edit Payment Proof
+const userpaymentproof = async (req, res) => {
+  try {
+    const { _id } = req.body;
+
+    if (!_id)
+      return res
+        .status(400)
+        .json({ success: false, message: "Order ID is required" });
+
+    const order = await orderModel.findById(_id);
+    if (!order)
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Image is required" });
+
+    // Upload to Cloudinary
+    const uploadedImage = await cloudinary.uploader.upload(req.file.path, {
+      resource_type: "image",
+      format: "webp",
+      quality: "auto",
+    });
+
+    order.paymentProof = uploadedImage.secure_url;
+    order.paymentStatus = "Submitted";
+
+    await order.save();
+
+    return res.json({
+      success: true,
+      message: "Payment proof uploaded/updated successfully",
+      order,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Remove Payment Proof
+const removePaymentProof = async (req, res) => {
+  try {
+    const { _id } = req.body;
+
+    if (!_id)
+      return res
+        .status(400)
+        .json({ success: false, message: "Order ID is required" });
+
+    const order = await orderModel.findById(_id);
+    if (!order)
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+
+    order.paymentProof = null;
+    order.paymentStatus = "Pending";
+
+    await order.save();
+
+    return res.json({
+      success: true,
+      message: "Payment proof removed successfully",
+      order,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 export {
   placeOrder,
   allOrders,
   getSingleOrder,
+  userpaymentproof,
+  removePaymentProof,
   userOrders,
   updateStatus,
   cancelOrder,

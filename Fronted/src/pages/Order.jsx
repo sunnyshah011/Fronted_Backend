@@ -463,10 +463,6 @@
 
 // export default Order;
 
-
-
-
-
 import { useContext, useEffect, useState, useRef } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
@@ -680,10 +676,11 @@ const Order = () => {
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-3 py-1 rounded font-medium shrink-0 ${filterStatus === status
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                } transition`}
+              className={`px-3 py-1 rounded font-medium shrink-0 ${
+                filterStatus === status
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              } transition`}
             >
               {status}
             </button>
@@ -704,141 +701,203 @@ const Order = () => {
               );
 
               return (
+                // <Link
+                //   key={order.orderId}
+                //   to={`/order/${order.orderId}`}
+                //   className="block p-4 rounded-lg shadow-sm hover:shadow-md transition bg-white"
+                // >
+                //   {/* Header */}
+                //   <div className="flex flex-wrap items-center justify-between border-b pb-2 mb-3">
+                //     <div>
+                //       <p className="font-medium text-gray-700">
+                //         Order ID:{" "}
+                //         <span className="text-gray-500">
+                //           #{order.orderNumber}
+                //         </span>
+                //       </p>
+                //       <p className="text-sm text-gray-500">
+                //         Date: {new Date(order.date).toLocaleDateString()}
+                //       </p>
+                //       <p className="text-sm text-gray-500">
+                //         Payment: {order.paymentMethod}
+                //       </p>
+                //     </div>
+
+                //     <div className="flex items-center gap-5 max-[630px]:w-full justify-between">
+                //       <div className="flex items-center gap-2">
+                //         <span
+                //           className={`w-2.5 h-2.5 rounded-full ${
+                //             order.status === "Delivered"
+                //               ? "bg-green-500"
+                //               : order.status === "Pending"
+                //               ? "bg-yellow-500"
+                //               : order.status === "Ready To Ship"
+                //               ? "bg-blue-500"
+                //               : order.status === "Cancelled"
+                //               ? "bg-red-500"
+                //               : order.status === "Returned"
+                //               ? "bg-pink-500"
+                //               : "bg-gray-400"
+                //           }`}
+                //         ></span>
+                //         <p className="font-medium text-gray-700">
+                //           {order.status}
+                //         </p>
+                //       </div>
+
+                //       {/* Cancel & Return buttons */}
+                //       {order.status === "Pending" && (
+                //         <button
+                //           disabled={loadingAction}
+                //           onClick={(e) => {
+                //             e.preventDefault();
+                //             setCancelOrderId(order.orderId);
+                //             setShowCancelModal(true);
+                //           }}
+                //           className="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                //         >
+                //           Cancel
+                //         </button>
+                //       )}
+
+                //       {order.status === "Delivered" && (
+                //         <div className="flex flex-col items-center">
+                //           <button
+                //             disabled={loadingAction}
+                //             onClick={(e) => {
+                //               e.preventDefault();
+                //               setReturnOrderId(order.orderId);
+                //               setReturnReason("");
+                //               setShowReturnModal(true);
+                //             }}
+                //             className={`px-3 py-1 text-sm rounded-md transition ${
+                //               order.returnRequest.isRequested
+                //                 ? order.returnRequest.status === "Approved" ||
+                //                   order.returnRequest.status === "Rejected"
+                //                   ? "bg-gray-400 text-white cursor-not-allowed"
+                //                   : "bg-pink-500 text-white hover:bg-pink-600"
+                //                 : "bg-pink-500 text-white hover:bg-pink-600"
+                //             } disabled:opacity-50 disabled:cursor-not-allowed`}
+                //           >
+                //             {order.returnRequest.isRequested
+                //               ? `Return ${order.returnRequest.status}`
+                //               : "Return"}
+                //           </button>
+                //           {order.returnRequest.isRequested && (
+                //             <p className="text-xs text-gray-700 mt-1">
+                //               <strong>Status:</strong>{" "}
+                //               {order.returnRequest.status}
+                //             </p>
+                //           )}
+                //         </div>
+                //       )}
+                //     </div>
+                //   </div>
+
+                //   {/* Items */}
+                //   <div className="space-y-3">
+                //     {order.items.map((item, i) => (
+                //       <div
+                //         key={i}
+                //         className="flex items-start gap-4 border-b last:border-0 pb-2"
+                //       >
+                //         <img
+                //           className="w-20 h-20 object-cover rounded-md"
+                //           src={item.productImage}
+                //           alt={item.productName}
+                //         />
+                //         <div>
+                //           <p className="font-semibold text-gray-800 text-sm sm:text-base line-clamp-2">
+                //             {item.productName}
+                //           </p>
+                //           <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                //             <p>
+                //               {currency} {item.price} × {item.quantity}
+                //             </p>
+                //             {item.size && <p>Size: {item.size}</p>}
+                //             {item.color && <p>Color: {item.color}</p>}
+                //           </div>
+                //         </div>
+                //       </div>
+                //     ))}
+                //   </div>
+
+                //   {/* Total */}
+                //   <div className="text-right mt-3 text-sm sm:text-base text-gray-700">
+                //     <p>
+                //       Subtotal:{" "}
+                //       <span className="font-medium">
+                //         {currency} {subtotal.toFixed(2)} /-
+                //       </span>
+                //     </p>
+                //     <p>
+                //       Shipping:{" "}
+                //       <span className="font-medium">
+                //         {currency} {SHIPPING_CHARGE.toFixed(2)} /-
+                //       </span>
+                //     </p>
+                //     <p className="font-semibold text-[16px] text-gray-900 mt-1">
+                //       Total: {currency} {order.amount.toFixed(2)} /-
+                //     </p>
+                //   </div>
+                // </Link>
                 <Link
                   key={order.orderId}
                   to={`/order/${order.orderId}`}
-                  className="block p-4 rounded-lg shadow-sm hover:shadow-md transition bg-white"
+                  className="block p-4 rounded-lg shadow-sm hover:shadow-md transition bg-white cursor-pointer relative overflow-hidden"
                 >
                   {/* Header */}
-                  <div className="flex flex-wrap items-center justify-between border-b pb-2 mb-3">
-                    <div>
-                      <p className="font-medium text-gray-700">
-                        Order ID:{" "}
-                        <span className="text-gray-500">
-                          #{order.orderNumber}
-                        </span>
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Date: {new Date(order.date).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Payment: {order.paymentMethod}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-5 max-[630px]:w-full justify-between">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`w-2.5 h-2.5 rounded-full ${order.status === "Delivered"
-                            ? "bg-green-500"
-                            : order.status === "Pending"
-                              ? "bg-yellow-500"
-                              : order.status === "Ready To Ship"
-                                ? "bg-blue-500"
-                                : order.status === "Cancelled"
-                                  ? "bg-red-500"
-                                  : order.status === "Returned"
-                                    ? "bg-pink-500"
-                                    : "bg-gray-400"
-                            }`}
-                        ></span>
-                        <p className="font-medium text-gray-700">{order.status}</p>
-                      </div>
-
-                      {/* Cancel & Return buttons */}
-                      {order.status === "Pending" && (
-                        <button
-                          disabled={loadingAction}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setCancelOrderId(order.orderId);
-                            setShowCancelModal(true);
-                          }}
-                          className="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          Cancel
-                        </button>
-                      )}
-
-                      {order.status === "Delivered" && (
-                        <div className="flex flex-col items-center">
-                          <button
-                            disabled={loadingAction}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setReturnOrderId(order.orderId);
-                              setReturnReason("");
-                              setShowReturnModal(true);
-                            }}
-                            className={`px-3 py-1 text-sm rounded-md transition ${order.returnRequest.isRequested
-                              ? order.returnRequest.status === "Approved" ||
-                                order.returnRequest.status === "Rejected"
-                                ? "bg-gray-400 text-white cursor-not-allowed"
-                                : "bg-pink-500 text-white hover:bg-pink-600"
-                              : "bg-pink-500 text-white hover:bg-pink-600"
-                              } disabled:opacity-50 disabled:cursor-not-allowed`}
-                          >
-                            {order.returnRequest.isRequested
-                              ? `Return ${order.returnRequest.status}`
-                              : "Return"}
-                          </button>
-                          {order.returnRequest.isRequested && (
-                            <p className="text-xs text-gray-700 mt-1">
-                              <strong>Status:</strong>{" "}
-                              {order.returnRequest.status}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="font-medium text-gray-700">
+                      Order #{order.orderNumber}
+                    </p>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        order.status === "Delivered"
+                          ? "bg-green-200 text-green-800"
+                          : order.status === "Pending"
+                          ? "bg-yellow-200 text-yellow-800"
+                          : order.status === "Ready To Ship"
+                          ? "bg-blue-200 text-blue-800"
+                          : order.status === "Cancelled"
+                          ? "bg-red-200 text-red-800"
+                          : order.status === "Returned"
+                          ? "bg-pink-200 text-pink-800"
+                          : "bg-gray-200 text-gray-800"
+                      }`}
+                    >
+                      {order.status}
+                    </span>
                   </div>
 
-                  {/* Items */}
-                  <div className="space-y-3">
-                    {order.items.map((item, i) => (
-                      <div
-                        key={i}
-                        className="flex items-start gap-4 border-b last:border-0 pb-2"
-                      >
+                  {/* Subtotal/Amount */}
+                  <div className="flex justify-between text-gray-600 text-sm mb-3">
+                    <p>Date: {new Date(order.date).toLocaleDateString()}</p>
+                    <p>
+                      Total: {currency} {order.amount.toFixed(2)}
+                    </p>
+                  </div>
+
+                  {/* Products preview */}
+                  <div className="flex gap-2 overflow-hidden">
+                    {order.items.slice(0, 2).map((item, i) => (
+                      <div key={i} className="shrink-0 w-16 h-16 relative">
                         <img
-                          className="w-20 h-20 object-cover rounded-md"
                           src={item.productImage}
                           alt={item.productName}
+                          className="w-full h-full object-cover rounded-md"
                         />
-                        <div>
-                          <p className="font-semibold text-gray-800 text-sm sm:text-base line-clamp-2">
-                            {item.productName}
-                          </p>
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                            <p>
-                              {currency} {item.price} × {item.quantity}
-                            </p>
-                            {item.size && <p>Size: {item.size}</p>}
-                            {item.color && <p>Color: {item.color}</p>}
-                          </div>
-                        </div>
                       </div>
                     ))}
+                    {order.items.length > 2 && (
+                      <div className="shrink-0 w-16 h-16 bg-gray-100 text-gray-600 flex items-center justify-center rounded-md text-sm font-semibold">
+                        +{order.items.length - 2}
+                      </div>
+                    )}
                   </div>
 
-                  {/* Total */}
-                  <div className="text-right mt-3 text-sm sm:text-base text-gray-700">
-                    <p>
-                      Subtotal:{" "}
-                      <span className="font-medium">
-                        {currency} {subtotal.toFixed(2)} /-
-                      </span>
-                    </p>
-                    <p>
-                      Shipping:{" "}
-                      <span className="font-medium">
-                        {currency} {SHIPPING_CHARGE.toFixed(2)} /-
-                      </span>
-                    </p>
-                    <p className="font-semibold text-[16px] text-gray-900 mt-1">
-                      Total: {currency} {order.amount.toFixed(2)} /-
-                    </p>
-                  </div>
+                  {/* Fade overlay to hint “more content” */}
+                  <div className="absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-white to-transparent pointer-events-none"></div>
                 </Link>
               );
             })}
@@ -901,10 +960,11 @@ const Order = () => {
                       type="button"
                       disabled={loadingAction}
                       onClick={() => setReturnReason(reason)}
-                      className={`text-left px-2 py-1 border rounded hover:bg-gray-100 transition ${returnReason === reason
-                        ? "bg-gray-200 font-semibold"
-                        : ""
-                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      className={`text-left px-2 py-1 border rounded hover:bg-gray-100 transition ${
+                        returnReason === reason
+                          ? "bg-gray-200 font-semibold"
+                          : ""
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {reason}
                     </button>
