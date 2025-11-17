@@ -348,7 +348,6 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 
-
 const OrderDetails = () => {
   const { orderId } = useParams();
   const { backendUrl, token, currency } = useContext(ShopContext);
@@ -365,6 +364,10 @@ const OrderDetails = () => {
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [returning, setReturning] = useState(false);
   const [returnReason, setReturnReason] = useState("");
+
+  const isPaymentDisabled = order
+    ? ["Delivered", "Cancelled", "Returned", "Return Requested"].includes(order.orderStatus)
+    : false;
 
   const fetchOrderDetails = async () => {
     if (!token) return;
@@ -485,32 +488,6 @@ const OrderDetails = () => {
     }
   };
 
-  //  const cancelOrderAPI = async (orderId) => {
-  //   if (loadingAction) return;
-  //   setLoadingAction(true);
-  //   try {
-  //     const res = await axios.post(
-  //       `${backendUrl}/api/order/cancel`,
-  //       { orderId },
-  //       { headers: { token } }
-  //     );
-  //     if (res.data.success) {
-  //       toast.success("Order cancelled successfully");
-  //       setShowCancelModal(false);
-  //
-  //       await loadOrderData();
-  //       await queryClient.refetchQueries(["products"], { exact: true });
-  //     } else {
-  //       toast.error(res.data.message);
-  //     }
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.error("Failed to cancel order");
-  //   } finally {
-  //     setLoadingAction(false);
-  //   }
-  // };
-
   // Return Order
   const returnOrder = async () => {
     if (returning) return;
@@ -537,33 +514,6 @@ const OrderDetails = () => {
       setReturning(false);
     }
   };
-
-  //   const returnOrderAPI = async (orderId, reason) => {
-  //   if (loadingAction) return;
-  //   setLoadingAction(true);
-  //   try {
-  //     const res = await axios.post(
-  //       `${backendUrl}/api/order/return`,
-  //       { orderId, reason },
-  //       { headers: { token } }
-  //     );
-  //     if (res.data.success) {
-  //       toast.success("Return request submitted");
-  //       setShowReturnModal(false);
-  //       setReturnOrderId(null);
-  //       setReturnReason("");
-  //       await loadOrderData();
-  //       await queryClient.refetchQueries(["products"], { exact: true });
-  //     } else {
-  //       toast.error(res.data.message);
-  //     }
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.error("Failed to submit return request");
-  //   } finally {
-  //     setLoadingAction(false);
-  //   }
-  // };
 
   if (loading)
     return <p className="text-center p-6">Loading order details...</p>;
@@ -604,25 +554,6 @@ const OrderDetails = () => {
           >
             {order.orderStatus}
           </span>
-
-          {/* Cancel & Return Buttons */}
-          {order.orderStatus === "Pending" && (
-            <button
-              onClick={() => setShowCancelModal(true)}
-              className="px-3 py-1 md:px-4 md:py-1.5 bg-red-500 text-white rounded hover:bg-red-600 text-sm md:text-base mt-2 md:mt-0"
-            >
-              Cancel Order
-            </button>
-          )}
-
-          {order.orderStatus === "Delivered" && !order.isReturned && (
-            <button
-              onClick={() => setShowReturnModal(true)}
-              className="px-3 py-1 md:px-4 md:py-1.5 bg-pink-500 text-white rounded hover:bg-pink-600 text-sm md:text-base mt-2 md:mt-0"
-            >
-              Return Order
-            </button>
-          )}
         </div>
       </div>
 
@@ -667,7 +598,7 @@ const OrderDetails = () => {
           <p className="font-medium text-sm md:text-base">
             Subtotal: {currency} {subtotal.toFixed(2)}/-
           </p>
-           <p className="font-medium text-[13px] md:text-base">
+          <p className="font-medium text-[13px] md:text-base">
             Shipping Fee: Rs.150/-
           </p>
           <p className="font-bold text-base md:text-lg">
@@ -687,38 +618,59 @@ const OrderDetails = () => {
               alt="Payment Proof"
               className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-cover rounded-md border"
             />
-            <div className="flex gap-2 flex-col sm:flex-row">
+            <div className="flex flex-col  sm:items-left sm:w-80 gap-2 w-full">
               <input
                 type="file"
                 onChange={handleFileChange}
-                className="border rounded p-2 text-sm sm:text-base"
+                className={`border rounded p-2 text-sm sm:text-base flex-1 ${
+                  isPaymentDisabled ? "bg-gray-100 cursor-not-allowed" : ""
+                }`}
+                disabled={isPaymentDisabled}
               />
+
               <button
                 onClick={handleUpload}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                disabled={uploading}
+                className={`px-4 py-2 rounded text-white w-full sm:w-auto ${
+                  isPaymentDisabled || uploading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
+                disabled={uploading || isPaymentDisabled}
               >
                 {uploading ? "Uploading..." : "Edit Proof"}
               </button>
+
               <button
                 onClick={handleRemoveProof}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                className={`px-4 py-2 rounded text-white w-full sm:w-auto ${
+                  isPaymentDisabled
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-600 hover:bg-red-700"
+                }`}
+                disabled={isPaymentDisabled}
               >
                 Remove Proof
               </button>
             </div>
           </div>
         ) : (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+          <div className="flex flex-col  sm:items-left gap-2 w-full">
             <input
               type="file"
               onChange={handleFileChange}
-              className="flex-1 min-w-0 border rounded p-2 text-sm sm:text-base w-full sm:w-auto"
+              className={`border rounded p-2 text-sm sm:text-base flex-1 ${
+                isPaymentDisabled ? "bg-gray-100 cursor-not-allowed" : ""
+              }`}
+              disabled={isPaymentDisabled}
             />
             <button
               onClick={handleUpload}
-              className="shrink-0 px-4 py-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base w-full sm:w-auto"
-              disabled={uploading}
+              className={`px-4 py-2 rounded text-white w-full sm:w-auto ${
+                isPaymentDisabled || uploading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
+              disabled={uploading || isPaymentDisabled}
             >
               {uploading ? "Uploading..." : "Upload Proof"}
             </button>
@@ -726,12 +678,35 @@ const OrderDetails = () => {
         )}
 
         {order.paymentStatus && (
-          <p className="mt-2 text-gray-600 text-sm md:text-base">
+          <p className="mt-3 text-gray-600 text-[10px] bg-green-100 w-fit p-1 px-3 rounded-2xl">
             Payment Status:{" "}
             <span className="font-medium">{order.paymentStatus}</span>
           </p>
         )}
       </div>
+
+      {/* Cancel & Return Buttons */}
+      {order.orderStatus === "Pending" && (
+        <div className="bg-white shadow rounded-xl p-4 md:p-6">
+          <button
+            onClick={() => setShowCancelModal(true)}
+            className=" px-3 py-1 md:px-4 md:py-1.5 bg-red-500 text-white rounded hover:bg-red-600 text-sm md:text-base"
+          >
+            Cancel Order
+          </button>
+        </div>
+      )}
+
+      {order.orderStatus === "Delivered" && !order.isReturned && (
+        <div className="bg-white shadow rounded-xl p-4 md:p-6">
+          <button
+            onClick={() => setShowReturnModal(true)}
+            className="px-3 py-1 md:px-4 md:py-1.5 bg-pink-500 text-white rounded hover:bg-pink-600 text-sm md:text-base mt-2 md:mt-0"
+          >
+            Return Order
+          </button>
+        </div>
+      )}
 
       {/* Cancel Modal */}
       {showCancelModal && (
