@@ -346,6 +346,8 @@ import { useParams } from "react-router-dom";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
+
 
 const OrderDetails = () => {
   const { orderId } = useParams();
@@ -354,6 +356,7 @@ const OrderDetails = () => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const queryClient = useQueryClient();
 
   // Cancel & Return States
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -470,6 +473,7 @@ const OrderDetails = () => {
         toast.success("Order cancelled successfully");
         setShowCancelModal(false);
         fetchOrderDetails();
+        await queryClient.refetchQueries(["products"], { exact: true });
       } else {
         toast.error(res.data.message);
       }
@@ -480,6 +484,32 @@ const OrderDetails = () => {
       setCanceling(false);
     }
   };
+
+  //  const cancelOrderAPI = async (orderId) => {
+  //   if (loadingAction) return;
+  //   setLoadingAction(true);
+  //   try {
+  //     const res = await axios.post(
+  //       `${backendUrl}/api/order/cancel`,
+  //       { orderId },
+  //       { headers: { token } }
+  //     );
+  //     if (res.data.success) {
+  //       toast.success("Order cancelled successfully");
+  //       setShowCancelModal(false);
+  //
+  //       await loadOrderData();
+  //       await queryClient.refetchQueries(["products"], { exact: true });
+  //     } else {
+  //       toast.error(res.data.message);
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("Failed to cancel order");
+  //   } finally {
+  //     setLoadingAction(false);
+  //   }
+  // };
 
   // Return Order
   const returnOrder = async () => {
@@ -496,6 +526,7 @@ const OrderDetails = () => {
         setShowReturnModal(false);
         setReturnReason("");
         fetchOrderDetails();
+        await queryClient.refetchQueries(["products"], { exact: true });
       } else {
         toast.error(res.data.message);
       }
@@ -506,6 +537,33 @@ const OrderDetails = () => {
       setReturning(false);
     }
   };
+
+  //   const returnOrderAPI = async (orderId, reason) => {
+  //   if (loadingAction) return;
+  //   setLoadingAction(true);
+  //   try {
+  //     const res = await axios.post(
+  //       `${backendUrl}/api/order/return`,
+  //       { orderId, reason },
+  //       { headers: { token } }
+  //     );
+  //     if (res.data.success) {
+  //       toast.success("Return request submitted");
+  //       setShowReturnModal(false);
+  //       setReturnOrderId(null);
+  //       setReturnReason("");
+  //       await loadOrderData();
+  //       await queryClient.refetchQueries(["products"], { exact: true });
+  //     } else {
+  //       toast.error(res.data.message);
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("Failed to submit return request");
+  //   } finally {
+  //     setLoadingAction(false);
+  //   }
+  // };
 
   if (loading)
     return <p className="text-center p-6">Loading order details...</p>;
@@ -607,10 +665,13 @@ const OrderDetails = () => {
         {/* Totals */}
         <div className="text-right mt-3 md:mt-4 space-y-1">
           <p className="font-medium text-sm md:text-base">
-            Subtotal: {currency} {subtotal.toFixed(2)}
+            Subtotal: {currency} {subtotal.toFixed(2)}/-
+          </p>
+           <p className="font-medium text-[13px] md:text-base">
+            Shipping Fee: Rs.150/-
           </p>
           <p className="font-bold text-base md:text-lg">
-            Total: {currency} {order.amount.toFixed(2)}
+            Total: {currency} {order.amount.toFixed(2)}/-
           </p>
         </div>
       </div>
