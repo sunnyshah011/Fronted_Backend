@@ -26,18 +26,18 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Redirect all other domains to primary domain
-app.use((req, res, next) => {
-  const primaryDomain = "fishingtacklestore.com.np";
+// // Redirect all other domains to primary domain
+// app.use((req, res, next) => {
+//   const primaryDomain = "fishingtacklestore.com.np";
   
-  // Check if the current host is NOT the primary
-  if (req.hostname !== primaryDomain) {
-    // Permanent redirect (301) preserving the path
-    return res.redirect(301, `https://${primaryDomain}${req.originalUrl}`);
-  }
+//   // Check if the current host is NOT the primary
+//   if (req.hostname !== primaryDomain) {
+//     // Permanent redirect (301) preserving the path
+//     return res.redirect(301, `https://${primaryDomain}${req.originalUrl}`);
+//   }
 
-  next();
-});
+//   next();
+// });
 
 app.get("/health", (req, res) => {
   res.status(200).send("Ok");
