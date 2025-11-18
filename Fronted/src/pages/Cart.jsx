@@ -119,7 +119,7 @@ const Cart = () => {
               className="bg-white shadow-sm rounded-xl px-3 py-2 sm:p-4 flex items-center gap-2 sm:gap-4"
             >
               {/* 🔹 Product Image */}
-              <Link to={productLink} className="flex-shrink-0">
+              <Link to={productLink} className="shrink-0">
                 <img
                   className="w-14 sm:w-20 h-14 sm:h-20 rounded-lg object-cover"
                   src={productData.images?.[0] || "/placeholder.png"}

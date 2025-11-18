@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { ShopContext } from "../Context/ShopContext";
 import { toast } from "react-toastify";
-import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import FishingLoader from "../component/FishingLoader";
 import { useQuery } from "@tanstack/react-query";

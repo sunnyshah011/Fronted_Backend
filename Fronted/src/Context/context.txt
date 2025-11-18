@@ -1,0 +1,2629 @@
+// import { createContext, useState, useEffect, useCallback } from "react";
+// import { toast } from "react-toastify";
+// import { useNavigate } from "react-router-dom";
+// import axios from "axios";
+// import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+// const ShopContext = createContext();
+
+// const ShopContextProvider = (props) => {
+//   const currency = "Rs.";
+//   const delivery_fee = 150;
+//   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+//   const navigate = useNavigate();
+//   const queryClient = useQueryClient();
+
+//   // State variables
+//   const [cartitem, setCartitem] = useState({});
+//   const [products, setProducts] = useState([]);
+//   const [token, setToken] = useState(null);
+//   const [address, setAddress] = useState(null);
+
+//   // Centralized error handler
+//   const handleApiError = (error) => {
+//     const message =
+//       error?.response?.data?.message || error.message || "Something went wrong";
+//     toast.error(message, {
+//       position: "top-center",
+//       className: "custom-toast-center",
+//       bodyClassName: "text-sm",
+//       closeOnClick: true,
+//       pauseOnHover: true,
+//       autoClose: 2000,
+//     });
+//   };
+
+//   const fetchCategories = async (backendUrl) => {
+//     try {
+//       const { data } = await axios.get(`${backendUrl}/api/categories`);
+//       if (Array.isArray(data.categories)) {
+//         return data.categories.slice(0, 5); // same as your previous logic
+//       }
+//       return [];
+//     } catch (error) {
+//       console.error("Error fetching categories:");
+//       return [];
+//     }
+//   };
+
+//   const {
+//     data: categories = [],
+//     isLoading,
+//     isError,
+//   } = useQuery({
+//     queryKey: ["categories"],
+//     queryFn: () => fetchCategories(backendUrl),
+//     staleTime: 1000 * 60 * 10,
+//     cacheTime: 1000 * 60 * 30,
+//     refetchOnWindowFocus: false,
+//     retry: 1,
+//   });
+
+
+//   // React Query: userDetails
+//   const { data: userDetails, isLoading: isLoadingUser } = useQuery({
+//     queryKey: ["userDetails", token],
+//     queryFn: async () => {
+//       const res = await axios.post(
+//         `${backendUrl}/api/user/user-data`,
+//         {},
+//         { headers: { token } }
+//       );
+//       if (!res.data.success) throw new Error("Failed to fetch user data");
+//       return res.data.message;
+//     },
+//     enabled: !!token, // only fetch if token exists
+//     staleTime: 5 * 60 * 1000,
+//     refetchOnWindowFocus: false,
+//     onError: (error) => handleApiError(error),
+//   });
+
+//   // Functions
+//   const updateAddress = useCallback((newAddress) => {
+//     setAddress(newAddress);
+//   }, []);
+
+//   const addtocart = useCallback(
+//     async (itemId, size, color, quantity = 1) => {
+//       if (!size && !color) return toast.error("Select size/color");
+
+//       if (!token) {
+//         const existing = toast.isActive("login-toast");
+
+//         if (existing) {
+//           toast.update("login-toast", {
+//             render: (
+//               <div className="flex flex-col items-center animate-pulse">
+//                 <p className="mb-2">
+//                   Please login or register to add items to cart!
+//                 </p>
+//                 <button
+//                   onClick={() => {
+//                     navigate("/login");
+//                     toast.dismiss("login-toast");
+//                   }}
+//                   className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
+//                 >
+//                   Go to Login
+//                 </button>
+//               </div>
+//             ),
+//             className: "custom-toast-center",
+//           });
+//         } else {
+//           toast.info(
+//             <div className="flex flex-col items-center">
+//               <p className="mb-2">
+//                 Please login or register to add items to cart!
+//               </p>
+//               <button
+//                 onClick={() => {
+//                   navigate("/register");
+//                   toast.dismiss("login-toast");
+//                 }}
+//                 className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700"
+//               >
+//                 Go to Login
+//               </button>
+//             </div>,
+//             {
+//               toastId: "login-toast",
+//               className: "custom-toast-center",
+//               autoClose: true,
+//               closeOnClick: false,
+//               draggable: false,
+//             }
+//           );
+//         }
+
+//         return;
+//       }
+
+//       // 🧠 Get current cart quantity
+//       const cartdata = structuredClone(cartitem);
+//       const currentQty = cartdata[itemId]?.[size]?.[color] || 0;
+
+//       // 🧠 Validate stock from products (must have 'products' available in context)
+//       const product = products?.find((p) => p._id === itemId);
+//       const variant = product?.variants?.find(
+//         (v) => v.size === size && v.color === color
+//       );
+//       const maxStock = variant?.stock || 0;
+
+//       // ✅ Prevent adding more than available stock
+//       if (currentQty + quantity > maxStock) {
+//         toast.error(`Only ${maxStock - currentQty} items left in stock`);
+//         return;
+//       }
+
+//       // 🛒 Proceed to add
+//       if (!cartdata[itemId]) cartdata[itemId] = {};
+//       if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
+//       cartdata[itemId][size][color] = currentQty + quantity;
+
+//       setCartitem(cartdata);
+//       toast.success("Product added to cart!", {
+//         className: "custom-toast-center",
+//         autoClose: true,
+//         closeOnClick: false,
+//         draggable: false,
+//       });
+
+//       // ✅ Update backend
+//       if (token) {
+//         try {
+//           await axios.post(
+//             `${backendUrl}/api/cart/add`,
+//             { itemId, size, color, quantity },
+//             { headers: { token } }
+//           );
+//           queryClient.invalidateQueries(["cart", token]); // refresh cart query
+//         } catch (error) {
+//           handleApiError(error);
+//         }
+//       }
+//     },
+//     [cartitem, products, token, backendUrl, navigate, queryClient]
+//   );
+
+//   // ✅ Get Cart Count
+//   const getcartcount = useCallback(() => {
+//     let totalcount = 0;
+//     for (const productId in cartitem) {
+//       for (const size in cartitem[productId]) {
+//         for (const color in cartitem[productId][size]) {
+//           totalcount += cartitem[productId][size][color];
+//         }
+//       }
+//     }
+//     return totalcount;
+//   }, [cartitem]);
+
+//   // ✅ Update Quantity
+//   const updateQuantity = useCallback(
+//     async (itemId, size, color, quantity) => {
+//       const cartdata = structuredClone(cartitem);
+//       if (!cartdata[itemId]) return;
+
+//       if (quantity <= 0) {
+//         delete cartdata[itemId][size][color];
+//         if (Object.keys(cartdata[itemId][size]).length === 0)
+//           delete cartdata[itemId][size];
+//         if (Object.keys(cartdata[itemId]).length === 0) delete cartdata[itemId];
+//         toast.info("Item removed from cart", {
+//           className: "custom-toast-center",
+//           closeOnClick: false,
+//           draggable: false,
+//           autoClose: 1000,
+//         });
+//       } else {
+//         if (!cartdata[itemId][size]) cartdata[itemId][size] = {};
+//         cartdata[itemId][size][color] = quantity;
+//         toast.success("Cart Updated!!", {
+//           className: "custom-toast-center",
+//           closeOnClick: false,
+//           draggable: false,
+//           autoClose: 1000,
+//         });
+//       }
+
+//       setCartitem(cartdata);
+
+//       if (token) {
+//         try {
+//           await axios.post(
+//             `${backendUrl}/api/cart/update`,
+//             { itemId, size, color, quantity },
+//             { headers: { token } }
+//           );
+//           queryClient.invalidateQueries(["cart", token]);
+//         } catch (error) {
+//           handleApiError(error);
+//         }
+//       }
+//     },
+//     [cartitem, token, backendUrl, queryClient]
+//   );
+
+//   // ✅ Calculate total amount
+//   const calculatetotalamount = useCallback(() => {
+//     let total = 0;
+//     for (const productId in cartitem) {
+//       const product = products.find((p) => p._id === productId);
+//       if (!product) continue;
+//       for (const size in cartitem[productId]) {
+//         for (const color in cartitem[productId][size]) {
+//           const qty = cartitem[productId][size][color];
+//           const variant = product.variants.find(
+//             (v) => v.size === size && v.color === color
+//           );
+//           if (variant) total += variant.price * qty;
+//         }
+//       }
+//     }
+//     return total;
+//   }, [cartitem, products]);
+
+//   // ✅ Fetching Products (TanStack Query)
+//   const { data: productsData, isLoading: isLoadingProductsQuery } = useQuery({
+//     queryKey: ["products"],
+//     queryFn: async () => {
+//       const response = await axios.get(`${backendUrl}/api/product/list`);
+//       if (!response.data.success) throw new Error(response.data.message);
+//       return response.data.products;
+//     },
+//     staleTime: 5 * 60 * 1000,
+//     refetchOnWindowFocus: false,
+//     onError: (error) => handleApiError(error),
+//   });
+
+//   useEffect(() => {
+//     if (productsData) setProducts(productsData);
+//   }, [productsData]);
+
+//   // ✅ Fetch User Cart
+//   const {
+//     data: cartDataQuery,
+//     isLoading: isLoadingCartQuery,
+//     refetch: refetchCartQuery,
+//   } = useQuery({
+//     queryKey: ["cart", token],
+//     queryFn: async () => {
+//       if (!token) return {};
+//       const response = await axios.post(
+//         `${backendUrl}/api/cart/get`,
+//         {},
+//         { headers: { token } }
+//       );
+//       if (!response.data.success) throw new Error("Failed to fetch cart");
+//       return response.data.cartData || {};
+//     },
+//     enabled: !!token,
+//     refetchOnWindowFocus: false,
+//     onError: (error) => handleApiError(error),
+//   });
+
+//   useEffect(() => {
+//     if (cartDataQuery) {
+//       setCartitem(cartDataQuery);
+//     }
+//   }, [cartDataQuery]);
+
+//   // ✅ Fetch Profile Data
+//   const {
+//     data: profileData,
+//     isLoading: isLoadingProfileQuery,
+//     refetch: refetchProfileQuery,
+//   } = useQuery({
+//     queryKey: ["profile", token],
+//     queryFn: async () => {
+//       if (!token) return {};
+//       const response = await axios.post(
+//         `${backendUrl}/api/profile/getprofile`,
+//         {},
+//         { headers: { token } }
+//       );
+//       if (!response.data.success) throw new Error("Failed to fetch profile");
+//       return response.data.userprofiledet || {};
+//     },
+//     enabled: !!token,
+//     refetchOnWindowFocus: false,
+//     onError: (error) => handleApiError(error),
+//   });
+
+//   useEffect(() => {
+//     if (profileData?.address) setAddress(profileData.address);
+//   }, [profileData]);
+
+//   // Load token & cart from localStorage
+//   useEffect(() => {
+//     const savedToken = localStorage.getItem("token");
+//     if (savedToken) setToken(savedToken);
+//     else queryClient.clear();
+//   }, []);
+
+
+//   // Context value
+//   const value = {
+//     isError,
+//     isLoading,
+//     categories,
+//     currency,
+//     delivery_fee,
+//     products,
+//     cartitem,
+//     addtocart,
+//     getcartcount,
+//     updateQuantity,
+//     calculatetotalamount,
+//     setCartitem,
+//     navigate,
+//     backendUrl,
+//     setToken,
+//     token,
+//     address,
+//     setAddress,
+//     updateAddress,
+//     userDetails,
+//     isLoadingUser,
+//     queryClient,
+//     refetchCartQuery,
+//     refetchProfileQuery,
+//     isLoadingProducts: isLoadingProductsQuery,
+//     isLoadingCart: isLoadingCartQuery,
+//     isLoadingProfile: isLoadingProfileQuery,
+//   };
+
+//   return (
+//     <ShopContext.Provider value={value}>{props.children}</ShopContext.Provider>
+//   );
+// };
+
+// export default ShopContextProvider;
+// export { ShopContext };
+
+
+
+
+order page ShopContextProvider// import { useContext, useEffect, useState, useRef } from "react";
+// import { ShopContext } from "../Context/ShopContext";
+// import axios from "axios";
+
+// const Order = () => {
+//   const { backendUrl, token, currency } = useContext(ShopContext);
+//   const [orders, setOrders] = useState([]);
+//   const [filterStatus, setFilterStatus] = useState("All");
+//   const scrollRef = useRef(null);
+
+//   const SHIPPING_CHARGE = 150;
+
+//   // ✅ Modals state
+//   const [showCancelModal, setShowCancelModal] = useState(false);
+//   const [cancelOrderId, setCancelOrderId] = useState(null);
+
+//   const [showReturnModal, setShowReturnModal] = useState(false);
+//   const [returnOrderId, setReturnOrderId] = useState(null);
+//   const [returnReason, setReturnReason] = useState("");
+
+//   // ✅ Load Orders
+//   const loadOrderData = async () => {
+//     try {
+//       if (!token) return;
+//       const response = await axios.post(
+//         `${backendUrl}/api/order/userorders`,
+//         {},
+//         { headers: { token } }
+//       );
+//       if (response.data.success && Array.isArray(response.data.orders)) {
+//         const formattedOrders = response.data.orders.map((order) => ({
+//           orderId: order._id,
+//           amount: order.amount,
+//           orderNumber: order.orderId,
+//           date: order.createdAt,
+//           status: order.orderStatus,
+//           paymentMethod: order.paymentMethod,
+//           returnRequest: order.returnRequest || {
+//             isRequested: false,
+//             status: "Pending",
+//             reason: "",
+//           },
+//           items: order.items.map((item) => ({
+//             ...item,
+//             productName: item.productId?.name || "Unknown Product",
+//             productImage: item.productId?.images?.[0] || "/placeholder.jpg",
+//           })),
+//         }));
+//         setOrders(formattedOrders);
+//       }
+//     } catch (error) {
+//       console.error("Error loading user orders:", error);
+//     }
+//   };
+
+//   // ✅ Cancel Order API
+//   const cancelOrderAPI = async (orderId) => {
+//     try {
+//       const res = await axios.post(
+//         `${backendUrl}/api/order/cancel`,
+//         { orderId },
+//         { headers: { token } }
+//       );
+//       if (res.data.success) {
+//         setShowCancelModal(false);
+//         setCancelOrderId(null);
+//         loadOrderData();
+//       } else {
+//         alert(res.data.message);
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       alert("Failed to cancel order.");
+//     }
+//   };
+
+//   // ✅ Return Order API
+//   const returnOrderAPI = async (orderId, reason) => {
+//     try {
+//       const res = await axios.post(
+//         `${backendUrl}/api/order/return`,
+//         { orderId, reason },
+//         { headers: { token } }
+//       );
+//       if (res.data.success) {
+//         setShowReturnModal(false);
+//         setReturnOrderId(null);
+//         setReturnReason("");
+//         loadOrderData();
+//       } else {
+//         alert(res.data.message);
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       alert("Failed to submit return request.");
+//     }
+//   };
+
+//   // ✅ Fetch orders on load
+//   useEffect(() => {
+//     loadOrderData();
+//     window.scrollTo(0, 0);
+//   }, [token]);
+
+//   const filteredOrders =
+//     filterStatus === "All"
+//       ? orders
+//       : orders.filter((order) => order.status === filterStatus);
+
+//   const statuses = [
+//     "All",
+//     "Pending",
+//     "Ready To Ship",
+//     "Delivered",
+//     "Cancelled",
+//     "Returned",
+//   ];
+
+//   // ✅ Drag to scroll horizontally
+//   useEffect(() => {
+//     const container = scrollRef.current;
+//     if (!container) return;
+
+//     let isDown = false;
+//     let startX;
+//     let scrollLeft;
+
+//     const handleMouseDown = (e) => {
+//       isDown = true;
+//       startX = e.pageX - container.offsetLeft;
+//       scrollLeft = container.scrollLeft;
+//     };
+//     const handleMouseLeave = () => (isDown = false);
+//     const handleMouseUp = () => (isDown = false);
+//     const handleMouseMove = (e) => {
+//       if (!isDown) return;
+//       e.preventDefault();
+//       const x = e.pageX - container.offsetLeft;
+//       const walk = (x - startX) * 1.2;
+//       container.scrollLeft = scrollLeft - walk;
+//     };
+
+//     container.addEventListener("mousedown", handleMouseDown);
+//     container.addEventListener("mouseleave", handleMouseLeave);
+//     container.addEventListener("mouseup", handleMouseUp);
+//     container.addEventListener("mousemove", handleMouseMove);
+
+//     return () => {
+//       container.removeEventListener("mousedown", handleMouseDown);
+//       container.removeEventListener("mouseleave", handleMouseLeave);
+//       container.removeEventListener("mouseup", handleMouseUp);
+//       container.removeEventListener("mousemove", handleMouseMove);
+//     };
+//   }, []);
+
+//   useEffect(() => {
+//     if (showCancelModal) {
+//       document.body.style.overflow = "hidden";
+//     } else {
+//       document.body.style.overflow = "";
+//     }
+
+//     return () => {
+//       document.body.style.overflow = "";
+//     };
+//   }, [showCancelModal]);
+
+//   useEffect(() => {
+//     if (showReturnModal) {
+//       document.body.style.overflow = "hidden";
+//     } else {
+//       document.body.style.overflow = "";
+//     }
+
+//     return () => {
+//       document.body.style.overflow = "";
+//     };
+//   }, [showReturnModal]);
+
+//   useEffect(() => {
+//     window.scrollTo(0, 0);
+//   }, []);
+
+//   return (
+//     <div className="mt-5 px-4 sm:px-6 lg:px-8">
+//       <div className="max-w-5xl mx-auto">
+//         <h2 className="text-2xl font-bold text-gray-800 mb-6">My Orders</h2>
+
+//         {/* Status filter */}
+//         <div
+//           ref={scrollRef}
+//           className="flex gap-2 mb-6 overflow-x-auto whitespace-nowrap py-1 cursor-grab active:cursor-grabbing select-none"
+//           onWheel={(e) => {
+//             e.preventDefault();
+//             e.currentTarget.scrollLeft += e.deltaY;
+//           }}
+//         >
+//           {statuses.map((status) => (
+//             <button
+//               key={status}
+//               onClick={() => setFilterStatus(status)}
+//               className={`px-3 py-1 rounded font-medium shrink-0 ${
+//                 filterStatus === status
+//                   ? "bg-blue-500 text-white"
+//                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+//               } transition`}
+//             >
+//               {status}
+//             </button>
+//           ))}
+//         </div>
+
+//         {filteredOrders.length === 0 ? (
+//           <p className="text-center text-gray-500 mt-10">
+//             No orders found for "{filterStatus}" status.
+//           </p>
+//         ) : (
+//           <div className="space-y-4">
+//             {filteredOrders.map((order) => {
+//               const subtotal = order.items.reduce(
+//                 (sum, item) => sum + item.price * item.quantity,
+//                 0
+//               );
+
+//               return (
+//                 <div
+//                   key={order.orderId}
+//                   className="p-4 rounded-lg shadow-sm hover:shadow-md transition bg-white"
+//                 >
+//                   {/* Header */}
+//                   <div className="flex flex-wrap items-center justify-between border-b pb-2 mb-3">
+//                     <div>
+//                       <p className="font-medium text-gray-700">
+//                         Order ID:{" "}
+//                         <span className="text-gray-500">
+//                           #{order.orderNumber}
+//                         </span>
+//                       </p>
+//                       <p className="text-sm text-gray-500">
+//                         Date: {new Date(order.date).toLocaleDateString()}
+//                       </p>
+//                       <p className="text-sm text-gray-500">
+//                         Payment: {order.paymentMethod}
+//                       </p>
+//                     </div>
+
+//                     <div className="flex items-center gap-5 max-[630px]:w-full justify-between">
+//                       <div className="flex items-center gap-2">
+//                         <span
+//                           className={`w-2.5 h-2.5 rounded-full ${
+//                             order.status === "Delivered"
+//                               ? "bg-green-500"
+//                               : order.status === "Pending"
+//                               ? "bg-yellow-500"
+//                               : order.status === "Ready To Ship"
+//                               ? "bg-blue-500"
+//                               : order.status === "Cancelled"
+//                               ? "bg-red-500"
+//                               : order.status === "Returned"
+//                               ? "bg-pink-500"
+//                               : "bg-gray-400"
+//                           }`}
+//                         ></span>
+//                         <p className="font-medium text-gray-700">
+//                           {order.status}
+//                         </p>
+//                       </div>
+
+//                       {/* Cancel Button */}
+//                       {order.status === "Pending" && (
+//                         <button
+//                           onClick={() => {
+//                             setCancelOrderId(order.orderId);
+//                             setShowCancelModal(true);
+//                           }}
+//                           className="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition"
+//                         >
+//                           Cancel
+//                         </button>
+//                       )}
+
+//                       {/* Return Button */}
+//                       {order.status === "Delivered" && (
+//                         <div className="flex flex-col items-center">
+//                           <button
+//                             onClick={() => {
+//                               setReturnOrderId(order.orderId);
+//                               setReturnReason("");
+//                               setShowReturnModal(true);
+//                             }}
+//                             className={`px-3 py-1 text-sm rounded-md transition ${
+//                               order.returnRequest.isRequested
+//                                 ? order.returnRequest.status === "Approved" ||
+//                                   order.returnRequest.status === "Rejected"
+//                                   ? "bg-gray-400 text-white cursor-not-allowed"
+//                                   : "bg-pink-500 text-white hover:bg-pink-600"
+//                                 : "bg-pink-500 text-white hover:bg-pink-600"
+//                             }`}
+//                             disabled={
+//                               order.returnRequest.status === "Approved" ||
+//                               order.returnRequest.status === "Rejected"
+//                             }
+//                           >
+//                             {order.returnRequest.isRequested
+//                               ? `Return ${order.returnRequest.status}`
+//                               : "Return"}
+//                           </button>
+
+//                           {order.returnRequest.isRequested && (
+//                             <p className="text-xs text-gray-700 mt-1">
+//                               <strong>Status:</strong>{" "}
+//                               {order.returnRequest.status}
+//                             </p>
+//                           )}
+//                         </div>
+//                       )}
+//                     </div>
+//                   </div>
+
+//                   {/* Items */}
+//                   <div className="space-y-3">
+//                     {order.items.map((item, i) => (
+//                       <div
+//                         key={i}
+//                         className="flex items-start gap-4 border-b last:border-0 pb-2"
+//                       >
+//                         <img
+//                           className="w-20 h-20 object-cover rounded-md"
+//                           src={item.productImage}
+//                           alt={item.productName}
+//                         />
+//                         <div>
+//                           <p className="font-semibold text-gray-800 text-sm sm:text-base line-clamp-2">
+//                             {item.productName}
+//                           </p>
+//                           <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+//                             <p>
+//                               {currency} {item.price} × {item.quantity}
+//                             </p>
+//                             {item.size && <p>Size: {item.size}</p>}
+//                             {item.color && <p>Color: {item.color}</p>}
+//                           </div>
+//                         </div>
+//                       </div>
+//                     ))}
+//                   </div>
+
+//                   {/* Total */}
+//                   <div className="text-right mt-3 text-sm sm:text-base text-gray-700">
+//                     <p>
+//                       Subtotal:{" "}
+//                       <span className="font-medium">
+//                         {currency} {subtotal.toFixed(2)} /-
+//                       </span>
+//                     </p>
+//                     <p>
+//                       Shipping:{" "}
+//                       <span className="font-medium">
+//                         {currency} {SHIPPING_CHARGE.toFixed(2)} /-
+//                       </span>
+//                     </p>
+//                     <p className="font-semibold text-[16px] text-gray-900 mt-1">
+//                       Total: {currency} {order.amount.toFixed(2)} /-
+//                     </p>
+//                   </div>
+//                 </div>
+//               );
+//             })}
+//           </div>
+//         )}
+
+//         {/* Cancel Modal */}
+//         {showCancelModal && (
+//           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 bg-opacity-40">
+//             <div className="bg-white rounded-xl p-6 w-80 max-w-sm shadow-lg">
+//               <h3 className="text-lg font-semibold mb-4">Confirm Cancel</h3>
+//               <p className="mb-6">
+//                 Are you sure you want to cancel this order?
+//               </p>
+//               <div className="flex justify-end gap-3">
+//                 <button
+//                   className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+//                   onClick={() => setShowCancelModal(false)}
+//                 >
+//                   No
+//                 </button>
+//                 <button
+//                   className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+//                   onClick={() => cancelOrderAPI(cancelOrderId)}
+//                 >
+//                   Yes, Cancel
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+//         )}
+
+//         {/* Return Modal */}
+//         {showReturnModal && (
+//           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 bg-opacity-40">
+//             <div className="bg-white rounded-xl p-6 w-80 max-w-sm shadow-lg">
+//               <h3 className="text-lg font-semibold mb-4">Return Order</h3>
+
+//               <textarea
+//                 className="w-full border rounded-md p-2 mb-4"
+//                 placeholder="Enter reason for return..."
+//                 value={returnReason}
+//                 onChange={(e) => setReturnReason(e.target.value)}
+//               />
+
+//               {/* Predefined reasons */}
+//               <div className="mb-4">
+//                 <p className="text-sm font-medium mb-1">Or select a reason:</p>
+//                 <div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
+//                   {[
+//                     "Received wrong item",
+//                     "Item damaged",
+//                     "Better price available",
+//                     "No longer needed",
+//                   ].map((reason) => (
+//                     <button
+//                       key={reason}
+//                       type="button"
+//                       onClick={() => setReturnReason(reason)}
+//                       className={`text-left px-2 py-1 border rounded hover:bg-gray-100 transition ${
+//                         returnReason === reason
+//                           ? "bg-gray-200 font-semibold"
+//                           : ""
+//                       }`}
+//                     >
+//                       {reason}
+//                     </button>
+//                   ))}
+//                 </div>
+//               </div>
+
+//               <div className="flex justify-end gap-3">
+//                 <button
+//                   className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+//                   onClick={() => setShowReturnModal(false)}
+//                 >
+//                   Cancel
+//                 </button>
+//                 <button
+//                   className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600"
+//                   onClick={() =>
+//                     returnOrderAPI(
+//                       returnOrderId,
+//                       returnReason.trim() || "No reason provided"
+//                     )
+//                   }
+//                 >
+//                   Submit
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Order;
+
+
+
+orderdetailpage code
+// import { useEffect, useState, useContext } from "react";
+// import { useParams } from "react-router-dom";
+// import { ShopContext } from "../Context/ShopContext";
+// import axios from "axios";
+// import { toast } from "react-toastify";
+
+// const OrderDetails = () => {
+//   const { orderId } = useParams();
+//   const { backendUrl, token, currency } = useContext(ShopContext);
+//   const [order, setOrder] = useState(null);
+//   const [loading, setLoading] = useState(false);
+//   const [uploading, setUploading] = useState(false);
+//   const [selectedFile, setSelectedFile] = useState(null);
+
+//   const fetchOrderDetails = async () => {
+//     if (!token) return;
+//     setLoading(true);
+//     try {
+//       const res = await axios.post(
+//         `${backendUrl}/api/order/${orderId}`,
+//         {},
+//         {
+//           headers: { token },
+//         }
+//       );
+
+//       if (res.data.success && res.data.order) {
+//         const o = res.data.order;
+//         const formattedOrder = {
+//           ...o,
+//           items: o.items.map((item) => ({
+//             ...item,
+//             productName: item.productId?.name || "Unknown Product",
+//             productImage: item.productId?.images?.[0] || "/placeholder.jpg",
+//           })),
+//         };
+//         setOrder(formattedOrder);
+//       } else {
+//         setOrder(null);
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Failed to load order details");
+//       setOrder(null);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchOrderDetails();
+//     window.scrollTo(0, 0);
+//   }, [orderId, token]);
+
+//   const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
+
+//   //   const handleUpload = async () => {
+//   //     if (!selectedFile) return toast.error("Please select a file first");
+//   //     setUploading(true);
+
+//   //     const formData = new FormData();
+//   //     formData.append("image", selectedFile); // MUST match multer field
+//   //     formData.append("_id", orderId); // backend needs this
+
+//   //     try {
+//   //       const res = await axios.post(
+//   //         `${backendUrl}/api/order/paymentproof`,
+//   //         formData,
+//   //         {
+//   //           headers: {
+//   //             token,
+//   //             "Content-Type": "multipart/form-data",
+//   //           },
+//   //         }
+//   //       );
+
+//   //       if (res.data.success) {
+//   //         toast.success("Payment proof uploaded successfully");
+//   //         setSelectedFile(null);
+//   //         fetchOrderDetails();
+//   //       } else {
+//   //         toast.error("Failed to upload payment proof");
+//   //       }
+//   //     } catch (err) {
+//   //       console.error(err);
+//   //       toast.error("Error uploading file");
+//   //     } finally {
+//   //       setUploading(false);
+//   //     }
+//   //   };
+
+//   // Upload or Edit Payment Proof
+
+//   const handleUpload = async () => {
+//     if (!selectedFile) return toast.error("Please select a image first");
+//     setUploading(true);
+
+//     const formData = new FormData();
+//     formData.append("image", selectedFile);
+//     formData.append("_id", order._id); // use _id from order, not orderId
+
+//     try {
+//       const res = await axios.post(
+//         `${backendUrl}/api/order/paymentproof`,
+//         formData,
+//         { headers: { token, "Content-Type": "multipart/form-data" } }
+//       );
+
+//       if (res.data.success) {
+//         toast.success("Payment proof uploaded/edited successfully");
+//         setSelectedFile(null);
+//         fetchOrderDetails();
+//       } else {
+//         toast.error("Failed to upload payment proof");
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Error uploading file");
+//     } finally {
+//       setUploading(false);
+//     }
+//   };
+
+//   // Remove Payment Proof
+//   const handleRemoveProof = async () => {
+//     if (!window.confirm("Are you sure you want to remove the payment proof?"))
+//       return;
+
+//     try {
+//       const res = await axios.post(
+//         `${backendUrl}/api/order/paymentproof/remove`,
+//         { _id: order._id },
+//         { headers: { token } }
+//       );
+
+//       if (res.data.success) {
+//         toast.success("Payment proof removed successfully");
+//         fetchOrderDetails();
+//       } else {
+//         toast.error("Failed to remove payment proof");
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Error removing payment proof");
+//     }
+//   };
+
+//   if (loading)
+//     return <p className="text-center p-6">Loading order details...</p>;
+//   if (!order) return <p className="text-center p-6">Order not found.</p>;
+
+//   const subtotal = order.items.reduce(
+//     (sum, item) => sum + item.price * item.quantity,
+//     0
+//   );
+
+//   const statusColor = {
+//     Pending: "bg-yellow-200 text-yellow-800",
+//     Completed: "bg-green-200 text-green-800",
+//     Cancelled: "bg-red-200 text-red-800",
+//   };
+
+//   return (
+//     <div className="max-w-4xl mx-auto px-3 py-4 space-y-4">
+//       {/* Order Header */}
+//       <div className="bg-white shadow rounded-xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+//         <div>
+//           <h1 className="text-xl md:text-2xl font-bold">
+//             Order #{order.orderId}
+//           </h1>
+//           <p className="text-gray-600 mt-1 text-sm md:text-base">
+//             Placed on {new Date(order.createdAt).toLocaleString()}
+//           </p>
+//           <p className="mt-1 text-sm md:text-base">
+//             Payment Method:{" "}
+//             <span className="font-medium">{order.paymentMethod}</span>
+//           </p>
+//         </div>
+//         <div>
+//           <span
+//             className={`px-3 py-1 md:px-4 md:py-1.5 rounded-full font-semibold text-sm md:text-base ${
+//               statusColor[order.orderStatus] || "bg-gray-200 text-gray-800"
+//             }`}
+//           >
+//             {order.orderStatus}
+//           </span>
+//         </div>
+//       </div>
+
+//       {/* Products Section */}
+//       <div className="bg-white shadow rounded-xl p-4 md:p-6">
+//         <h2 className="text-lg md:text-xl font-semibold mb-3">Products</h2>
+//         <div className="space-y-3">
+//           {order.items.map((item, i) => (
+//             <div
+//               key={i}
+//               className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 border-b pb-3 last:border-b-0"
+//             >
+//               <img
+//                 src={item.productImage}
+//                 alt={item.productName}
+//                 className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md border"
+//               />
+//               <div className="flex-1">
+//                 <p className="font-semibold text-sm md:text-base">
+//                   {item.productName}
+//                 </p>
+//                 <p className="text-gray-600 text-sm md:text-base">
+//                   {currency} {item.price} × {item.quantity}
+//                 </p>
+//                 {item.size && (
+//                   <p className="text-gray-500 text-sm md:text-base">
+//                     Size: {item.size}
+//                   </p>
+//                 )}
+//                 {item.color && (
+//                   <p className="text-gray-500 text-sm md:text-base">
+//                     Color: {item.color}
+//                   </p>
+//                 )}
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+
+//         {/* Totals */}
+//         <div className="text-right mt-3 md:mt-4 space-y-1">
+//           <p className="font-medium text-sm md:text-base">
+//             Subtotal: {currency} {subtotal.toFixed(2)}
+//           </p>
+//           <p className="font-bold text-base md:text-lg">
+//             Total: {currency} {order.amount.toFixed(2)}
+//           </p>
+//         </div>
+//       </div>
+
+//       {/* Payment Proof Section */}
+//       {/* <div className="bg-white shadow rounded-xl p-4 md:p-6">
+//         <h2 className="text-lg md:text-xl font-semibold mb-2">Payment Proof</h2>
+//         {order.paymentProof ? (
+//           <img
+//             src={order.paymentProof}
+//             alt="Payment Proof"
+//             className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-cover rounded-md border"
+//           />
+//         ) : (
+//           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+//             Payment Proof Preview
+//             {order.paymentProof && (
+//               <img
+//                 src={order.paymentProof}
+//                 alt="Payment Proof"
+//                 className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-md border shrink-0"
+//               />
+//             )}
+
+//             File Input + Button
+//             <div className="flex flex-1 flex-col sm:flex-row gap-2 sm:gap-3 w-full">
+//               <input
+//                 type="file"
+//                 onChange={handleFileChange}
+//                 className="flex-1 min-w-0 border rounded p-2 text-sm sm:text-base w-full sm:w-auto"
+//               />
+//               <button
+//                 onClick={handleUpload}
+//                 className="shrink-0 px-4 py-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base w-full sm:w-auto"
+//                 disabled={uploading}
+//               >
+//                 {uploading ? "Uploading..." : "Upload Proof"}
+//               </button>
+//             </div>
+//           </div>
+//         )}
+//         {order.paymentStatus && (
+//           <p className="mt-2 text-gray-600 text-sm md:text-base">
+//             Payment Status:{" "}
+//             <span className="font-medium">{order.paymentStatus}</span>
+//           </p>
+//         )}
+//       </div> */}
+
+//       {/* Payment Proof Section */}
+//       <div className="bg-white shadow rounded-xl p-4 md:p-6">
+//         <h2 className="text-lg md:text-xl font-semibold mb-2">Payment Proof</h2>
+
+//         {order.paymentProof ? (
+//           <div className="flex flex-col sm:flex-row items-center gap-4">
+//             <img
+//               src={order.paymentProof}
+//               alt="Payment Proof"
+//               className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-cover rounded-md border"
+//             />
+//             <div className="flex gap-2 flex-col sm:flex-row">
+//               <input
+//                 type="file"
+//                 onChange={handleFileChange}
+//                 className="border rounded p-2 text-sm sm:text-base"
+//               />
+//               <button
+//                 onClick={handleUpload}
+//                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+//                 disabled={uploading}
+//               >
+//                 {uploading ? "Uploading..." : "Edit Proof"}
+//               </button>
+//               <button
+//                 onClick={handleRemoveProof}
+//                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+//               >
+//                 Remove Proof
+//               </button>
+//             </div>
+//           </div>
+//         ) : (
+//           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+//             <input
+//               type="file"
+//               onChange={handleFileChange}
+//               className="flex-1 min-w-0 border rounded p-2 text-sm sm:text-base w-full sm:w-auto"
+//             />
+//             <button
+//               onClick={handleUpload}
+//               className="shrink-0 px-4 py-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base w-full sm:w-auto"
+//               disabled={uploading}
+//             >
+//               {uploading ? "Uploading..." : "Upload Proof"}
+//             </button>
+//           </div>
+//         )}
+
+//         {order.paymentStatus && (
+//           <p className="mt-2 text-gray-600 text-sm md:text-base">
+//             Payment Status:{" "}
+//             <span className="font-medium">{order.paymentStatus}</span>
+//           </p>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default OrderDetails;
+
+
+
+placeorder code
+// import { useContext, useState, useEffect } from "react";
+// import CartTotal from "../component/CartTotal";
+// import { ShopContext } from "../Context/ShopContext";
+// import axios from "axios";
+// import { toast } from "react-toastify";
+// import { useQueryClient } from "@tanstack/react-query";
+
+// const Placeorder = () => {
+//   const [payment, setPayment] = useState(false);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [addressError, setAddressError] = useState(false);
+//   const queryClient = useQueryClient();
+
+//   const {
+//     navigate,
+//     backendUrl,
+//     token,
+//     updateAddress,
+//     address,
+//     cartitem,
+//     setCartitem,
+//     calculatetotalamount,
+//     delivery_fee,
+//     products,
+//   } = useContext(ShopContext);
+
+//   const [provinces, setProvinces] = useState([]);
+//   const [districts, setDistricts] = useState([]);
+//   // const [cities, setCities] = useState([]);
+
+//   const [formData, setFormData] = useState({
+//     fullName: "",
+//     phone: "",
+//     province: "",
+//     district: "",
+//     city: "",
+//     streetAddress: "",
+//   });
+
+//   const [originalData, setOriginalData] = useState({});
+//   const [isModified, setIsModified] = useState(false);
+
+//   const isFirstTime = !address || Object.keys(address).length === 0;
+
+//   // ✅ Fetch provinces/districts/cities
+//   const fetchProvinces = async () => {
+//     try {
+//       const res = await axios.get(`${backendUrl}/api/location/province`);
+//       setProvinces(res.data.provinces || []);
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   };
+
+//   const fetchDistricts = async (province) => {
+//     if (!province) return;
+//     try {
+//       const res = await axios.get(
+//         `${backendUrl}/api/location/${province}/districts`
+//       );
+//       setDistricts(res.data.districts || []);
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   };
+
+//   // const fetchCities = async (province, district) => {
+//   //   if (!province || !district) return;
+//   //   try {
+//   //     const res = await axios.get(
+//   //       `${backendUrl}/api/location/${province}/${district}/cities`
+//   //     );
+//   //     setCities(res.data.cities || []);
+//   //   } catch (err) {
+//   //     console.error(err);
+//   //   }
+//   // };
+
+//   // ✅ Load address if exists
+//   useEffect(() => {
+//     fetchProvinces();
+
+//     if (!isFirstTime) {
+//       const data = {
+//         fullName: address.name || address.fullName || "",
+//         phone: address.phone ? String(address.phone) : "",
+//         province: address.province || "",
+//         district: address.district || "",
+//         city: address.city || "",
+//         streetAddress: address.street || address.streetAddress || "",
+//       };
+//       setFormData(data);
+//       setOriginalData(data);
+//       setIsModified(false);
+
+//       if (address.province) fetchDistricts(address.province);
+//       // if (address.province && address.district)
+//       //   fetchCities(address.province, address.district);
+//     }
+//   }, [address]);
+
+//   // ✅ Detect modifications
+//   const checkIfModified = (newData) => {
+//     const normalize = (val) => (val ? val.trim().replace(/\s+/g, " ") : "");
+//     if (!originalData || Object.keys(originalData).length === 0) return true;
+//     return (
+//       normalize(newData.fullName) !== normalize(originalData.fullName) ||
+//       normalize(newData.phone) !== normalize(originalData.phone) ||
+//       normalize(newData.province) !== normalize(originalData.province) ||
+//       normalize(newData.district) !== normalize(originalData.district) ||
+//       normalize(newData.city) !== normalize(originalData.city) ||
+//       normalize(newData.streetAddress) !== normalize(originalData.streetAddress)
+//     );
+//   };
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+
+//     // Prevent leading/only spaces and convert everything safely to string
+//     let cleanedValue = String(value || "").replace(/^\s+/, "");
+//     if (cleanedValue.trim() === "") cleanedValue = "";
+
+//     let updatedForm = { ...formData, [name]: cleanedValue };
+
+//     if (name === "province") {
+//       updatedForm.district = "";
+//       updatedForm.city = "";
+//       setDistricts([]);
+//       // setCities([]);
+//       fetchDistricts(cleanedValue);
+//     }
+
+//     if (name === "district") {
+//       updatedForm.city = "";
+//       // setCities([]);
+//       // fetchCities(updatedForm.province, cleanedValue);
+//     }
+
+//     setFormData(updatedForm);
+//     setIsModified(checkIfModified(updatedForm));
+//   };
+
+//   // ✅ Reset form
+//   const handleReset = () => {
+//     if (originalData && Object.keys(originalData).length > 0) {
+//       setFormData(originalData);
+//       setIsModified(false);
+//     }
+//   };
+
+//   // ✅ Save / Update Address
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     if (!isModified && !isFirstTime) {
+//       toast.info("No changes to save.", {
+//         className: "custom-toast-center",
+//         autoClose: 1000,
+//         pauseOnHover: false,
+//         closeOnClick: true,
+//         hideProgressBar: true,
+//       });
+//       return;
+//     }
+
+//     const payload = {
+//       name: formData.fullName.trim().replace(/\s+/g, " "),
+//       phone: formData.phone.trim(),
+//       province: formData.province.trim(),
+//       district: formData.district.trim(),
+//       city: formData.city.trim(),
+//       street: formData.streetAddress.trim().replace(/\s+/g, " "),
+//     };
+
+//     try {
+//       const res = await axios.post(
+//         `${backendUrl}/api/profile/setaddress`,
+//         payload,
+//         {
+//           headers: { token },
+//         }
+//       );
+
+//       if (res.data.success) {
+//         toast.success(res.data.message || "Address saved", {
+//           className: "custom-toast-center",
+//           autoClose: 1000,
+//           pauseOnHover: false,
+//           closeOnClick: true,
+//           hideProgressBar: true,
+//         });
+
+//         setOriginalData(formData);
+//         setIsModified(false);
+//         updateAddress(payload);
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Failed to save address");
+//     }
+//   };
+
+//   // ✅ Place Order (untouched)
+//   const handlePlaceOrder = async () => {
+//     if (!payment) {
+//       toast.error("Select payment method", {
+//         className: "custom-toast-center",
+//         draggable: false,
+//         autoClose: 1000,
+//       });
+//       return;
+//     }
+
+//     if (isModified) {
+//       toast.warning("Update address first", {
+//         className: "custom-toast-center",
+//         autoClose: 1000,
+//       });
+//       return;
+//     }
+
+//     const items = [];
+//     for (const productId in cartitem) {
+//       const productCart = cartitem[productId];
+//       for (const size in productCart) {
+//         const colorData = productCart[size];
+//         for (const color in colorData) {
+//           const quantity = colorData[color];
+//           if (quantity <= 0) continue;
+
+//           const product = products.find((p) => p._id === productId);
+//           if (!product) continue;
+
+//           const variant = product.variants.find(
+//             (v) => v.size === size && v.color === color
+//           );
+//           if (!variant) continue;
+
+//           if (quantity > variant.stock) {
+//             toast.error(
+//               `Not enough stock for ${product.name} (${size} - ${color})`,
+//               {
+//                 className: "custom-toast-center",
+//                 autoClose: 1000,
+//               }
+//             );
+//             return;
+//           }
+
+//           items.push({
+//             productId: product._id,
+//             size: variant.size,
+//             color: variant.color,
+//             quantity,
+//             price: variant.price,
+//           });
+//         }
+//       }
+//     }
+
+//     if (items.length === 0) {
+//       toast.error("Cart is empty", {
+//         className: "custom-toast-center",
+//         autoClose: 1000,
+//       });
+//       return;
+//     }
+
+//     if (
+//       !formData.fullName ||
+//       !formData.phone ||
+//       !formData.province ||
+//       !formData.district ||
+//       !formData.city ||
+//       !formData.streetAddress
+//     ) {
+//       setAddressError(true);
+//       window.scroll(0, 0);
+//       toast.error("Address is Empty", {
+//         className: "custom-toast-center",
+//         autoClose: 1000,
+//       });
+//       return;
+//     } else {
+//       setAddressError(false);
+//     }
+
+//     const payload = {
+//       items,
+//       amount: calculatetotalamount() + delivery_fee,
+//       address: {
+//         fullName: formData.fullName,
+//         phone: Number(formData.phone),
+//         province: formData.province,
+//         district: formData.district,
+//         city: formData.city,
+//         streetAddress: formData.streetAddress,
+//       },
+//     };
+
+//     try {
+//       setIsLoading(true);
+//       const res = await axios.post(`${backendUrl}/api/order/place`, payload, {
+//         headers: { token },
+//       });
+//       if (res.data.success) {
+//         setCartitem({});
+//         toast.success("Order placed!", {
+//           className: "custom-toast-center",
+//           autoClose: 1000,
+//         });
+
+//         // ✅ Refetch product stock for all ordered items
+//         for (const item of items) {
+//           const product = products.find((p) => p._id === item.productId);
+//           if (!product) continue;
+
+//           const categorySlug = product.subcategory?.category?.slug;
+//           const productSlug = product.slug;
+
+//           if (categorySlug && productSlug) {
+//             await queryClient.refetchQueries(["product", categorySlug, productSlug]);
+//           }
+//         }
+
+//         navigate("/order");
+//       } else {
+//         toast.error(res.data.message || "Failed to place order", {
+//           className: "custom-toast-center",
+//           autoClose: 1000,
+//         });
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Failed to place order", {
+//         className: "custom-toast-center",
+//         autoClose: 1000,
+//       });
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     window.scrollTo(0, 0);
+//   }, []);
+
+//   return (
+//     <div className="p-4 flex flex-col md:flex-row gap-8 min-h-[50vh]">
+//       {/* ✅ Left: Address Section (updated like Profile) */}
+//       <div className="flex-1 bg-white shadow-sm rounded-xl p-5">
+//         <h2
+//           className={`text-xl sm:text-2xl font-semibold mb-6 ${addressError ? "text-red-600 animate-pulse" : "text-gray-900"
+//             }`}
+//         >
+//           Shipping Address
+//         </h2>
+
+//         <form onSubmit={handleSubmit}>
+//           {/* Full Name & Phone */}
+//           {[
+//             { label: "Full Name", name: "fullName", type: "text" },
+//             { label: "Phone", name: "phone", type: "tel" },
+//           ].map(({ label, name, type }) => (
+//             <div className="mb-3" key={name}>
+//               <label className="block text-sm mb-1 font-medium text-gray-700">
+//                 {label} *
+//               </label>
+//               <input
+//                 type={type}
+//                 name={name}
+//                 value={formData[name] || ""}
+//                 onChange={handleChange}
+//                 className="w-full bg-white border border-gray-300 pl-3 py-2  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+//                 required
+//               />
+//             </div>
+//           ))}
+
+//           {/* Province, District, City */}
+//           {[
+//             { label: "Province", name: "province", options: provinces },
+//             { label: "District", name: "district", options: districts },
+//             // { label: "City", name: "city", options: cities },
+//           ].map(({ label, name, options }) => (
+//             <div className="mb-3" key={name}>
+//               <label className="block  text-sm mb-1 font-medium text-gray-700">
+//                 {label} *
+//               </label>
+//               <select
+//                 name={name}
+//                 value={formData[name] || ""}
+//                 onChange={handleChange}
+//                 className="w-full bg-white border border-gray-300 pl-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+//                 required
+//               >
+//                 <option value="">{`Select ${label}`}</option>
+//                 {options.map((val) => (
+//                   <option key={val._id || val.name} value={val.name}>
+//                     {val.name}
+//                   </option>
+//                 ))}
+//               </select>
+//             </div>
+//           ))}
+
+//           {/* ✅ City input instead of dropdown */}
+//           <div className="mb-3">
+//             <label className="block text-sm mb-1 font-medium text-gray-700">
+//               City/Municipality *
+//             </label>
+//             <input
+//               type="text"
+//               name="city"
+//               value={formData.city || ""}
+//               onChange={handleChange}
+//               placeholder="Enter your city"
+//               className="w-full bg-white border border-gray-300 pl-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+//               required
+//             />
+//           </div>
+
+//           {/* Street */}
+//           <div className="mb-2">
+//             <label className="block text-sm mb-1 font-medium text-gray-700">
+//               Street Address *
+//             </label>
+//             <input
+//               type="text"
+//               name="streetAddress"
+//               value={formData.streetAddress || ""}
+//               onChange={handleChange}
+//               className="w-full bg-white border border-gray-300 pl-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+//               required
+//             />
+//           </div>
+
+//           {/* Buttons */}
+//           <div className="flex flex-col sm:flex-row gap-4 mt-4">
+//             <button
+//               type="submit"
+//               className={`flex-1 py-3 rounded-lg text-white font-medium transition ${isFirstTime
+//                 ? "bg-blue-600 hover:bg-blue-700"
+//                 : isModified
+//                   ? "bg-green-600 hover:bg-green-700"
+//                   : "bg-gray-500 cursor-not-allowed"
+//                 }`}
+//               disabled={!isModified && !isFirstTime}
+//             >
+//               {isFirstTime
+//                 ? "Add Address"
+//                 : isModified
+//                   ? "Update Address"
+//                   : "Saved"}
+//             </button>
+
+//             {!isFirstTime && isModified && (
+//               <button
+//                 type="button"
+//                 onClick={handleReset}
+//                 className="flex-1 py-3 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition"
+//               >
+//                 Cancel
+//               </button>
+//             )}
+//           </div>
+//         </form>
+//       </div>
+
+//       {/* ✅ Right: Cart + Payment (unchanged) */}
+//       <div className="flex-1 space-y-6.5">
+//         {Object.keys(cartitem).length > 0 && (
+//           <div className="bg-white shadow-sm rounded-xl p-6 py-3">
+//             <h2 className="text-xl font-semibold mb-3">Products in Cart</h2>
+//             <div className="space-y-2 max-h-40 overflow-y-auto">
+//               {Object.keys(cartitem).map((productId) => {
+//                 const productCart = cartitem[productId];
+//                 const product = products.find((p) => p._id === productId);
+//                 if (!product) return null;
+
+//                 return Object.keys(productCart).map((size) => {
+//                   const colorData = productCart[size];
+//                   return Object.keys(colorData).map((color) => {
+//                     const quantity = colorData[color];
+//                     if (quantity <= 0) return null;
+
+//                     const variant = product.variants.find(
+//                       (v) => v.size === size && v.color === color
+//                     );
+//                     if (!variant) return null;
+
+//                     return (
+//                       <div
+//                         key={`${productId}-${size}-${color}`}
+//                         className="flex items-center gap-4 pb-2"
+//                       >
+//                         <img
+//                           src={product.images?.[0] || "/placeholder.png"}
+//                           alt={product.name}
+//                           className="w-14 sm:w-20 h-14 sm:h-20 rounded-lg object-cover"
+//                         />
+//                         <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+//                           <div className="flex flex-col gap-1 sm:gap-2 flex-wrap">
+//                             <p className="text-sm sm:text-[13px] font-medium text-gray-700 line-clamp-1">
+//                               {product.name}
+//                             </p>
+//                             <span className="text-[12px] font-semibold text-gray-900">
+//                               ₹ {variant.price} /-
+//                             </span>
+//                             <span className="px-2 py-0.5 text-[10px] border border-gray-200 bg-gray-50 rounded-md w-fit">
+//                               Size: {variant.size}
+//                             </span>
+//                             {variant.color && (
+//                               <span className="px-2 py-0.5 text-[10px] border border-gray-200 bg-gray-50 rounded-md w-fit">
+//                                 Color: {variant.color}
+//                               </span>
+//                             )}
+//                             <span className="px-2 py-0.5 text-[10px] border border-gray-200 bg-gray-50 rounded-md w-fit">
+//                               Qty: {quantity}
+//                             </span>
+//                           </div>
+//                         </div>
+//                       </div>
+//                     );
+//                   });
+//                 });
+//               })}
+//             </div>
+//           </div>
+//         )}
+
+//         <CartTotal />
+
+//         <div className="bg-white shadow-sm rounded-xl p-6">
+//           <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
+//           <div
+//             onClick={() => setPayment(!payment)}
+//             className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${payment ? "border-green-500 bg-green-50" : "border-gray-200"
+//               }`}
+//           >
+//             <div
+//               className={`w-4 h-4 rounded-full border ${payment ? "bg-green-500 border-green-500" : "border-gray-400"
+//                 }`}
+//             ></div>
+//             <span>Cash on Delivery</span>
+//           </div>
+
+//           <button
+//             onClick={handlePlaceOrder}
+//             disabled={isModified || isLoading}
+//             className={`mt-4 w-full py-3 rounded-lg text-white ${isModified
+//               ? "bg-gray-400 cursor-not-allowed"
+//               : isLoading
+//                 ? "bg-gray-700"
+//                 : "bg-black hover:bg-gray-800"
+//               } flex items-center justify-center gap-2`}
+//           >
+//             {isLoading ? (
+//               <>
+//                 <svg
+//                   className="animate-spin h-5 w-5 text-white"
+//                   xmlns="http://www.w3.org/2000/svg"
+//                   fill="none"
+//                   viewBox="0 0 24 24"
+//                 >
+//                   <circle
+//                     className="opacity-25"
+//                     cx="12"
+//                     cy="12"
+//                     r="10"
+//                     stroke="currentColor"
+//                     strokeWidth="4"
+//                   ></circle>
+//                   <path
+//                     className="opacity-75"
+//                     fill="currentColor"
+//                     d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+//                   ></path>
+//                 </svg>
+//                 Processing...
+//               </>
+//             ) : isModified ? (
+//               "Update address first"
+//             ) : (
+//               "Place Order"
+//             )}
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Placeorder;
+
+// import { useContext, useState, useEffect } from "react";
+// import CartTotal from "../component/CartTotal";
+// import { ShopContext } from "../Context/ShopContext";
+// import axios from "axios";
+// import { toast } from "react-toastify";
+// import { useQueryClient } from "@tanstack/react-query";
+
+// const Placeorder = () => {
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [addressError, setAddressError] = useState(false);
+//   const queryClient = useQueryClient();
+
+//   const [paymentMethods, setPaymentMethods] = useState([]);
+//   const [paymentOne, setPaymentOne] = useState(false);
+//   const [paymentTwo, setPaymentTwo] = useState(false);
+//   const [selectedOnlineMethod, setSelectedOnlineMethod] = useState(null);
+
+//   const [qrView, setQrView] = useState(null);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+
+//   const [copied, setCopied] = useState(null);
+//   // At the top of your component (with other useState)
+//   const [copiedId, setCopiedId] = useState(null);
+
+//   const {
+//     navigate,
+//     backendUrl,
+//     token,
+//     updateAddress,
+//     address,
+//     cartitem,
+//     setCartitem,
+//     calculatetotalamount,
+//     delivery_fee,
+//     products,
+//   } = useContext(ShopContext);
+
+//   useEffect(() => {
+//     const fetchPaymentMethods = async () => {
+//       try {
+//         const res = await axios.get(`${backendUrl}/api/paymentmethods`);
+//         if (res.data.success) {
+//           setPaymentMethods(res.data.methods || []);
+//         } else {
+//           toast.error("Failed to load payment methods", {
+//             className: "custom-toast-center",
+//             autoClose: 1000,
+//           });
+//         }
+//       } catch (err) {
+//         console.error("Error fetching payment methods:", err);
+//         toast.error("Error fetching payment methods", {
+//           className: "custom-toast-center",
+//           autoClose: 1000,
+//         });
+//       }
+//     };
+
+//     fetchPaymentMethods();
+//   }, [backendUrl]);
+
+//   const [provinces, setProvinces] = useState([]);
+//   const [districts, setDistricts] = useState([]);
+//   // const [cities, setCities] = useState([]);
+
+//   const [formData, setFormData] = useState({
+//     fullName: "",
+//     phone: "",
+//     province: "",
+//     district: "",
+//     city: "",
+//     streetAddress: "",
+//   });
+
+//   const [originalData, setOriginalData] = useState({});
+//   const [isModified, setIsModified] = useState(false);
+
+//   const isFirstTime = !address || Object.keys(address).length === 0;
+
+//   // ✅ Fetch provinces/districts/cities
+//   const fetchProvinces = async () => {
+//     try {
+//       const res = await axios.get(`${backendUrl}/api/location/province`);
+//       setProvinces(res.data.provinces || []);
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   };
+
+//   const fetchDistricts = async (province) => {
+//     if (!province) return;
+//     try {
+//       const res = await axios.get(
+//         `${backendUrl}/api/location/${province}/districts`
+//       );
+//       setDistricts(res.data.districts || []);
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   };
+
+//   // const fetchCities = async (province, district) => {
+//   //   if (!province || !district) return;
+//   //   try {
+//   //     const res = await axios.get(
+//   //       `${backendUrl}/api/location/${province}/${district}/cities`
+//   //     );
+//   //     setCities(res.data.cities || []);
+//   //   } catch (err) {
+//   //     console.error(err);
+//   //   }
+//   // };
+
+//   // ✅ Load address if exists
+//   useEffect(() => {
+//     fetchProvinces();
+
+//     if (!isFirstTime) {
+//       const data = {
+//         fullName: address.name || address.fullName || "",
+//         phone: address.phone ? String(address.phone) : "",
+//         province: address.province || "",
+//         district: address.district || "",
+//         city: address.city || "",
+//         streetAddress: address.street || address.streetAddress || "",
+//       };
+//       setFormData(data);
+//       setOriginalData(data);
+//       setIsModified(false);
+
+//       if (address.province) fetchDistricts(address.province);
+//       // if (address.province && address.district)
+//       //   fetchCities(address.province, address.district);
+//     }
+//   }, [address]);
+
+//   // ✅ Detect modifications
+//   const checkIfModified = (newData) => {
+//     const normalize = (val) => (val ? val.trim().replace(/\s+/g, " ") : "");
+//     if (!originalData || Object.keys(originalData).length === 0) return true;
+//     return (
+//       normalize(newData.fullName) !== normalize(originalData.fullName) ||
+//       normalize(newData.phone) !== normalize(originalData.phone) ||
+//       normalize(newData.province) !== normalize(originalData.province) ||
+//       normalize(newData.district) !== normalize(originalData.district) ||
+//       normalize(newData.city) !== normalize(originalData.city) ||
+//       normalize(newData.streetAddress) !== normalize(originalData.streetAddress)
+//     );
+//   };
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+
+//     // Prevent leading/only spaces and convert everything safely to string
+//     let cleanedValue = String(value || "").replace(/^\s+/, "");
+//     if (cleanedValue.trim() === "") cleanedValue = "";
+
+//     let updatedForm = { ...formData, [name]: cleanedValue };
+
+//     if (name === "province") {
+//       updatedForm.district = "";
+//       updatedForm.city = "";
+//       setDistricts([]);
+//       // setCities([]);
+//       fetchDistricts(cleanedValue);
+//     }
+
+//     if (name === "district") {
+//       updatedForm.city = "";
+//       // setCities([]);
+//       // fetchCities(updatedForm.province, cleanedValue);
+//     }
+
+//     setFormData(updatedForm);
+//     setIsModified(checkIfModified(updatedForm));
+//   };
+
+//   // ✅ Reset form
+//   const handleReset = () => {
+//     if (originalData && Object.keys(originalData).length > 0) {
+//       setFormData(originalData);
+//       setIsModified(false);
+//     }
+//   };
+
+//   // ✅ Save / Update Address
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     if (!isModified && !isFirstTime) {
+//       toast.info("No changes to save.", {
+//         className: "custom-toast-center",
+//         autoClose: 1000,
+//         pauseOnHover: false,
+//         closeOnClick: true,
+//         hideProgressBar: true,
+//       });
+//       return;
+//     }
+
+//     const payload = {
+//       name: formData.fullName.trim().replace(/\s+/g, " "),
+//       phone: formData.phone.trim(),
+//       province: formData.province.trim(),
+//       district: formData.district.trim(),
+//       city: formData.city.trim(),
+//       street: formData.streetAddress.trim().replace(/\s+/g, " "),
+//     };
+
+//     try {
+//       const res = await axios.post(
+//         `${backendUrl}/api/profile/setaddress`,
+//         payload,
+//         {
+//           headers: { token },
+//         }
+//       );
+
+//       if (res.data.success) {
+//         toast.success(res.data.message || "Address saved", {
+//           className: "custom-toast-center",
+//           autoClose: 1000,
+//           pauseOnHover: false,
+//           closeOnClick: true,
+//           hideProgressBar: true,
+//         });
+
+//         setOriginalData(formData);
+//         setIsModified(false);
+//         updateAddress(payload);
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Failed to save address");
+//     }
+//   };
+
+//   // ✅ Place Order (untouched)
+//   const handlePlaceOrder = async () => {
+//     if (!paymentOne && !paymentTwo) {
+//       toast.error("Select payment method", {
+//         className: "custom-toast-center",
+//         autoClose: 1000,
+//       });
+//       return;
+//     }
+
+//     if (isModified) {
+//       toast.warning("Update address first", {
+//         className: "custom-toast-center",
+//         autoClose: 1000,
+//       });
+//       return;
+//     }
+
+//     if (paymentTwo && !selectedOnlineMethod) {
+//       toast.warn(
+//         "Please select an online payment method (eSewa, Khalti, etc.)"
+//       );
+//       return;
+//     }
+
+//     // find selected online payment method
+//     const selectedMethod = paymentMethods.find(
+//       (m) => m._id === selectedOnlineMethod
+//     );
+
+//     const items = [];
+//     for (const productId in cartitem) {
+//       const productCart = cartitem[productId];
+//       for (const size in productCart) {
+//         const colorData = productCart[size];
+//         for (const color in colorData) {
+//           const quantity = colorData[color];
+//           if (quantity <= 0) continue;
+
+//           const product = products.find((p) => p._id === productId);
+//           if (!product) continue;
+
+//           const variant = product.variants.find(
+//             (v) => v.size === size && v.color === color
+//           );
+//           if (!variant) continue;
+
+//           if (quantity > variant.stock) {
+//             toast.error(
+//               `Not enough stock for ${product.name} (${size} - ${color})`,
+//               {
+//                 className: "custom-toast-center",
+//                 autoClose: 1000,
+//               }
+//             );
+//             return;
+//           }
+
+//           items.push({
+//             productId: product._id,
+//             size: variant.size,
+//             color: variant.color,
+//             quantity,
+//             price: variant.price,
+//           });
+//         }
+//       }
+//     }
+
+//     if (items.length === 0) {
+//       toast.error("Cart is empty", {
+//         className: "custom-toast-center",
+//         autoClose: 1000,
+//       });
+//       return;
+//     }
+
+//     if (
+//       !formData.fullName ||
+//       !formData.phone ||
+//       !formData.province ||
+//       !formData.district ||
+//       !formData.city ||
+//       !formData.streetAddress
+//     ) {
+//       setAddressError(true);
+//       window.scroll(0, 0);
+//       toast.error("Address is Empty", {
+//         className: "custom-toast-center",
+//         autoClose: 1000,
+//       });
+//       return;
+//     } else {
+//       setAddressError(false);
+//     }
+
+//     const payload = {
+//       items,
+//       amount: calculatetotalamount() + delivery_fee,
+//       address: {
+//         fullName: formData.fullName,
+//         phone: Number(formData.phone),
+//         province: formData.province,
+//         district: formData.district,
+//         city: formData.city,
+//         streetAddress: formData.streetAddress,
+//       },
+//       paymentMethod: paymentOne
+//         ? "Cash On Delivery"
+//         : selectedMethod?.name || "Online",
+//       paymentMethodId: selectedOnlineMethod || null,
+//     };
+
+//     try {
+//       setIsLoading(true);
+//       const res = await axios.post(`${backendUrl}/api/order/place`, payload, {
+//         headers: { token },
+//       });
+//       if (res.data.success) {
+//         setCartitem({});
+//         toast.success("Order placed!", {
+//           className: "custom-toast-center",
+//           autoClose: 1000,
+//         });
+
+//         // ✅ Refetch product stock for all ordered items
+//         for (const item of items) {
+//           const product = products.find((p) => p._id === item.productId);
+//           if (!product) continue;
+
+//           const categorySlug = product.subcategory?.category?.slug;
+//           const productSlug = product.slug;
+
+//           if (categorySlug && productSlug) {
+//             await queryClient.refetchQueries([
+//               "product",
+//               categorySlug,
+//               productSlug,
+//             ]);
+//           }
+//         }
+
+//         navigate("/order");
+//       } else {
+//         toast.error(res.data.message || "Failed to place order", {
+//           className: "custom-toast-center",
+//           autoClose: 1000,
+//         });
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Failed to place order", {
+//         className: "custom-toast-center",
+//         autoClose: 1000,
+//       });
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     window.scrollTo(0, 0);
+//   }, []);
+
+//   return (
+//     <div className="p-4 flex flex-col md:flex-row gap-8 min-h-[50vh]">
+//       {/* ✅ Left: Address Section (updated like Profile) */}
+//       <div className="flex-1 bg-white shadow-sm rounded-xl p-5 md:h-[70vh] ">
+//         <h2
+//           className={`text-xl sm:text-2xl font-semibold mb-6 ${
+//             addressError ? "text-red-600 animate-pulse" : "text-gray-900"
+//           }`}
+//         >
+//           Shipping Address
+//         </h2>
+
+//         <form onSubmit={handleSubmit}>
+//           {/* Full Name & Phone */}
+//           {[
+//             { label: "Full Name", name: "fullName", type: "text" },
+//             { label: "Phone", name: "phone", type: "tel" },
+//           ].map(({ label, name, type }) => (
+//             <div className="mb-3" key={name}>
+//               <label className="block text-sm mb-3 font-medium text-gray-700">
+//                 {label} *
+//               </label>
+//               <input
+//                 type={type}
+//                 name={name}
+//                 value={formData[name] || ""}
+//                 onChange={handleChange}
+//                 className="w-full bg-white border border-gray-300 pl-3 py-2  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+//                 required
+//               />
+//             </div>
+//           ))}
+
+//           {/* Province, District, City */}
+//           {[
+//             { label: "Province", name: "province", options: provinces },
+//             { label: "District", name: "district", options: districts },
+//             // { label: "City", name: "city", options: cities },
+//           ].map(({ label, name, options }) => (
+//             <div className="mb-3" key={name}>
+//               <label className="block  text-sm mb-3 font-medium text-gray-700">
+//                 {label} *
+//               </label>
+//               <select
+//                 name={name}
+//                 value={formData[name] || ""}
+//                 onChange={handleChange}
+//                 className="w-full bg-white border border-gray-300 pl-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+//                 required
+//               >
+//                 <option value="">{`Select ${label}`}</option>
+//                 {options.map((val) => (
+//                   <option key={val._id || val.name} value={val.name}>
+//                     {val.name}
+//                   </option>
+//                 ))}
+//               </select>
+//             </div>
+//           ))}
+
+//           {/* ✅ City input instead of dropdown */}
+//           <div className="mb-3">
+//             <label className="block text-sm mb-1 font-medium text-gray-700">
+//               City/Municipality *
+//             </label>
+//             <input
+//               type="text"
+//               name="city"
+//               value={formData.city || ""}
+//               onChange={handleChange}
+//               placeholder="Enter your city"
+//               className="w-full bg-white border border-gray-300 pl-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+//               required
+//             />
+//           </div>
+
+//           {/* Street */}
+//           <div className="mb-2">
+//             <label className="block text-sm mb-1 font-medium text-gray-700">
+//               Street Address *
+//             </label>
+//             <input
+//               type="text"
+//               name="streetAddress"
+//               value={formData.streetAddress || ""}
+//               onChange={handleChange}
+//               className="w-full bg-white border border-gray-300 pl-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+//               required
+//             />
+//           </div>
+
+//           {/* Buttons */}
+//           <div className="flex flex-col sm:flex-row gap-4 mt-4">
+//             <button
+//               type="submit"
+//               className={`flex-1 py-3 rounded-lg text-white font-medium transition ${
+//                 isFirstTime
+//                   ? "bg-blue-600 hover:bg-blue-700"
+//                   : isModified
+//                   ? "bg-green-600 hover:bg-green-700"
+//                   : "bg-gray-500 cursor-not-allowed"
+//               }`}
+//               disabled={!isModified && !isFirstTime}
+//             >
+//               {isFirstTime
+//                 ? "Add Address"
+//                 : isModified
+//                 ? "Update Address"
+//                 : "Saved"}
+//             </button>
+
+//             {!isFirstTime && isModified && (
+//               <button
+//                 type="button"
+//                 onClick={handleReset}
+//                 className="flex-1 py-3 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition"
+//               >
+//                 Cancel
+//               </button>
+//             )}
+//           </div>
+//         </form>
+//       </div>
+
+//       {/* ✅ Right: Cart + Payment (unchanged) */}
+//       <div className="flex-1 space-y-6.5">
+//         {Object.keys(cartitem).length > 0 && (
+//           <div className="bg-white shadow-sm rounded-xl p-6 py-3">
+//             <h2 className="text-xl font-semibold mb-3">Products in Cart</h2>
+//             <div className="space-y-2 max-h-40 overflow-y-auto">
+//               {Object.keys(cartitem).map((productId) => {
+//                 const productCart = cartitem[productId];
+//                 const product = products.find((p) => p._id === productId);
+//                 if (!product) return null;
+
+//                 return Object.keys(productCart).map((size) => {
+//                   const colorData = productCart[size];
+//                   return Object.keys(colorData).map((color) => {
+//                     const quantity = colorData[color];
+//                     if (quantity <= 0) return null;
+
+//                     const variant = product.variants.find(
+//                       (v) => v.size === size && v.color === color
+//                     );
+//                     if (!variant) return null;
+
+//                     return (
+//                       <div
+//                         key={`${productId}-${size}-${color}`}
+//                         className="flex items-center gap-4 pb-2"
+//                       >
+//                         <img
+//                           src={product.images?.[0] || "/placeholder.png"}
+//                           alt={product.name}
+//                           className="w-14 sm:w-20 h-14 sm:h-20 rounded-lg object-cover"
+//                         />
+//                         <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+//                           <div className="flex flex-col gap-1 sm:gap-2 flex-wrap">
+//                             <p className="text-sm sm:text-[13px] font-medium text-gray-700 line-clamp-1">
+//                               {product.name}
+//                             </p>
+//                             <span className="text-[12px] font-semibold text-gray-900">
+//                               ₹ {variant.price} /-
+//                             </span>
+//                             <span className="px-2 py-0.5 text-[10px] border border-gray-200 bg-gray-50 rounded-md w-fit">
+//                               Size: {variant.size}
+//                             </span>
+//                             {variant.color && (
+//                               <span className="px-2 py-0.5 text-[10px] border border-gray-200 bg-gray-50 rounded-md w-fit">
+//                                 Color: {variant.color}
+//                               </span>
+//                             )}
+//                             <span className="px-2 py-0.5 text-[10px] border border-gray-200 bg-gray-50 rounded-md w-fit">
+//                               Qty: {quantity}
+//                             </span>
+//                           </div>
+//                         </div>
+//                       </div>
+//                     );
+//                   });
+//                 });
+//               })}
+//             </div>
+//           </div>
+//         )}
+
+//         <CartTotal />
+
+//         {/* ✅ Payment Method Section */}
+//         <div className="bg-white shadow-sm rounded-xl p-6">
+//           <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
+
+//           <div className="flex flex-col gap-2">
+//             {/* Cash on Delivery */}
+//             <div
+//               onClick={() => {
+//                 setPaymentOne(true);
+//                 setPaymentTwo(false);
+//                 setSelectedOnlineMethod(null);
+//               }}
+//               className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${
+//                 paymentOne ? "border-green-500 bg-green-50" : "border-gray-200"
+//               }`}
+//             >
+//               <div
+//                 className={` min-w-4.5 min-h-4.5 rounded-full border ${
+//                   paymentOne
+//                     ? "bg-green-500 border-green-500"
+//                     : "border-gray-400"
+//                 }`}
+//               ></div>
+//               <div>
+//                 <span className="text-[18px] md:text-[19px]">Cash on Delivery</span>
+//                 <p className="text-[11px] md:text-[12px] text-red-800">
+//                   Note: You have to Pay 150/- Advance payment which is Courier
+//                   Charge.
+//                 </p>
+//               </div>
+//             </div>
+
+//             {/* Online Payment */}
+//             <div
+//               onClick={() => {
+//                 setPaymentTwo(!paymentTwo);
+//                 setPaymentOne(false);
+//               }}
+//               className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${
+//                 paymentTwo ? "border-blue-500 bg-blue-50" : "border-gray-200"
+//               }`}
+//             >
+//               <div
+//                 className={` min-w-4.5 min-h-4.5 rounded-full border ${
+//                   paymentTwo ? "bg-blue-500 border-blue-500" : "border-gray-400"
+//                 }`}
+//               ></div>
+//               <span>Online Payment</span>
+//             </div>
+
+//             {/* ✅ Fetch & show mock payment methods */}
+//             {paymentTwo && (
+//               <div className="ml-3 mt-1 flex max-[1250px]:flex-col gap-2">
+//                 {isLoading ? (
+//                   <p className="text-gray-500 text-sm italic">
+//                     Loading payment methods...
+//                   </p>
+//                 ) : (
+//                   paymentMethods.map((method) => {
+//                     const imgUrl = method.image?.startsWith("http")
+//                       ? method.image
+//                       : `${backendUrl.replace("/api", "")}/${method.image}`;
+
+//                     return (
+//                       <div
+//                         key={method._id}
+//                         onClick={() => setSelectedOnlineMethod(method._id)}
+//                         className={`border p-2 rounded-lg cursor-pointer flex flex-row items-center gap-4 transition relative ${
+//                           selectedOnlineMethod === method._id
+//                             ? "border-blue-500 bg-blue-50"
+//                             : "border-gray-200"
+//                         }`}
+//                       >
+//                         {/* QR Image on the left */}
+//                         <img
+//                           src={imgUrl}
+//                           alt={method.name}
+//                           className="w-15 h-15 rounded-md object-contain border border-gray-400"
+//                         />
+
+//                         {/* Text content on the right */}
+//                         <div className="flex flex-col items-start gap-1 flex-1 pr-3">
+//                           {/* Name */}
+//                           <span className="font-medium text-gray-800">
+//                             {method.name}
+//                           </span>
+
+//                           {/* Account Number with copy button */}
+//                           {method.accountNumber && (
+//                             <div className="flex items-center gap-2 text-sm text-gray-600">
+//                               <span className="truncate">
+//                                 {method.accountNumber}
+//                               </span>
+//                               <button
+//                                 onClick={(e) => {
+//                                   e.stopPropagation();
+//                                   navigator.clipboard.writeText(
+//                                     method.accountNumber
+//                                   );
+//                                   setCopiedId(method._id);
+//                                   setTimeout(() => setCopiedId(null), 1500);
+//                                 }}
+//                                 className="text-blue-600 hover:underline pl-1"
+//                               >
+//                                 {copiedId === method._id ? "Copied!" : "Copy"}
+//                               </button>
+//                             </div>
+//                           )}
+
+//                           {/* View QR button */}
+//                           {method.image && (
+//                             <button
+//                               onClick={(e) => {
+//                                 e.stopPropagation();
+//                                 setQrView(imgUrl);
+//                                 setIsModalOpen(true);
+//                                 document.body.style.overflow = "hidden"; // disable scroll
+//                               }}
+//                               className="text-blue-600 hover:underline text-sm mt-1"
+//                             >
+//                               View QR
+//                             </button>
+//                           )}
+//                         </div>
+//                       </div>
+//                     );
+//                   })
+//                 )}
+//               </div>
+//             )}
+//           </div>
+
+//           {/* QR Code Modal */}
+//           {isModalOpen && qrView && (
+//             <div
+//               onClick={() => {
+//                 setQrView(null);
+//                 setIsModalOpen(false);
+//                 document.body.style.overflow = "auto";
+//               }}
+//               className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 cursor-pointer"
+//             >
+//               <div
+//                 className="relative bg-white p-4 rounded-xl shadow-xl"
+//                 onClick={(e) => e.stopPropagation()} // prevent close when clicking inside
+//               >
+//                 <img
+//                   src={qrView}
+//                   alt="QR Code"
+//                   className="max-w-[70vw] max-h-[80vh] rounded-lg object-contain"
+//                 />
+//                 <div className="flex justify-center gap-4 mt-3">
+//                   <button
+//                     onClick={async (e) => {
+//                       e.stopPropagation(); // prevent modal close
+//                       try {
+//                         const response = await fetch(qrView, { mode: "cors" });
+//                         const blob = await response.blob();
+//                         const url = URL.createObjectURL(blob);
+
+//                         const link = document.createElement("a");
+//                         link.href = url;
+//                         link.download = "qr-code.jpg";
+//                         document.body.appendChild(link);
+//                         link.click();
+//                         document.body.removeChild(link);
+
+//                         URL.revokeObjectURL(url);
+//                         toast.success("Image saved!", { autoClose: 1000 });
+//                       } catch (err) {
+//                         console.error("Failed to download image:", err);
+//                         toast.error("Failed to save image", {
+//                           autoClose: 1000,
+//                         });
+//                       }
+//                     }}
+//                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+//                   >
+//                     Save Image
+//                   </button>
+//                   <button
+//                     onClick={() => {
+//                       setQrView(null);
+//                       setIsModalOpen(false);
+//                       document.body.style.overflow = "auto";
+//                     }}
+//                     className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+//                   >
+//                     Close
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           )}
+
+//           {/* ✅ Place Order Button */}
+//           <button
+//             onClick={handlePlaceOrder}
+//             disabled={isModified || isLoading}
+//             className={`mt-4 w-full py-3 rounded-lg text-white ${
+//               isModified
+//                 ? "bg-gray-400 cursor-not-allowed"
+//                 : isLoading
+//                 ? "bg-gray-700"
+//                 : "bg-black hover:bg-gray-800"
+//             } flex items-center justify-center gap-2`}
+//           >
+//             {isLoading ? (
+//               <>
+//                 <svg
+//                   className="animate-spin h-5 w-5 text-white"
+//                   xmlns="http://www.w3.org/2000/svg"
+//                   fill="none"
+//                   viewBox="0 0 24 24"
+//                 >
+//                   <circle
+//                     className="opacity-25"
+//                     cx="12"
+//                     cy="12"
+//                     r="10"
+//                     stroke="currentColor"
+//                     strokeWidth="4"
+//                   ></circle>
+//                   <path
+//                     className="opacity-75"
+//                     fill="currentColor"
+//                     d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+//                   ></path>
+//                 </svg>
+//                 Processing...
+//               </>
+//             ) : isModified ? (
+//               "Update address first"
+//             ) : (
+//               "Place Order"
+//             )}
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Placeorder;

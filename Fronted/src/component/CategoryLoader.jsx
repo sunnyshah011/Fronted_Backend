@@ -1,5 +1,3 @@
-import React from "react";
-
 const CategoryLoader = () => {
   return (
     <div className="bg-white py-2">

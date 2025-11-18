@@ -1,5 +1,3 @@
-import React from "react";
-
 const FishingLoader = () => {
   return (
     <div className="flex flex-col md:flex-row gap-8 items-center justify-center h-[70vh] p-6 animate-fade-in">
