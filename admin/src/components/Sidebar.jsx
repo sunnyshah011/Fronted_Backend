@@ -1,5 +1,10 @@
 import { NavLink } from "react-router-dom";
-import { assets } from "../assets/admin_assets/assets";
+import { FiBox } from "react-icons/fi";
+import { HiOutlineReceiptRefund } from "react-icons/hi";
+import { HiOutlineLocationMarker  } from "react-icons/hi";
+import { AiOutlineQrcode } from "react-icons/ai";
+import { AiOutlinePlus } from "react-icons/ai";
+import { AiOutlineAppstore } from "react-icons/ai";
 
 const Sidebar = () => {
   return (
@@ -9,7 +14,7 @@ const Sidebar = () => {
           className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-lg"
           to="/add"
         >
-          <img className="w-5 h-5" src={assets.add_icon} alt="" />
+          <AiOutlinePlus size={20} />
           <p className="hidden md:block"> Add itmes </p>
         </NavLink>
 
@@ -17,7 +22,7 @@ const Sidebar = () => {
           className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-lg"
           to="/list"
         >
-          <img className="w-5 h-5" src={assets.order_icon} alt="" />
+          <FiBox size={20} />
           <p className="hidden md:block"> List itmes </p>
         </NavLink>
 
@@ -25,7 +30,7 @@ const Sidebar = () => {
           className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-lg"
           to="/order"
         >
-          <img className="w-5 h-5" src={assets.order_icon} alt="" />
+          <HiOutlineReceiptRefund size={20} />
           <p className="hidden md:block"> Order </p>
         </NavLink>
 
@@ -33,7 +38,7 @@ const Sidebar = () => {
           className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-lg"
           to="/location"
         >
-          <img className="w-5 h-5" src={assets.order_icon} alt="" />
+          <HiOutlineLocationMarker  size={20} />
           <p className="hidden md:block"> Location </p>
         </NavLink>
 
@@ -41,7 +46,7 @@ const Sidebar = () => {
           className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-lg"
           to="/category-manager"
         >
-          <img className="w-5 h-5" src={assets.order_icon} alt="" />
+          <AiOutlineAppstore  size={20} />
           <p className="hidden md:block"> Category </p>
         </NavLink>
 
@@ -49,7 +54,7 @@ const Sidebar = () => {
           className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-lg"
           to="/payment-methods"
         >
-          <img className="w-5 h-5" src={assets.QR} alt="" />
+          <AiOutlineQrcode size={20} />
           <p className="hidden md:block"> Payment-Methods </p>
         </NavLink>
       </div>
