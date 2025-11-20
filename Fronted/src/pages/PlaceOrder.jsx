@@ -4,6 +4,12 @@ import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
+import { FiTruck } from "react-icons/fi";
+import { FaMoneyBillWave } from "react-icons/fa";
+// import { FaMoneyBillWave } from "react-icons/fa"; // COD
+// import { SiEsewa } from "react-icons/si"; // eSewa
+// import { MdAccountBalance } from "react-icons/md"; // Bank Transfer
+
 
 const Placeorder = () => {
   // ──────────────── EXISTING STATES ────────────────
@@ -510,10 +516,10 @@ const Placeorder = () => {
           <button
             type="submit"
             className={`flex-1 py-3 rounded-lg text-white font-medium transition ${isFirstTime
-                ? "bg-blue-600 hover:bg-blue-700"
-                : isModified
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-gray-500 cursor-not-allowed"
+              ? "bg-blue-600 hover:bg-blue-700"
+              : isModified
+                ? "bg-green-600 hover:bg-green-700"
+                : "bg-gray-500 cursor-not-allowed"
               }`}
             disabled={!isModified && !isFirstTime}
           >
@@ -562,7 +568,7 @@ const Placeorder = () => {
       {Object.keys(cartitem).length > 0 && (
         <div className="bg-white shadow-sm rounded-xl p-6 py-3">
           <h2 className="text-xl font-semibold mb-3">Products in Cart</h2>
-          <div className="space-y-2 max-h-40 overflow-y-auto">
+          <div className="space-y-2 max-h-50 overflow-y-auto">
             {Object.keys(cartitem).map((productId) => {
               const productCart = cartitem[productId];
               const product = products.find((p) => p._id === productId);
@@ -645,10 +651,14 @@ const Placeorder = () => {
                 }`}
             ></div>
             <div>
-              <span className="text-[18px]">Cash on Delivery</span>
+              <div>
+                <FiTruck size={24} className="text-black inline pr-2" />
+                <span className="text-[18px]">Cash on Delivery</span>
+              </div>
+
               <p className="text-[10px] text-red-800">
                 Note: You have to pay Rs. 150 in advance for the courier charge.
-                You can pay the remaining amount after you receive your package.
+                {/* You can pay the remaining amount after you receive your package. */}
               </p>
             </div>
           </div>
@@ -670,8 +680,8 @@ const Placeorder = () => {
                       key={method._id}
                       onClick={() => setSelectedOnlineMethod(method._id)}
                       className={`border p-2 rounded-lg cursor-pointer flex flex-row items-center gap-4 transition relative ${selectedOnlineMethod === method._id
-                          ? "border-green-500 bg-green-50"
-                          : "border-gray-200"
+                        ? "border-green-500 bg-green-50"
+                        : "border-gray-200"
                         }`}
                     >
                       <img
@@ -740,7 +750,10 @@ const Placeorder = () => {
               className={`min-w-4.5 min-h-4.5 rounded-full border ${paymentTwo ? "bg-blue-500 border-blue-500" : "border-gray-400"
                 }`}
             ></div>
-            <span>Online Payment</span>
+            <div>
+              <FaMoneyBillWave size={24} className="text-green-600 inline pr-2" />
+              <span className="text-[18px]">Online Payment</span>
+            </div>
           </div>
           {/* Online payment methods */}
           {paymentTwo && (
@@ -760,8 +773,8 @@ const Placeorder = () => {
                       key={method._id}
                       onClick={() => setSelectedOnlineMethod(method._id)}
                       className={`border p-2 rounded-lg cursor-pointer flex flex-row items-center gap-4 transition relative ${selectedOnlineMethod === method._id
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200"
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200"
                         }`}
                     >
                       <img
@@ -883,10 +896,10 @@ const Placeorder = () => {
           onClick={handlePlaceOrder}
           disabled={isModified || isLoading}
           className={`mt-4 w-full py-3 rounded-lg text-white ${isModified
-              ? "bg-gray-400 cursor-not-allowed"
-              : isLoading
-                ? "bg-gray-700"
-                : "bg-black hover:bg-gray-800"
+            ? "bg-gray-400 cursor-not-allowed"
+            : isLoading
+              ? "bg-gray-700"
+              : "bg-black hover:bg-gray-800"
             } flex items-center justify-center gap-2`}
         >
           {isLoading ? (
