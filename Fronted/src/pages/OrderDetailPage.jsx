@@ -1,17 +1,14 @@
-
-
 import { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import OrderDetailsSkeleton from "../component/OrderDetailsSkeleton";
 
 const OrderDetails = () => {
   const { orderId } = useParams();
   const { backendUrl, token, currency } = useContext(ShopContext);
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const queryClient = useQueryClient();
@@ -24,47 +21,81 @@ const OrderDetails = () => {
   const [returning, setReturning] = useState(false);
   const [returnReason, setReturnReason] = useState("");
 
-  const isPaymentDisabled = order
-    ? ["Delivered", "Cancelled", "Returned", "Return Requested"].includes(order.orderStatus)
-    : false;
+  // const [order, setOrder] = useState(null);
+  // const [loading, setLoading] = useState(false);
 
-  const fetchOrderDetails = async () => {
-    if (!token) return;
-    setLoading(true);
-    try {
+  // const fetchOrderDetails = async () => {
+  //   if (!token) return;
+  //   setLoading(true);
+  //   try {
+  //     const res = await axios.post(
+  //       `${backendUrl}/api/order/${orderId}`,
+  //       {},
+  //       { headers: { token } }
+  //     );
+
+  //     if (res.data.success && res.data.order) {
+  //       const o = res.data.order;
+  //       const formattedOrder = {
+  //         ...o,
+  //         items: o.items.map((item) => ({
+  //           ...item,
+  //           productName: item.productId?.name || "Unknown Product",
+  //           productImage: item.productId?.images?.[0] || "/placeholder.jpg",
+  //         })),
+  //       };
+  //       setOrder(formattedOrder);
+  //     } else {
+  //       setOrder(null);
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("Failed to load order details");
+  //     setOrder(null);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchOrderDetails();
+  //   window.scrollTo(0, 0);
+  // }, [orderId, token]);
+
+  // 🔥 React Query Order Fetch
+  const {
+    data: order,
+    isLoading: loading,
+    refetch: refetchOrder,
+  } = useQuery({
+    queryKey: ["order-details", orderId],
+    enabled: !!token,
+    queryFn: async () => {
       const res = await axios.post(
         `${backendUrl}/api/order/${orderId}`,
         {},
         { headers: { token } }
       );
 
-      if (res.data.success && res.data.order) {
-        const o = res.data.order;
-        const formattedOrder = {
-          ...o,
-          items: o.items.map((item) => ({
-            ...item,
-            productName: item.productId?.name || "Unknown Product",
-            productImage: item.productId?.images?.[0] || "/placeholder.jpg",
-          })),
-        };
-        setOrder(formattedOrder);
-      } else {
-        setOrder(null);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to load order details");
-      setOrder(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (!res.data.success || !res.data.order) return null;
 
-  useEffect(() => {
-    fetchOrderDetails();
-    window.scrollTo(0, 0);
-  }, [orderId, token]);
+      const o = res.data.order;
+      return {
+        ...o,
+        items: o.items.map((item) => ({
+          ...item,
+          productName: item.productId?.name || "Unknown Product",
+          productImage: item.productId?.images?.[0] || "/placeholder.jpg",
+        })),
+      };
+    },
+  });
+
+  const isPaymentDisabled = order
+    ? ["Delivered", "Cancelled", "Returned", "Return Requested"].includes(
+        order.orderStatus
+      )
+    : false;
 
   const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
 
@@ -86,7 +117,8 @@ const OrderDetails = () => {
       if (res.data.success) {
         toast.success("Payment proof uploaded/edited successfully");
         setSelectedFile(null);
-        fetchOrderDetails();
+        // fetchOrderDetails();
+        refetchOrder();
       } else {
         toast.error("Failed to upload payment proof");
       }
@@ -111,7 +143,8 @@ const OrderDetails = () => {
 
       if (res.data.success) {
         toast.success("Payment proof removed successfully");
-        fetchOrderDetails();
+        // fetchOrderDetails();
+        refetchOrder();
       } else {
         toast.error("Failed to remove payment proof");
       }
@@ -134,7 +167,9 @@ const OrderDetails = () => {
       if (res.data.success) {
         toast.success("Order cancelled successfully");
         setShowCancelModal(false);
-        fetchOrderDetails();
+        // fetchOrderDetails();
+        refetchOrder();
+
         await queryClient.refetchQueries(["products"], { exact: true });
       } else {
         toast.error(res.data.message);
@@ -161,7 +196,9 @@ const OrderDetails = () => {
         toast.success("Return request submitted");
         setShowReturnModal(false);
         setReturnReason("");
-        fetchOrderDetails();
+        // fetchOrderDetails();
+        refetchOrder();
+
         await queryClient.refetchQueries(["products"], { exact: true });
       } else {
         toast.error(res.data.message);
@@ -174,8 +211,7 @@ const OrderDetails = () => {
     }
   };
 
-  if (loading)
-    return <p className="text-center p-6">Loading order details...</p>;
+  if (loading) if (loading) return <OrderDetailsSkeleton />;
   if (!order) return <p className="text-center p-6">Order not found.</p>;
 
   const subtotal = order.items.reduce(

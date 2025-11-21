@@ -71,7 +71,7 @@ const Order = () => {
     <div className="mt-5 px-4 sm:px-6 lg:px-8">
       {/* Loading overlay */}
       {loadingOrders && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
