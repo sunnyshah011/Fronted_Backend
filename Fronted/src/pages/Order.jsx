@@ -1,57 +1,98 @@
 import { useContext, useEffect, useState, useRef } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+
 
 const Order = () => {
   const { backendUrl, token, currency } = useContext(ShopContext);
-  const [orders, setOrders] = useState([]);
   const [filterStatus, setFilterStatus] = useState("All");
-  const [loadingOrders, setLoadingOrders] = useState(false);
   const scrollRef = useRef(null);
 
-  // Load orders
-  const loadOrderData = async () => {
-    if (!token) return;
-    setLoadingOrders(true);
 
-    try {
+  // const [orders, setOrders] = useState([]);
+  // const [loadingOrders, setLoadingOrders] = useState(false);
+
+  // Load orders
+  // const loadOrderData = async () => {
+  //   if (!token) return;
+  //   setLoadingOrders(true);
+
+  //   try {
+  //     const response = await axios.post(
+  //       `${backendUrl}/api/order/userorders`,
+  //       {},
+  //       { headers: { token } }
+  //     );
+
+  //     if (response.data.success && Array.isArray(response.data.orders)) {
+  //       const formattedOrders = response.data.orders.map((order) => ({
+  //         orderId: order._id,
+  //         amount: order.amount,
+  //         orderNumber: order.orderId,
+  //         date: order.createdAt,
+  //         status: order.orderStatus,
+  //         paymentMethod: order.paymentMethod,
+  //         items: order.items.map((item) => ({
+  //           ...item,
+  //           productName: item.productId?.name || "Unknown Product",
+  //           productImage: item.productId?.images?.[0] || "/placeholder.jpg",
+  //         })),
+  //       }));
+
+  //       setOrders(formattedOrders);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error loading user orders:", error);
+  //     toast.error("Failed to load orders");
+  //   } finally {
+  //     setLoadingOrders(false);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   loadOrderData();
+  //   window.scrollTo(0, 0);
+  // }, [token]);
+
+  const {
+    data: orders = [],
+    isLoading: loadingOrders,
+  } = useQuery({
+    queryKey: ["userOrders", token],
+    queryFn: async () => {
+      if (!token) return [];
+
       const response = await axios.post(
         `${backendUrl}/api/order/userorders`,
         {},
         { headers: { token } }
       );
 
-      if (response.data.success && Array.isArray(response.data.orders)) {
-        const formattedOrders = response.data.orders.map((order) => ({
-          orderId: order._id,
-          amount: order.amount,
-          orderNumber: order.orderId,
-          date: order.createdAt,
-          status: order.orderStatus,
-          paymentMethod: order.paymentMethod,
-          items: order.items.map((item) => ({
-            ...item,
-            productName: item.productId?.name || "Unknown Product",
-            productImage: item.productId?.images?.[0] || "/placeholder.jpg",
-          })),
-        }));
-
-        setOrders(formattedOrders);
+      if (!response.data.success || !Array.isArray(response.data.orders)) {
+        return [];
       }
-    } catch (error) {
-      console.error("Error loading user orders:", error);
-      toast.error("Failed to load orders");
-    } finally {
-      setLoadingOrders(false);
-    }
-  };
 
-  useEffect(() => {
-    loadOrderData();
-    window.scrollTo(0, 0);
-  }, [token]);
+      return response.data.orders.map((order) => ({
+        orderId: order._id,
+        amount: order.amount,
+        orderNumber: order.orderId,
+        date: order.createdAt,
+        status: order.orderStatus,
+        paymentMethod: order.paymentMethod,
+        items: order.items.map((item) => ({
+          ...item,
+          productName: item.productId?.name || "Unknown Product",
+          productImage: item.productId?.images?.[0] || "/placeholder.jpg",
+        })),
+      }));
+    },
+    enabled: !!token,
+    refetchOnWindowFocus: false,
+  });
+
 
   const filteredOrders =
     filterStatus === "All"
@@ -66,6 +107,11 @@ const Order = () => {
     "Cancelled",
     "Returned",
   ];
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
 
   return (
     <div className="mt-5 px-4 sm:px-6 lg:px-8">
@@ -92,11 +138,10 @@ const Order = () => {
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-3 py-1 rounded font-medium shrink-0 ${
-                filterStatus === status
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              } transition`}
+              className={`px-3 py-1 rounded font-medium shrink-0 ${filterStatus === status
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                } transition`}
             >
               {status}
             </button>
@@ -122,19 +167,18 @@ const Order = () => {
                     Order #{order.orderNumber}
                   </p>
                   <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                      order.status === "Delivered"
-                        ? "bg-green-200 text-green-800"
-                        : order.status === "Pending"
+                    className={`px-2 py-0.5 rounded-full text-xs font-semibold ${order.status === "Delivered"
+                      ? "bg-green-200 text-green-800"
+                      : order.status === "Pending"
                         ? "bg-yellow-200 text-yellow-800"
                         : order.status === "Ready To Ship"
-                        ? "bg-blue-200 text-blue-800"
-                        : order.status === "Cancelled"
-                        ? "bg-red-200 text-red-800"
-                        : order.status === "Returned"
-                        ? "bg-pink-200 text-pink-800"
-                        : "bg-gray-200 text-gray-800"
-                    }`}
+                          ? "bg-blue-200 text-blue-800"
+                          : order.status === "Cancelled"
+                            ? "bg-red-200 text-red-800"
+                            : order.status === "Returned"
+                              ? "bg-pink-200 text-pink-800"
+                              : "bg-gray-200 text-gray-800"
+                      }`}
                   >
                     {order.status}
                   </span>

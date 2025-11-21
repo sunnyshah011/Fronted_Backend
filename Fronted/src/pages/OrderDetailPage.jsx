@@ -93,8 +93,8 @@ const OrderDetails = () => {
 
   const isPaymentDisabled = order
     ? ["Delivered", "Cancelled", "Returned", "Return Requested"].includes(
-        order.orderStatus
-      )
+      order.orderStatus
+    )
     : false;
 
   const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
@@ -211,7 +211,12 @@ const OrderDetails = () => {
     }
   };
 
-  if (loading) if (loading) return <OrderDetailsSkeleton />;
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  if (loading) return <OrderDetailsSkeleton />;
   if (!order) return <p className="text-center p-6">Order not found.</p>;
 
   const subtotal = order.items.reduce(
@@ -219,11 +224,23 @@ const OrderDetails = () => {
     0
   );
 
+  // const statusColor = {
+  //   Pending: "bg-yellow-200 text-yellow-800",
+  //   Completed: "bg-green-200 text-green-800",
+  //   Cancelled: "bg-red-200 text-red-800",
+  // };
+
   const statusColor = {
     Pending: "bg-yellow-200 text-yellow-800",
+    "Ready To Ship": "bg-blue-200 text-blue-800",
     Completed: "bg-green-200 text-green-800",
     Cancelled: "bg-red-200 text-red-800",
+    Delivered: "bg-green-200 text-green-800",
+    Returned: "bg-purple-200 text-purple-800",
+    "Return Requested": "bg-orange-200 text-orange-800",
   };
+
+
 
   return (
     <div className="max-w-4xl mx-auto px-3 py-4 space-y-4">
@@ -243,9 +260,8 @@ const OrderDetails = () => {
         </div>
         <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
           <span
-            className={`px-3 py-1 md:px-4 md:py-1.5 rounded-full font-semibold text-sm md:text-base ${
-              statusColor[order.orderStatus] || "bg-gray-200 text-gray-800"
-            }`}
+            className={`px-3 py-1 md:px-4 md:py-1.5 rounded-full font-semibold text-sm md:text-base ${statusColor[order.orderStatus] || "bg-gray-200 text-gray-800"
+              }`}
           >
             {order.orderStatus}
           </span>
@@ -317,19 +333,17 @@ const OrderDetails = () => {
               <input
                 type="file"
                 onChange={handleFileChange}
-                className={`border rounded p-2 text-sm sm:text-base flex-1 ${
-                  isPaymentDisabled ? "bg-gray-100 cursor-not-allowed" : ""
-                }`}
+                className={`border rounded p-2 text-sm sm:text-base flex-1 ${isPaymentDisabled ? "bg-gray-100 cursor-not-allowed" : ""
+                  }`}
                 disabled={isPaymentDisabled}
               />
 
               <button
                 onClick={handleUpload}
-                className={`px-4 py-2 rounded text-white w-full sm:w-auto ${
-                  isPaymentDisabled || uploading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
+                className={`px-4 py-2 rounded text-white w-full sm:w-auto ${isPaymentDisabled || uploading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+                  }`}
                 disabled={uploading || isPaymentDisabled}
               >
                 {uploading ? "Uploading..." : "Edit Proof"}
@@ -337,11 +351,10 @@ const OrderDetails = () => {
 
               <button
                 onClick={handleRemoveProof}
-                className={`px-4 py-2 rounded text-white w-full sm:w-auto ${
-                  isPaymentDisabled
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-red-600 hover:bg-red-700"
-                }`}
+                className={`px-4 py-2 rounded text-white w-full sm:w-auto ${isPaymentDisabled
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-red-600 hover:bg-red-700"
+                  }`}
                 disabled={isPaymentDisabled}
               >
                 Remove Proof
@@ -353,18 +366,16 @@ const OrderDetails = () => {
             <input
               type="file"
               onChange={handleFileChange}
-              className={`border rounded p-2 text-sm sm:text-base flex-1 ${
-                isPaymentDisabled ? "bg-gray-100 cursor-not-allowed" : ""
-              }`}
+              className={`border rounded p-2 text-sm sm:text-base flex-1 ${isPaymentDisabled ? "bg-gray-100 cursor-not-allowed" : ""
+                }`}
               disabled={isPaymentDisabled}
             />
             <button
               onClick={handleUpload}
-              className={`px-4 py-2 rounded text-white w-full sm:w-auto ${
-                isPaymentDisabled || uploading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
+              className={`px-4 py-2 rounded text-white w-full sm:w-auto ${isPaymentDisabled || uploading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+                }`}
               disabled={uploading || isPaymentDisabled}
             >
               {uploading ? "Uploading..." : "Upload Proof"}
@@ -456,9 +467,8 @@ const OrderDetails = () => {
                     type="button"
                     disabled={returning}
                     onClick={() => setReturnReason(reason)}
-                    className={`text-left px-2 py-1 border rounded hover:bg-gray-100 transition ${
-                      returnReason === reason ? "bg-gray-200 font-semibold" : ""
-                    } disabled:opacity-50`}
+                    className={`text-left px-2 py-1 border rounded hover:bg-gray-100 transition ${returnReason === reason ? "bg-gray-200 font-semibold" : ""
+                      } disabled:opacity-50`}
                   >
                     {reason}
                   </button>
