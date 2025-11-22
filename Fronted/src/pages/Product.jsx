@@ -502,14 +502,12 @@ const Product = () => {
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* LEFT IMAGES */}
           <div className="w-full flex flex-col items-center">
-            {/* IMAGE SLIDER LIKE CODE 2 */}
             <Swiper
               modules={[Navigation, Thumbs]}
               thumbs={{ swiper: thumbsSwiper }}
               // navigation
               spaceBetween={10}
               className="w-full max-w-[470px] aspect-square rounded-xl overflow-hidden mb-3 flex items-center justify-center shadow"
-            // className="w-full max-w-[500px] aspect-square bg-white overflow-hidden rounded-xl mb-2 flex items-center justify-center shadow"
             >
               {fproduct.images?.map((img) => (
                 <SwiperSlide key={img}>
@@ -523,29 +521,6 @@ const Product = () => {
                 </SwiperSlide>
               ))}
             </Swiper>
-
-            {/* {fproduct.images?.length > 1 && (
-              <Swiper
-                onSwiper={setThumbsSwiper}
-                modules={[Navigation, Thumbs]}
-                spaceBetween={20}
-                slidesPerView={4}
-                freeMode
-                watchSlidesProgress
-                className="w-full max-w-[400px] mt-1"
-              >
-                {fproduct.images.map((img) => (
-                  <SwiperSlide key={img} className="cursor-pointer">
-                    <img
-                      src={img}
-                      alt="thumbnail"
-                      className="w-19 h-19 object-cover rounded hover:scale-105 border border-gray-200 transition-all "
-                    />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            )} */}
-
 
             {fproduct.images?.length > 1 && (
               <div className="w-full max-w-[470px] flex justify-center">
@@ -563,7 +538,7 @@ const Product = () => {
                       <img
                         src={img}
                         alt="thumbnail"
-                        className="w-17 h-17 sm:w-20 sm:h-20 object-cover rounded hover:scale-105 border border-gray-200 transition-all"
+                        className="w-17 h-17 sm:w-20 sm:h-20 object-cover rounded border border-gray-200 transition-all"
                       />
                     </SwiperSlide>
                   ))}
@@ -575,10 +550,10 @@ const Product = () => {
 
           {/* RIGHT INFO */}
           <div className="flex flex-col sm:pr-5">
-            <h1 className="text-[13px] md:text-[20px] font-medium mb-2 mt-4">
+            <h1 className="text-[19px] md:text-[20px] font-medium mb-3 mt-4">
               {fproduct.name}
             </h1>
-            <p className="text-2xl font-medium mb-4">
+            <p className="text-[26px] font-medium mb-4">
               {currency} {displayPrice} /-
             </p>
            <p className="mb-2 bg-gray-200 w-fit px-3 rounded"> SIZE SELECT</p>
@@ -590,7 +565,7 @@ const Product = () => {
                     (v) => v.size === size && v.stock > 0
                   );
                   return (
-                    <div key={size} className="flex flex-col items-center max-[500px]:text-[11px]">
+                    <div key={size} className="flex flex-col items-center max-[500px]:text-[12.5px]">
                       <button
                         onClick={() => setSelectedSize(size)}
                         className={`sm:px-4 px-3 py-2 border rounded-lg transition ${selectedSize === size
@@ -625,7 +600,7 @@ const Product = () => {
                       v.stock > 0
                   );
                   return (
-                    <div key={color} className="flex flex-col items-center max-[500px]:text-[11px]">
+                    <div key={color} className="flex flex-col items-center max-[500px]:text-[12.5px]">
                       <button
                         onClick={() => setSelectedColor(color)}
                         className={`sm:px-4 px-3 py-2 border rounded-lg transition ${selectedColor === color
@@ -716,7 +691,7 @@ const Product = () => {
                 // !isVariantSelected ||
                 isAdding
               }
-              className={`px-6 w-50 py-3 rounded-lg mb-4 transition ${!anyStockAvailable || isOutOfStock || isMaxInCart || isAdding
+              className={`px-6 w-50 py-3 text-[20px] rounded-lg mb-4 transition ${!anyStockAvailable || isOutOfStock || isMaxInCart || isAdding
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-black text-white hover:bg-gray-800"
                 }`}

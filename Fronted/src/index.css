@@ -31,3 +31,11 @@ a.active hr {
   text-align: center;
   border-radius: 8px;
 }
+
+
+/* Add this to your global CSS file (index.css, App.css, etc.) */
+.swiper-slide-thumb-active img {
+  border: 1px solid darkblue !important; /* blue border */
+  opacity: 1 !important;
+  transform: scale(1);
+}
