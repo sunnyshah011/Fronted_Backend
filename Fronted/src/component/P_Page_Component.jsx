@@ -17,7 +17,7 @@ const Product_Page = ({ categorySlug, productSlug, name, price, images }) => {
         />
       </div>
       <p className="pt-5 pb-1 pl-2 text-sm line-clamp-1">{name}</p>
-      <p className="pl-2 mt-2 pb-3 text-[18px] font-semibold truncate">
+      <p className="pl-2 mt-2 pb-3 text-[18px] font-medium truncate">
         {currency} {price} /-
       </p>
     </Link>
