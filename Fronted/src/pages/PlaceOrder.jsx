@@ -5,7 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import { FiTruck } from "react-icons/fi";
-import { FaMoneyBillWave } from "react-icons/fa";
+// import { FaMoneyBillWave } from "react-icons/fa";
 // import { FaMoneyBillWave } from "react-icons/fa"; // COD
 // import { SiEsewa } from "react-icons/si"; // eSewa
 // import { MdAccountBalance } from "react-icons/md"; // Bank Transfer
@@ -653,15 +653,16 @@ const Placeorder = () => {
             <div>
               <div>
                 <FiTruck size={24} className="text-black inline pr-2" />
-                <span className="text-[18px]">Cash on Delivery</span>
+                <span className="text-[18px]">QR Payment</span>
               </div>
 
-              <p className="text-[10px] text-red-800">
+              {/* <p className="text-[10px] text-red-800">
                 Note: You have to pay Rs. 150 in advance for the courier charge.
-                {/* You can pay the remaining amount after you receive your package. */}
-              </p>
+                You can pay the remaining amount after you receive your package.
+              </p> */}
             </div>
           </div>
+
           {/* COD payment methods (same UI as Online Payment) */}
           {paymentOne && (
             <div className="ml-3 mt-1 flex max-[1250px]:flex-col gap-2">
@@ -736,12 +737,16 @@ const Placeorder = () => {
             </div>
           )}
 
+
+
+
+
           {/* Online Payment */}
-          <div
+          {/* <div
             onClick={() => {
               setPaymentTwo(!paymentTwo);
               setPaymentOne(false);
-              setSelectedOnlineMethod(null); // ← ADD THIS LINE
+              setSelectedOnlineMethod(null);
             }}
             className={`flex items-center gap-3 border p-3 rounded-lg cursor-pointer ${paymentTwo ? "border-blue-500 bg-blue-50" : "border-gray-200"
               }`}
@@ -754,9 +759,9 @@ const Placeorder = () => {
               <FaMoneyBillWave size={24} className="text-green-600 inline pr-2" />
               <span className="text-[18px]">Online Payment</span>
             </div>
-          </div>
+          </div> */}
           {/* Online payment methods */}
-          {paymentTwo && (
+          {/* {paymentTwo && (
             <div className="ml-3 mt-1 flex max-[1250px]:flex-col gap-2">
               {isLoading ? (
                 <p className="text-gray-500 text-sm italic">
@@ -828,8 +833,11 @@ const Placeorder = () => {
                 })
               )}
             </div>
-          )}
+          )} */}
+
         </div>
+
+
 
         {/* QR Modal */}
         {isModalOpen && qrView && (
