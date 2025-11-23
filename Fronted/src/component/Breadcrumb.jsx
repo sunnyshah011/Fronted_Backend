@@ -34,7 +34,7 @@ const Breadcrumbs = () => {
   if (pathname === "/") return null;
 
   return (
-    <nav className="mt-23 px-4 text-sm text-gray-600" aria-label="breadcrumb">
+    <nav className="mt-23 px-4 sm:pl-10 text-sm text-gray-600" aria-label="breadcrumb">
       <ol className="flex items-center space-x-2 flex-wrap">
         {/* Home */}
         <li>

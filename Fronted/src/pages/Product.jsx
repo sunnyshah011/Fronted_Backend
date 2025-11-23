@@ -9,7 +9,6 @@
 // import { Fancybox } from "@fancyapps/ui";
 // import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
-
 // const fetchProduct = async (backendUrl, categorySlug, productSlug) => {
 //   const { data } = await axios.get(
 //     `${backendUrl}/api/categories/${categorySlug}/${productSlug}`
@@ -126,7 +125,6 @@
 //     };
 //   }, [fproduct, mainImage]);
 
-
 //   return (
 //     <div className="max-w-[1250px] mt-3 pt-4 px-4 bg-white">
 //       {isLoading && <FishingLoader />}
@@ -180,7 +178,6 @@
 //               </div>
 //             )}
 //           </div>
-
 
 //           {/* RIGHT INFO */}
 //           <div className="flex flex-col pr-5">
@@ -348,7 +345,6 @@
 
 // export default Product;
 
-
 import { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -365,8 +361,6 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
 
-
-
 const fetchProduct = async (backendUrl, categorySlug, productSlug) => {
   const { data } = await axios.get(
     `${backendUrl}/api/categories/${categorySlug}/${productSlug}`
@@ -376,7 +370,8 @@ const fetchProduct = async (backendUrl, categorySlug, productSlug) => {
 };
 
 const Product = () => {
-  const { backendUrl, currency, addtocart, cartitem, token } = useContext(ShopContext);
+  const { backendUrl, currency, addtocart, cartitem, token } =
+    useContext(ShopContext);
   const { categorySlug, productSlug } = useParams();
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
@@ -385,7 +380,6 @@ const Product = () => {
   const [isAdding, setIsAdding] = useState(false);
 
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
-
 
   const {
     data: fproduct,
@@ -430,8 +424,8 @@ const Product = () => {
   const selectedVariant =
     selectedSize && selectedColor
       ? fproduct?.variants.find(
-        (v) => v.size === selectedSize && v.color === selectedColor
-      )
+          (v) => v.size === selectedSize && v.color === selectedColor
+        )
       : null;
 
   const priceVariant = selectedVariant || fproduct?.variants?.[0];
@@ -486,226 +480,245 @@ const Product = () => {
     };
   }, [fproduct, mainImage]);
 
-
   return (
-    <div className="max-w-[1250px] mt-3 pt-4 px-4 bg-white">
-      {isLoading && <FishingLoader />}
-      {isError && (
-        <p className="text-center py-5 text-red-500">
-          Failed to load product: {error.message}
-        </p>
-      )}
-      {!isLoading && !isError && !fproduct && (
-        <p className="text-center py-5 text-gray-500">Product not found</p>
-      )}
-      {fproduct && (
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          {/* LEFT IMAGES */}
-          <div className="w-full flex flex-col items-center">
-            <Swiper
-              modules={[Navigation, Thumbs]}
-              thumbs={{ swiper: thumbsSwiper }}
-              // navigation
-              spaceBetween={10}
-              className="w-full max-w-[470px] aspect-square rounded-xl overflow-hidden mb-3 flex items-center justify-center shadow"
-            >
-              {fproduct.images?.map((img) => (
-                <SwiperSlide key={img}>
-                  <a data-fancybox="gallery" href={img}>
-                    <img
-                      src={img}
-                      alt={fproduct.name}
-                      className="w-full h-full object-contain rounded-xl cursor-zoom-in"
-                    />
-                  </a>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-
-            {fproduct.images?.length > 1 && (
-              <div className="w-full max-w-[470px] flex justify-center">
-                <Swiper
-                  onSwiper={setThumbsSwiper}
-                  modules={[Navigation, Thumbs]}
-                  spaceBetween={10}
-                  slidesPerView={"auto"}
-                  freeMode
-                  watchSlidesProgress
-                  className="w-auto!"
-                >
-                  {fproduct.images.map((img) => (
-                    <SwiperSlide key={img} className="w-auto! cursor-pointer">
+    <div>
+      <div className="max-w-[1200px] mt-3 pt-4 px-4 bg-white pb-5">
+        {isLoading && <FishingLoader />}
+        {isError && (
+          <p className="text-center py-5 text-red-500">
+            Failed to load product: {error.message}
+          </p>
+        )}
+        {!isLoading && !isError && !fproduct && (
+          <p className="text-center py-5 text-gray-500">Product not found</p>
+        )}
+        {fproduct && (
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            {/* LEFT IMAGES */}
+            <div className="w-full flex flex-col items-center">
+              <Swiper
+                modules={[Navigation, Thumbs]}
+                thumbs={{ swiper: thumbsSwiper }}
+                // navigation
+                spaceBetween={10}
+                className="w-full max-w-[470px] aspect-square rounded-xl overflow-hidden mb-3 flex items-center justify-center shadow"
+              >
+                {fproduct.images?.map((img) => (
+                  <SwiperSlide key={img}>
+                    <a data-fancybox="gallery" href={img}>
                       <img
                         src={img}
-                        alt="thumbnail"
-                        className="w-17 h-17 sm:w-20 sm:h-20 object-cover rounded border border-gray-200 transition-all"
+                        alt={fproduct.name}
+                        className="w-full h-full object-contain rounded-xl cursor-zoom-in"
                       />
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-              </div>
-            )}
-          </div>
+                    </a>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
 
+              {fproduct.images?.length > 1 && (
+                <div className="w-full max-w-[470px] flex justify-center">
+                  <Swiper
+                    onSwiper={setThumbsSwiper}
+                    modules={[Navigation, Thumbs]}
+                    spaceBetween={10}
+                    slidesPerView={"auto"}
+                    freeMode
+                    watchSlidesProgress
+                    className="w-auto!"
+                  >
+                    {fproduct.images.map((img) => (
+                      <SwiperSlide key={img} className="w-auto! cursor-pointer">
+                        <img
+                          src={img}
+                          alt="thumbnail"
+                          className="w-17 h-17 sm:w-20 sm:h-20 object-cover rounded border border-gray-200 transition-all"
+                        />
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                </div>
+              )}
+            </div>
 
-          {/* RIGHT INFO */}
-          <div className="flex flex-col sm:pr-5">
-            <h1 className="text-[19px] md:text-[20px] font-medium mb-3 mt-4">
-              {fproduct.name}
-            </h1>
-            <p className="text-[26px] font-medium mb-4">
-              {currency} {displayPrice} /-
-            </p>
-           <p className="mb-2 bg-gray-200 w-fit px-3 rounded"> SIZE SELECT</p>
-            <div className="mb-2 mt-1">
-              <p className="font-medium mb-1 pl-3">Available Sizes</p>
-              <div className="flex gap-2 flex-wrap">
-                {allSizes.map((size) => {
-                  const sizeHasStock = fproduct.variants.some(
-                    (v) => v.size === size && v.stock > 0
-                  );
-                  return (
-                    <div key={size} className="flex flex-col items-center max-[500px]:text-[12.5px]">
-                      <button
-                        onClick={() => setSelectedSize(size)}
-                        className={`sm:px-4 px-3 py-2 border rounded-lg transition ${selectedSize === size
-                          ? "bg-black text-white"
-                          : sizeHasStock
-                            ? "bg-white hover:bg-gray-100"
-                            : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                          }`}
-                        disabled={!sizeHasStock}
-                      >
-                        {size}
-                      </button>
-                      {!sizeHasStock && (
-                        <p className="text-xs text-red-500 mt-1">
-                          Out of stock
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            {/* COLOR SELECT */}
-            <div className="mb-4 mt-1">
-              <p className="font-medium mb-1 pl-3">Available Colors</p>
-              <div className="flex gap-2 flex-wrap">
-                {allColors.map((color) => {
-                  const colorHasStock = fproduct.variants.some(
-                    (v) =>
-                      v.color === color &&
-                      (!selectedSize || v.size === selectedSize) &&
-                      v.stock > 0
-                  );
-                  return (
-                    <div key={color} className="flex flex-col items-center max-[500px]:text-[12.5px]">
-                      <button
-                        onClick={() => setSelectedColor(color)}
-                        className={`sm:px-4 px-3 py-2 border rounded-lg transition ${selectedColor === color
-                          ? "bg-black text-white"
-                          : colorHasStock
-                            ? "bg-white hover:bg-gray-100"
-                            : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                          }`}
-                        disabled={!colorHasStock}
-                      >
-                        {color}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            {/* STOCK INFO */}
-            {isVariantSelected && (
-              <p className="mb-2 pl-2 text-sm text-gray-600">
-                Stock Available: {selectedVariant?.stock || 0}
+            {/* RIGHT INFO */}
+            <div className="flex flex-col sm:pr-5">
+              <h1 className="text-[19px] md:text-[20px] font-medium mb-3 mt-4">
+                {fproduct.name}
+              </h1>
+              <p className="text-[26px] font-medium mb-4">
+                {currency} {displayPrice} /-
               </p>
-            )}
-            {/* QUANTITY */}
-            {isVariantSelected && !isOutOfStock && (
-              <div className="mb-6 pl-2 flex items-center gap-3 mt-2">
-                <button
-                  onClick={decrement}
-                  className="px-3 py-1 bg-gray-200 rounded"
-                  disabled={quantity <= 1}
-                >
-                  -
-                </button>
-                <span className="font-medium">{quantity}</span>
-                <button
-                  onClick={increment}
-                  className="px-3 py-1 bg-gray-200 rounded"
-                  disabled={quantity + inCartQty >= selectedVariant?.stock}
-                >
-                  +
-                </button>
+              <p className="mb-2 bg-gray-200 w-fit px-3 rounded">
+                {" "}
+                SIZE SELECT
+              </p>
+              <div className="mb-2 mt-1">
+                <p className="font-medium mb-1 pl-3">Available Sizes</p>
+                <div className="flex gap-2 flex-wrap">
+                  {allSizes.map((size) => {
+                    const sizeHasStock = fproduct.variants.some(
+                      (v) => v.size === size && v.stock > 0
+                    );
+                    return (
+                      <div
+                        key={size}
+                        className="flex flex-col items-center max-[500px]:text-[12.5px]"
+                      >
+                        <button
+                          onClick={() => setSelectedSize(size)}
+                          className={`sm:px-4 px-3 py-2 border rounded-lg transition ${
+                            selectedSize === size
+                              ? "bg-black text-white"
+                              : sizeHasStock
+                              ? "bg-white hover:bg-gray-100"
+                              : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          }`}
+                          disabled={!sizeHasStock}
+                        >
+                          {size}
+                        </button>
+                        {!sizeHasStock && (
+                          <p className="text-xs text-red-500 mt-1">
+                            Out of stock
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            )}
-            {/* // Replace your Add to Cart button with this: */}
-            <button
-              onClick={async () => {
+              {/* COLOR SELECT */}
+              <div className="mb-4 mt-1">
+                <p className="font-medium mb-1 pl-3">Available Colors</p>
+                <div className="flex gap-2 flex-wrap">
+                  {allColors.map((color) => {
+                    const colorHasStock = fproduct.variants.some(
+                      (v) =>
+                        v.color === color &&
+                        (!selectedSize || v.size === selectedSize) &&
+                        v.stock > 0
+                    );
+                    return (
+                      <div
+                        key={color}
+                        className="flex flex-col items-center max-[500px]:text-[12.5px]"
+                      >
+                        <button
+                          onClick={() => setSelectedColor(color)}
+                          className={`sm:px-4 px-3 py-2 border rounded-lg transition ${
+                            selectedColor === color
+                              ? "bg-black text-white"
+                              : colorHasStock
+                              ? "bg-white hover:bg-gray-100"
+                              : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          }`}
+                          disabled={!colorHasStock}
+                        >
+                          {color}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {/* STOCK INFO */}
+              {isVariantSelected && (
+                <p className="mb-2 pl-2 text-sm text-gray-600">
+                  Stock Available: {selectedVariant?.stock || 0}
+                </p>
+              )}
+              {/* QUANTITY */}
+              {isVariantSelected && !isOutOfStock && (
+                <div className="mb-6 pl-2 flex items-center gap-3 mt-2">
+                  <button
+                    onClick={decrement}
+                    className="px-3 py-1 bg-gray-200 rounded"
+                    disabled={quantity <= 1}
+                  >
+                    -
+                  </button>
+                  <span className="font-medium">{quantity}</span>
+                  <button
+                    onClick={increment}
+                    className="px-3 py-1 bg-gray-200 rounded"
+                    disabled={quantity + inCartQty >= selectedVariant?.stock}
+                  >
+                    +
+                  </button>
+                </div>
+              )}
+              {/* // Replace your Add to Cart button with this: */}
+              <button
+                onClick={async () => {
+                  // 1️⃣ Check login first
+                  if (!token) {
+                    await addtocart(
+                      fproduct._id,
+                      selectedVariant?.size,
+                      selectedVariant?.color,
+                      quantity
+                    );
+                    return; // prevent further execution
+                  }
 
-                // 1️⃣ Check login first
-                if (!token) {
+                  if (!isVariantSelected) {
+                    toast.error("Please select size and color");
+                    return;
+                  }
+                  if (isOutOfStock) {
+                    toast.error("This variant is out of stock");
+                    return;
+                  }
+                  if (inCartQty + quantity > selectedVariant?.stock) {
+                    toast.error(
+                      `Cannot add more than ${selectedVariant.stock} items`
+                    );
+                    return;
+                  }
+
+                  setIsAdding(true); // 🔹 prevent multiple clicks
                   await addtocart(
                     fproduct._id,
-                    selectedVariant?.size,
-                    selectedVariant?.color,
+                    selectedVariant.size,
+                    selectedVariant.color,
                     quantity
                   );
-                  return; // prevent further execution
+                  setQuantity(1);
+                  setIsAdding(false); // 🔹 re-enable button
+                }}
+                disabled={
+                  !anyStockAvailable ||
+                  isOutOfStock ||
+                  isMaxInCart ||
+                  // !isVariantSelected ||
+                  isAdding
                 }
-
-                if (!isVariantSelected) {
-                  toast.error("Please select size and color");
-                  return;
-                }
-                if (isOutOfStock) {
-                  toast.error("This variant is out of stock");
-                  return;
-                }
-                if (inCartQty + quantity > selectedVariant?.stock) {
-                  toast.error(
-                    `Cannot add more than ${selectedVariant.stock} items`
-                  );
-                  return;
-                }
-
-                setIsAdding(true); // 🔹 prevent multiple clicks
-                await addtocart(
-                  fproduct._id,
-                  selectedVariant.size,
-                  selectedVariant.color,
-                  quantity
-                );
-                setQuantity(1);
-                setIsAdding(false); // 🔹 re-enable button
-              }}
-              disabled={
-                !anyStockAvailable ||
-                isOutOfStock ||
-                isMaxInCart ||
-                // !isVariantSelected ||
-                isAdding
-              }
-              className={`px-6 w-50 py-3 text-[20px] rounded-lg mb-4 transition ${!anyStockAvailable || isOutOfStock || isMaxInCart || isAdding
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-black text-white hover:bg-gray-800"
+                className={`px-6 w-50 py-3 text-[20px] rounded-lg mb-4 transition ${
+                  !anyStockAvailable || isOutOfStock || isMaxInCart || isAdding
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-black text-white hover:bg-gray-800"
                 }`}
-            >
-              {isAdding
-                ? "Adding..."
-                : !anyStockAvailable || isOutOfStock
+              >
+                {isAdding
+                  ? "Adding..."
+                  : !anyStockAvailable || isOutOfStock
                   ? "Out of Stock"
                   : isMaxInCart
-                    ? "Added to Cart"
-                    : "Add to Cart"}
-            </button>
-            <p className="mb-6 text-gray-700">{fproduct.description}</p>
+                  ? "Added to Cart"
+                  : "Add to Cart"}
+              </button>
+            </div>
           </div>
+        )}
+      </div>
+
+      {fproduct && (
+        <div className="bg-white mt-5 sm:p-10 p-4 pt-6 py-6 max-w-[1200px]">
+          <p className="text-2xl mb-4">Product Description</p>
+          <p className="text-gray-700">
+            {fproduct?.description || "No description available"}
+          </p>
         </div>
       )}
     </div>
