@@ -6,28 +6,28 @@ const CartTotal = () => {
 
     return (
         <div className="w-full">
-            <div className="text-2xl">
+            <div className="text-2xl font-medium text-gray-800">
                 <p>CART TOTAL</p>
             </div>
 
             <div className="flex flex-col gap-2 mt-2 text-[15px]">
                 <div className="flex justify-between">
-                    <p>Subtotal</p>
-                    <p> {currency} {calculatetotalamount()}.00/- </p>
+                    <p className="text-lg">Subtotal</p>
+                    <p className="text-lg"> {currency} {calculatetotalamount()}.00/- </p>
                 </div>
 
                 <hr />
 
                 <div className="flex justify-between">
-                    <p> Shipping Fee </p>
-                    <p> {currency} {delivery_fee}.00/- </p>
+                    <p className="text-lg"> Shipping Fee </p>
+                    <p className="text-lg"> + {currency} {delivery_fee}.00/- </p>
                 </div>
 
                 <hr />
 
                 <div className="flex justify-between">
-                    <p> Total </p>
-                    <b> {currency} {calculatetotalamount() === 0 ? 0 : calculatetotalamount() + delivery_fee}.00/- </b>
+                    <p className="font-medium text-lg"> Total </p>
+                    <p className="font-medium text-lg"> {currency} {calculatetotalamount() === 0 ? 0 : calculatetotalamount() + delivery_fee}.00/- </p>
                 </div>
             </div>
         </div>

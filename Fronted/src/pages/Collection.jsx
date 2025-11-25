@@ -69,7 +69,7 @@ const Collection = () => {
     setSelectedSizes([]);
   }, [activeSub]);
 
-  
+
   // Extract unique colors and sizes
   const { allColors, allSizes } = useMemo(() => {
     const colorSet = new Set();
@@ -184,15 +184,14 @@ const Collection = () => {
       <div className="sm:sticky sm:top-20 sm:self-start">
         {/* Sidebar */}
         <div
-          className={`${
-            showFilter
+          className={`${showFilter
               ? "fixed top-19 right-0 h-full w-64 bg-white shadow-lg z-50 transform translate-x-0"
               : "fixed top-19 right-0 h-full w-64 bg-white shadow-lg z-50 transform translate-x-full"
-          } transition-transform duration-300
+            } transition-transform duration-300
            sm:relative sm:top-auto sm:right-auto sm:h-auto sm:w-60 sm:translate-x-0 sm:shadow-none overflow-y-auto pb-25`}
         >
           <div className="flex justify-between items-center p-4 border-b sm:hidden">
-            <p className="font-medium">Filter</p>
+            <p className="font-medium text-gray-800 text-lg">Filter</p>
             <button
               className="text-gray-600"
               onClick={() => setShowFilter(false)}
@@ -205,7 +204,7 @@ const Collection = () => {
             {/* Categories */}
             <div>
               <div className="flex justify-between items-center mb-2">
-                <p className="font-semibold">Category</p>
+                <p className="font-medium text-gray-800">Category</p>
                 <button
                   className="text-xs text-blue-600"
                   onClick={resetFilters}
@@ -282,7 +281,7 @@ const Collection = () => {
 
             {/* Colors */}
             <div>
-              <p className="font-semibold mb-2">Color</p>
+              <p className="font-medium text-gray-800 mb-2">Color</p>
               <div className="flex flex-col gap-1">
                 {allColors.map((color) => (
                   <label
@@ -303,7 +302,7 @@ const Collection = () => {
 
             {/* Sizes */}
             <div>
-              <p className="font-semibold mb-2">Size</p>
+              <p className="font-medium text-gray-800 mb-2">Size</p>
               <div className="flex flex-col gap-1">
                 {allSizes.map((size) => (
                   <label
@@ -335,7 +334,7 @@ const Collection = () => {
 
       {/* Products Grid */}
       <div className="flex-1">
-        <div className="flex justify-between text-base sm:text-2xl mb-4">
+        <div className="flex justify-between text-base sm:text-2xl mb-4 font-medium text-gray-800">
           <p>ALL COLLECTION</p>
           <select
             className="border-2 border-gray-300 text-sm px-2 rounded-md"

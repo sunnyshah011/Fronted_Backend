@@ -29,24 +29,27 @@ const Footer = () => {
 
   return (
     <footer className="bg-white text-gray-300 py-10 mt-10">
-      <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo + About */}
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Fishing Tackle Store</h2>
-          <p className="text-sm leading-6 text-gray-800">
+        <div className="md:col-span-2">
+          <div className="flex items-center gap-1 mb-3 sm:gap-3">
+            <img src="favicon.png" alt="" srcset="" className="w-12 sm:w-18 border rounded-full" />
+            <h2 className="text-3xl sm:text-[33px] text-gray-700">Fishing Tackle Store</h2>
+          </div>
+          <p className="text-lg  leading-6 text-gray-700">
             Your one-stop destination for quality products at the best prices. 
             Shop with trust and experience hassle-free delivery.
           </p>
         </div>
 
         {/* Product Categories */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Product Categories</h3>
-          <ul className="space-y-2">
+        <div  className="col-span-1">
+          <h3 className="text-lg font-medium text-gray-700 mb-4">Product Categories</h3>
+          <ul className="space-y-2 font-medium">
             {categories.map((cat) => (
               <li
                 key={cat._id}
-                className="hover:text-gray-900 cursor-pointer text-gray-600"
+                className="hover:text-gray-900 cursor-pointer text-gray-800 underline"
                 onClick={() => handleCategoryClick(cat.slug)}
               >
                 {cat.name}
@@ -56,8 +59,8 @@ const Footer = () => {
         </div>
 
         {/* Social Media */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Follow Us On:</h3>
+        <div  className="col-span-1">
+          <h3 className="text-lg font-medium text-gray-700 mb-4">Follow Us On:</h3>
           <div className="flex space-x-4">
             <a
               href="https://www.facebook.com/FishingTackleStoreNGT"

@@ -93,7 +93,7 @@ const Cart = () => {
         </div>
       )}
 
-      <h2 className="text-2xl font-semibold mb-4">My Cart</h2>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">My Cart</h2>
 
       <div className="space-y-3">
         {cartdata.map((item) => {
@@ -130,20 +130,20 @@ const Cart = () => {
               {/* 🔹 Product Details */}
               <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 flex-wrap">
                 <div className="flex flex-col gap-1 sm:gap-2">
-                  <p className="text-sm sm:text-base font-medium text-gray-700 sm:truncate sm:w-150 line-clamp-1">
+                  <p className="text-sm sm:text-base text-gray-950 sm:truncate sm:w-150 line-clamp-1">
                     {productData.name}
                   </p>
 
-                  <span className="text-[15px] sm:text-[18px] font-semibold text-gray-900">
-                    {currency} {price} /-
+                  <span className="text-[18px] sm:text-[20px] font-medium text-gray-700">
+                    <span className="text-[16px]">{currency}</span>{price} /-
                   </span>
 
-                  <span className="px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md w-fit">
+                  <span className="px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md w-fit text-gray-700">
                     Size: {item.size}
                   </span>
 
                   {item.color && (
-                    <span className="px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md w-fit">
+                    <span className="px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md w-fit text-gray-700">
                       Color: {item.color}
                     </span>
                   )}
@@ -199,7 +199,7 @@ const Cart = () => {
               <button
                 onClick={handleProceed}
                 disabled={loading}
-                className="bg-black text-white text-sm sm:text-base px-8 sm:px-12 py-3 rounded-lg hover:bg-gray-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                className="bg-black text-white text-lg sm:text-base px-8 sm:px-12 py-3 font-medium  rounded-lg hover:bg-gray-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading ? "Processing..." : "PROCEED TO CHECKOUT"}
               </button>

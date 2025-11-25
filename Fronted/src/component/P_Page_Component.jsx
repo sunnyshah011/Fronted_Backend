@@ -6,20 +6,30 @@ const Product_Page = ({ categorySlug, productSlug, name, price, images }) => {
   const { currency } = useContext(ShopContext);
   return (
     <Link
-      className="text-gray-700 cursor-pointer rounded bg-white block"
+      className="text-gray-700 cursor-pointer rounded-md bg-white block"
       to={`/categories/${categorySlug}/${productSlug}`}
     >
-      <div className="w-full aspect-square overflow-hidden rounded  bg-white flex items-center justify-center">
+      <div className="p-2 w-full aspect-square overflow-hidden rounded-md  bg-white flex items-center justify-center">
         <img
           src={images[0]}
           alt={name}
           className="max-w-full max-h-full object-contain"
         />
       </div>
-      <p className="pt-5 pb-1 pl-2 text-sm line-clamp-1">{name}</p>
-      <p className="pl-2 mt-2 pb-3 text-[18px] font-medium truncate">
-        {currency} {price} /-
-      </p>
+
+      <p className="pt-4 mb-1 pl-3 text-[15px] line-clamp-1 text-black">{name}</p>
+
+      <div className="flex items-center pl-3 mt-1 pb-1 mb-3">
+        <div className="text-[19px] truncate font-medium text-gray-700 ">
+          <span className="text-[16px]">{currency}</span>{price} /-
+        </div>
+        {/* <div className="text-[10px] ml-3 bg-red-50 w-fit p-0.5 px-1 rounded-md text-red-500">
+          27% OFF
+        </div> */}
+      </div>
+      {/* <div className="ml-3 mb-3 text-sm text-gray-500">
+        7 sold
+      </div> */}
     </Link>
   );
 };

@@ -15,16 +15,16 @@ const Main_Category = () => {
     );
 
   return (
-    <div className="bg-white pt-3 pb-1">
+    <div className="bg-white pt-3 pb-2">
       {isLoading ? (
         <CategoryLoader />
       ) : (
         <>
           <div className="flex justify-between px-3">
-            <h3 className="font-semibold text-sm">All Category</h3>
+            <h3 className="font-medium text-[18px] text-gray-800">All Category</h3>
             <p
               onClick={() => navigate(`/collection`)}
-              className="cursor-pointer font-semibold text-sm"
+              className="cursor-pointer font-medium text-[18px] text-gray-800"
             >
               View All
             </p>
@@ -45,7 +45,7 @@ const Main_Category = () => {
                     />
                   </div>
                   <div>
-                    <p className="max-[768px]:text-[13.5px] text-center max-[768px]:font-medium md:text-[18px] font-normal pt-3">
+                    <p className="max-[768px]:text-[13.5px] text-center max-[768px]:font-medium md:text-[18px] font-medium pt-3 text-gray-800">
                       {" "}
                       {cat.name}{" "}
                     </p>

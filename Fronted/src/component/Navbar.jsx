@@ -180,7 +180,7 @@ const Navbar = () => {
         <div className="flex items-center justify-center">
           <div className="flex items-center gap-2 min-[350px]:gap-2">
             <div className="relative border rounded-[9px] p-1.5 w-10 aspect-square border-gray-400 flex justify-center items-center">
-              <Link to="/cart" className=" flex-shrink-0">
+              <Link to="/cart" className=" shrink-0">
                 {/* <img
                   src={assets.cart_icon}
                   className=" w-5 flex-shrink-0"
@@ -203,12 +203,12 @@ const Navbar = () => {
                   <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
                 </svg>
               </Link>
-              <span className="absolute right-[-8px] top-[-10px] w-5 text-center leading-5 bg-black text-white aspect-square rounded-full text-[8px]">
+              <span className="absolute -right-2 -top-2.5 w-5 text-center leading-5 bg-black text-white aspect-square rounded-full text-[8px]">
                 {Number(getcartcount()) || 0}
               </span>
             </div>
 
-            <div className="relative flex-shrink-0 ml-1 sm:ml-2" ref={userRef}>
+            <div className="relative shrink-0 ml-1 sm:ml-2" ref={userRef}>
               <div className="border rounded-[9px] p-1.5 w-10 aspect-square flex border-gray-400 justify-center items-center">
                 <button
                   className="flex gap-2"
@@ -224,11 +224,11 @@ const Navbar = () => {
               </div>
 
               <div
-                className={`absolute left-[-160px] pt-5 ${
+                className={`absolute -left-40 pt-5 ${
                   show ? "block" : "hidden"
                 }`}
               >
-                <div className="flex flex-col gap-4 w-60 py-5 px-5 bg-white border border-gray-300 rounded-[12px] text-gray-700">
+                <div className="flex flex-col gap-4 w-60 py-5 px-5 bg-white border border-gray-300 rounded-xl text-gray-700">
                   {token ? (
                     <div className="flex flex-col gap-5">
                       <p
@@ -282,7 +282,7 @@ const Navbar = () => {
 
             <div className="text-sm flex flex-col">
               <div className="text-[12px] ">{address?.name && <p>HI,</p>}</div>
-              <p className="text-[12px] ">
+              <p className="text-[12px] text-gray-800">
                 {address?.name ? address.name.slice(0, 6) : ""}
               </p>
             </div>

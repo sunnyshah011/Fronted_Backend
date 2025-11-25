@@ -1,11 +1,11 @@
-import { useContext } from "react";
+import { useContext,useEffect } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import { useState, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 function EmailVerify() {
-  const { token, navigate, backendUrl,userDetails,queryClient } = useContext(ShopContext);
+  const { token, navigate, backendUrl, userDetails, queryClient } = useContext(ShopContext);
   const OTP_LENGTH = 6;
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(""));
   const [loading, setLoading] = useState(false);
@@ -69,7 +69,7 @@ function EmailVerify() {
       );
       if (res.data.success) {
         toast.success(res.data.message);
-         // 🔹 v5 React Query: invalidate userDetails to refresh it globally
+        // 🔹 v5 React Query: invalidate userDetails to refresh it globally
         queryClient.invalidateQueries({ queryKey: ["userDetails", token] });
         navigate('/manage-account')
       } else {
@@ -82,9 +82,13 @@ function EmailVerify() {
     }
   };
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="max-w-md mx-auto mt-6 p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4 text-center">Enter OTP</h2>
+      <h2 className="text-xl font-medium mb-4 text-center">Enter OTP</h2>
       <div className="flex justify-center gap-2 mb-4">
         {otp.map((digit, index) => (
           <input

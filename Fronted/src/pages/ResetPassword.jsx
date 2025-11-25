@@ -1,10 +1,10 @@
-import { useState, useContext, useRef } from "react";
+import { useState, useContext,useEffect, useRef } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 const ResetPassword = () => {
-  const { backendUrl,navigate } = useContext(ShopContext);
+  const { backendUrl, navigate } = useContext(ShopContext);
 
 
   const OTP_LENGTH = 6;
@@ -123,6 +123,10 @@ const ResetPassword = () => {
     }
   };
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="mt-5 flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
@@ -132,7 +136,7 @@ const ResetPassword = () => {
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
               Reset Password
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="mb-6 font-medium text-gray-600">
               Enter your email to receive OTP
             </p>
             <form onSubmit={handleSendOtp} className="space-y-4">

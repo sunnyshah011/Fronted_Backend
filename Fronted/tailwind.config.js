@@ -8,8 +8,16 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        poppins: ['Poppins', 'sans-serif','Montserrat','Lato','Roboto','Quicksand'],
-      },
+        poppins: ['Poppins', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
+        roboto: ['Roboto', 'sans-serif'],
+        lato: ['Lato', 'sans-serif'],
+        montserrat: ['Montserrat', 'sans-serif'],
+        opensans: ['Open Sans', 'sans-serif'],
+        nunito: ['Nunito', 'sans-serif'],
+        urbanist: ['Urbanist', 'sans-serif'],
+        outfit: ['Outfit', 'sans-serif'],
+      }
     },
   },
   plugins: [],
