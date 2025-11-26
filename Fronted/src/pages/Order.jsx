@@ -123,7 +123,7 @@ const Order = () => {
       )}
 
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">My Orders</h2>
+        <h2 className="text-2xl font-medium text-gray-800 mb-6">My Orders</h2>
 
         {/* Status filter */}
         <div
@@ -163,8 +163,8 @@ const Order = () => {
               >
                 {/* Header */}
                 <div className="flex justify-between items-center mb-2">
-                  <p className="font-medium text-gray-700">
-                    Order #{order.orderNumber}
+                  <p className="font-medium text-gray-700 px-2 py-0.5 text-md border border-gray-200 bg-gray-50 rounded-md w-fit">
+                    Order ID #{order.orderNumber}
                   </p>
                   <span
                     className={`px-2 py-0.5 rounded-full text-xs font-semibold ${order.status === "Delivered"
@@ -187,7 +187,7 @@ const Order = () => {
                 {/* Subtotal/Amount */}
                 <div className="flex justify-between text-gray-600 text-sm mb-3">
                   <p>Date: {new Date(order.date).toLocaleDateString()}</p>
-                  <p>
+                  <p className="font-medium">
                     Total: {currency} {order.amount.toFixed(2)}
                   </p>
                 </div>

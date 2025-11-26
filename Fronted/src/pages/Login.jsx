@@ -259,7 +259,7 @@ const Login = () => {
         </div>
       )}
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md z-10">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome Back</h2>
+        <h2 className="text-2xl font-medium text-gray-800 mb-2">Welcome Back</h2>
         <p className="text-gray-600 mb-6">Please log in to your account</p>
 
         {/* Server error */}
@@ -329,7 +329,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 bg-blue-600 text-white rounded-md transition ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+            className={`w-full py-3 bg-blue-600 text-white rounded-md font-medium text-lg transition ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
               }`}
           >
             {loading ? "Logging In..." : "Sign In"}

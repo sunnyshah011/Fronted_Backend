@@ -183,7 +183,7 @@ const Profile = () => {
       {/* ✅ Saved Address Preview */}
       {!isFirstTime && (
         <div className="max-w-xl mx-auto mt-6 p-6 mb-5 bg-linear-to-br from-gray-50 to-white shadow-sm rounded-2xl border border-gray-200">
-          <h3 className="text-xl font-semibold mb-5 text-gray-800 flex items-center gap-2">
+          <h3 className="text-xl font-medium mb-5 text-gray-700 flex items-center gap-2">
             📍 Saved Delivery Address
           </h3>
 
@@ -217,7 +217,7 @@ const Profile = () => {
         onSubmit={handleSubmit}
         className="max-w-xl mx-auto mt-6 p-6 bg-linear-to-br from-gray-50 to-white shadow-sm rounded-2xl border border-gray-200"
       >
-        <h2 className="text-xl font-semibold mb-6 text-gray-800 flex items-center gap-2">
+        <h2 className="text-xl font-medium mb-6 text-gray-700 flex items-center gap-2">
           📝 Profile Details
         </h2>
 

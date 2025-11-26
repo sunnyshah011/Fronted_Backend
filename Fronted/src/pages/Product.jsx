@@ -543,18 +543,18 @@ const Product = () => {
 
             {/* RIGHT INFO */}
             <div className="flex flex-col sm:pr-5">
-              <h1 className="text-[19px] md:text-[20px] font-medium mb-3 mt-4">
+              <h1 className="text-[19px] md:text-[20px] font-medium mb-3 mt-4 text-gray-800">
                 {fproduct.name}
               </h1>
-              <p className="text-[26px] font-medium mb-4">
+              <p className="text-[26px] font-medium mb-4 text-gray-800">
                 {currency} {displayPrice} /-
               </p>
-              <p className="mb-2 bg-gray-200 w-fit px-3 rounded">
+              <p className="mb-1 px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md w-fit text-gray-700">
                 {" "}
                 SIZE SELECT
               </p>
               <div className="mb-2 mt-1">
-                <p className="font-medium mb-1 pl-3">Available Sizes</p>
+                <p className="font-medium pl-3 text-gray-700">Available Sizes</p>
                 <div className="flex gap-2 flex-wrap">
                   {allSizes.map((size) => {
                     const sizeHasStock = fproduct.variants.some(
@@ -589,8 +589,8 @@ const Product = () => {
                 </div>
               </div>
               {/* COLOR SELECT */}
-              <div className="mb-4 mt-1">
-                <p className="font-medium mb-1 pl-3">Available Colors</p>
+              <div className="mb-4 mt-1"> 
+                <p className="font-medium mb-1 pl-3 text-gray-700">Available Colors</p>
                 <div className="flex gap-2 flex-wrap">
                   {allColors.map((color) => {
                     const colorHasStock = fproduct.variants.some(

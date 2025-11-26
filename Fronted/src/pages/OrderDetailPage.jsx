@@ -93,8 +93,8 @@ const OrderDetails = () => {
 
   const isPaymentDisabled = order
     ? ["Delivered", "Cancelled", "Returned", "Return Requested"].includes(
-      order.orderStatus
-    )
+        order.orderStatus
+      )
     : false;
 
   const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
@@ -211,7 +211,6 @@ const OrderDetails = () => {
     }
   };
 
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -240,28 +239,27 @@ const OrderDetails = () => {
     "Return Requested": "bg-orange-200 text-orange-800",
   };
 
-
-
   return (
     <div className="max-w-4xl mx-auto px-3 py-4 space-y-4">
       {/* Order Header */}
       <div className="bg-white shadow rounded-xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold">
-            Order #{order.orderId}
+          <h1 className="text-xl md:text-2xl font-medium text-gray-800">
+            Order ID #{order.orderId}
           </h1>
           <p className="text-gray-600 mt-1 text-sm md:text-base">
             Placed on {new Date(order.createdAt).toLocaleString()}
           </p>
           <p className="mt-1 text-sm md:text-base">
             Payment Method:{" "}
-            <span className="font-medium">{order.paymentMethod}</span>
+            <span className="font-medium text-gray-700">{order.paymentMethod}</span>
           </p>
         </div>
         <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
           <span
-            className={`px-3 py-1 md:px-4 md:py-1.5 rounded-full font-semibold text-sm md:text-base ${statusColor[order.orderStatus] || "bg-gray-200 text-gray-800"
-              }`}
+            className={`px-3 py-1 md:px-4 md:py-1.5 rounded-full font-semibold text-sm md:text-base ${
+              statusColor[order.orderStatus] || "bg-gray-200 text-gray-800"
+            }`}
           >
             {order.orderStatus}
           </span>
@@ -270,7 +268,7 @@ const OrderDetails = () => {
 
       {/* Products Section */}
       <div className="bg-white shadow rounded-xl p-4 md:p-6">
-        <h2 className="text-lg md:text-xl font-semibold mb-3">Products</h2>
+        <h2 className="text-xl md:text-xl font-medium mb-3 px-2 py-0.5 ">Order Products</h2>
         <div className="space-y-3">
           {order.items.map((item, i) => (
             <div
@@ -280,22 +278,22 @@ const OrderDetails = () => {
               <img
                 src={item.productImage}
                 alt={item.productName}
-                className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md border border-gray-400"
+                className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md border border-gray-200"
               />
               <div className="flex-1">
-                <p className="font-semibold text-xs md:text-base">
+                <p className="font-medium text-xs md:text-base mb-1 text-gray-700">
                   {item.productName}
                 </p>
-                <p className="text-gray-600 text-sm md:text-base">
+                <p className="md:text-base px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md w-fit text-gray-700 mb-1">
                   {currency} {item.price} × {item.quantity}
                 </p>
                 {item.size && (
-                  <p className="text-gray-500 text-sm md:text-base">
+                  <p className="md:text-base px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md w-fit text-gray-700 mb-1">
                     Size: {item.size}
                   </p>
                 )}
                 {item.color && (
-                  <p className="text-gray-500 text-sm md:text-base">
+                  <p className="md:text-base px-2 py-0.5 text-xs border border-gray-200 bg-gray-50 rounded-md w-fit text-gray-700">
                     Color: {item.color}
                   </p>
                 )}
@@ -305,22 +303,22 @@ const OrderDetails = () => {
         </div>
 
         {/* Totals */}
-        <div className="text-right mt-3 md:mt-4 space-y-1">
-          <p className="font-medium text-sm md:text-base">
+        <div className="text-right mt-3 md:mt-4 space-y-1 text-gray-700">
+          <p className="font-medium text-md md:text-base">
             Subtotal: {currency} {subtotal.toFixed(2)}/-
           </p>
-          <p className="font-medium text-[13px] md:text-base">
-            Shipping Fee: Rs.150/-
+          <p className="font-medium text-md md:text-base text-gray-700">
+            + Shipping : Rs.150/-
           </p>
-          <p className="font-bold text-base md:text-lg">
-            Total: {currency} {order.amount.toFixed(2)}/-
+          <p className="font-medium text-[20px] md:text-lg text-gray-800">
+            Total: {currency}{order.amount.toFixed(2)}/-
           </p>
         </div>
       </div>
 
       {/* Payment Proof Section */}
       <div className="bg-white shadow rounded-xl p-4 md:p-6">
-        <h2 className="text-lg md:text-xl font-semibold mb-2">Payment Proof</h2>
+        <h2 className="text-lg md:text-xl font-medium mb-2">Payment Proof</h2>
 
         {order.paymentProof ? (
           <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -333,17 +331,19 @@ const OrderDetails = () => {
               <input
                 type="file"
                 onChange={handleFileChange}
-                className={`border rounded p-2 text-sm sm:text-base flex-1 ${isPaymentDisabled ? "bg-gray-100 cursor-not-allowed" : ""
-                  }`}
+                className={`border rounded p-2 text-sm sm:text-base flex-1 ${
+                  isPaymentDisabled ? "bg-gray-100 cursor-not-allowed" : ""
+                }`}
                 disabled={isPaymentDisabled}
               />
 
               <button
                 onClick={handleUpload}
-                className={`px-4 py-2 rounded text-white w-full sm:w-auto ${isPaymentDisabled || uploading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-                  }`}
+                className={`px-4 py-2 rounded text-white w-full sm:w-auto ${
+                  isPaymentDisabled || uploading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
                 disabled={uploading || isPaymentDisabled}
               >
                 {uploading ? "Uploading..." : "Edit Proof"}
@@ -351,10 +351,11 @@ const OrderDetails = () => {
 
               <button
                 onClick={handleRemoveProof}
-                className={`px-4 py-2 rounded text-white w-full sm:w-auto ${isPaymentDisabled
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-red-600 hover:bg-red-700"
-                  }`}
+                className={`px-4 py-2 rounded text-white w-full sm:w-auto ${
+                  isPaymentDisabled
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-600 hover:bg-red-700"
+                }`}
                 disabled={isPaymentDisabled}
               >
                 Remove Proof
@@ -366,16 +367,18 @@ const OrderDetails = () => {
             <input
               type="file"
               onChange={handleFileChange}
-              className={`border rounded p-2 text-sm sm:text-base flex-1 ${isPaymentDisabled ? "bg-gray-100 cursor-not-allowed" : ""
-                }`}
+              className={`border rounded p-2 text-sm sm:text-base flex-1 ${
+                isPaymentDisabled ? "bg-gray-100 cursor-not-allowed" : ""
+              }`}
               disabled={isPaymentDisabled}
             />
             <button
               onClick={handleUpload}
-              className={`px-4 py-2 rounded text-white w-full sm:w-auto ${isPaymentDisabled || uploading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-                }`}
+              className={`px-4 py-2 rounded text-white w-full sm:w-auto ${
+                isPaymentDisabled || uploading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
               disabled={uploading || isPaymentDisabled}
             >
               {uploading ? "Uploading..." : "Upload Proof"}
@@ -467,8 +470,9 @@ const OrderDetails = () => {
                     type="button"
                     disabled={returning}
                     onClick={() => setReturnReason(reason)}
-                    className={`text-left px-2 py-1 border rounded hover:bg-gray-100 transition ${returnReason === reason ? "bg-gray-200 font-semibold" : ""
-                      } disabled:opacity-50`}
+                    className={`text-left px-2 py-1 border rounded hover:bg-gray-100 transition ${
+                      returnReason === reason ? "bg-gray-200 font-semibold" : ""
+                    } disabled:opacity-50`}
                   >
                     {reason}
                   </button>

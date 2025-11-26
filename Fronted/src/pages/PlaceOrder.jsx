@@ -432,7 +432,7 @@ const Placeorder = () => {
   const AddressSection = (
     <div className="flex-1 bg-white shadow-sm rounded-xl p-5">
       <h2
-        className={`text-xl sm:text-2xl font-semibold mb-6 ${addressError ? "text-red-600 animate-pulse" : "text-gray-900"
+        className={`text-2xl sm:text-2xl font-medium mb-6 ${addressError ? "text-red-600 animate-pulse" : "text-gray-900"
           }`}
       >
         Shipping Address
@@ -545,7 +545,7 @@ const Placeorder = () => {
       {isMobile && (
         <button
           onClick={handleNextStep}
-          className="mt-5 w-full bg-black text-white py-2 rounded-lg"
+          className="mt-5 w-full bg-black text-white py-3 rounded-lg"
         >
           Continue to Payment →
         </button>
@@ -567,7 +567,7 @@ const Placeorder = () => {
       {/* Products in cart: moved above CartTotal */}
       {Object.keys(cartitem).length > 0 && (
         <div className="bg-white shadow-sm rounded-xl p-6 py-3">
-          <h2 className="text-xl font-semibold mb-3">Products in Cart</h2>
+          <h2 className="text-xl font-medium mb-3">Products in Cart</h2>
           <div className="space-y-2 max-h-50 overflow-y-auto">
             {Object.keys(cartitem).map((productId) => {
               const productCart = cartitem[productId];
@@ -630,7 +630,7 @@ const Placeorder = () => {
 
       {/* Payment Method Section */}
       <div className="bg-white shadow-sm rounded-xl p-6">
-        <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
+        <h2 className="text-xl font-medium mb-4">Payment Method</h2>
         <div className="flex flex-col gap-2">
           {/* Cash on Delivery */}
           <div
