@@ -10,10 +10,33 @@
 @import "tailwindcss";
 
 
-*{
-    font-family: outfit;
+/* *{
+    font-family: roboto;
+    letter-spacing: 0.3px;
+} */
 
+body {
+  font-family: "Inter", "Roboto", sans-serif;
+  letter-spacing: 0.2px;
 }
+
+h1 {
+  letter-spacing: 0.2px;
+}
+
+h2, h3 {
+  letter-spacing: 0.3px;
+}
+
+button {
+  letter-spacing: 0.5px;
+}
+
+.nav-item {
+  letter-spacing: 0.3px;
+}
+
+
 
 a.active hr {
   display: block;
