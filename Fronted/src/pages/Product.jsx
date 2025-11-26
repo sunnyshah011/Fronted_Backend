@@ -360,6 +360,8 @@ import { Navigation, Thumbs } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
+// import ProductSuggestion from "../component/ProductSuggestion";
+
 
 const fetchProduct = async (backendUrl, categorySlug, productSlug) => {
   const { data } = await axios.get(
@@ -721,6 +723,9 @@ const Product = () => {
           </p>
         </div>
       )}
+
+      {/* <ProductSuggestion /> */}
+      
     </div>
   );
 };
