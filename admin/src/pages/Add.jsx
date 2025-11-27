@@ -24,6 +24,9 @@ const AddProduct = ({ token }) => {
   const [deliveryCharge, setDeliveryCharge] = useState(150);
   const [error, setError] = useState("");
 
+  const [discountedPrice, setDiscountedPrice] = useState(0);
+
+
   const handleChange = (e) => {
     const value = Number(e.target.value);
     setDeliveryCharge(value);
@@ -277,6 +280,7 @@ const AddProduct = ({ token }) => {
             </button>
           </div>
 
+
           <div className="mt-4">
             <label className="block text-sm font-medium">Category</label>
             <select
@@ -306,8 +310,22 @@ const AddProduct = ({ token }) => {
               ))}
             </select>
           </div>
+
         </div>
+        <div className="bg-white rounded-2xl shadow p-6">
+          <h2 className="text-lg font-semibold mb-4">Discounted Price <span className="text-sm text-red-500">(only for flashsale & topproduct)</span></h2>
+
+          <input
+            type="number"
+            value={discountedPrice}
+            onChange={(e) => setDiscountedPrice(Number(e.target.value))}
+            className="border rounded-lg p-2 w-full"
+            placeholder="Enter discounted price (Optional)"
+          />
+        </div>
+
       </div>
+
 
       {/* Right Column */}
       <div className="space-y-6">
@@ -374,22 +392,22 @@ const AddProduct = ({ token }) => {
             min={150}
             value={deliveryCharge}
             onChange={handleChange}
-            className={`border rounded-lg p-2 flex-1 ${
-              error ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`border rounded-lg p-2 flex-1 ${error ? "border-red-500" : "border-gray-300"
+              }`}
             required
           />
 
           {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         </div>
 
+
+
         <div className="flex justify-end">
           <button
             type="submit"
             disabled={loading}
-            className={`bg-green-600 text-white px-6 py-2 rounded-xl shadow hover:bg-green-700 ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`bg-green-600 text-white px-6 py-2 rounded-xl shadow hover:bg-green-700 ${loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
           >
             {loading ? "Adding..." : "Add Product"}
           </button>

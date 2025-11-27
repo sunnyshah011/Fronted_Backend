@@ -3,7 +3,8 @@
 
 
 *{
-    font-family: Outfit;
+    font-family: roboto;
+    letter-spacing: 0.6px;
 }
 
 .active {

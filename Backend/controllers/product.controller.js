@@ -2,29 +2,6 @@ import { v2 as cloudinary } from "cloudinary";
 import ProductModel from "../models/product.model.js";
 import slugify from "slugify";
 import SubCategoryModel from "../models/subcategory.model.js";
-// import sharp from "sharp";
-// import fs from "fs";
-
-// // Helper: compress and upload image
-// const uploadCompressedImage = async (filePath) => {
-//   const buffer = await sharp(filePath)
-//     .resize(600, 600, { fit: "inside" }) // max width/height
-//     .webp({ quality: 30 })               // aggressive compression
-//     .toBuffer();
-
-//   const uploadResult = await new Promise((resolve, reject) => {
-//     const stream = cloudinary.uploader.upload_stream(
-//       { resource_type: "image" },
-//       (err, result) => (err ? reject(err) : resolve(result))
-//     );
-//     stream.end(buffer);
-//   });
-
-//   // Remove temporary local file
-//   fs.unlink(filePath, () => {});
-
-//   return uploadResult.secure_url;
-// };
 
 // Add Product
 export const addProduct = async (req, res) => {
@@ -262,7 +239,7 @@ export const getTopProducts = async (req, res) => {
         path: "subcategory",
         populate: { path: "category" },
       })
-      .limit(6);
+      .limit(6).sort({ createdAt: -1 }); // sort newest → oldest
 
     res.json({ success: true, products });
   } catch (error) {
@@ -317,3 +294,29 @@ export const getTop30Products = async (req, res) => {
     });
   }
 };
+
+
+
+// import sharp from "sharp";
+// import fs from "fs";
+
+// // Helper: compress and upload image
+// const uploadCompressedImage = async (filePath) => {
+//   const buffer = await sharp(filePath)
+//     .resize(600, 600, { fit: "inside" }) // max width/height
+//     .webp({ quality: 30 })               // aggressive compression
+//     .toBuffer();
+
+//   const uploadResult = await new Promise((resolve, reject) => {
+//     const stream = cloudinary.uploader.upload_stream(
+//       { resource_type: "image" },
+//       (err, result) => (err ? reject(err) : resolve(result))
+//     );
+//     stream.end(buffer);
+//   });
+
+//   // Remove temporary local file
+//   fs.unlink(filePath, () => {});
+
+//   return uploadResult.secure_url;
+// };

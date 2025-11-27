@@ -60,6 +60,9 @@ const TopProducts = () => {
       <p className="text-center py-5 text-gray-500">No top products found.</p>
     );
 
+  // Take last 6 products (latest first)
+  // const latestSix = [...topProducts].reverse().slice(0, 6);
+
   return (
     <div className="w-full px-2 py-1">
       <Link to="all-top-products">

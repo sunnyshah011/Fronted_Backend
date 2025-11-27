@@ -42,6 +42,13 @@ const productSchema = new mongoose.Schema(
       default: 150,
       min: [150, "Delivery charge must be at least Rs.150"],
     },
+
+    // 💰 Discount Offer Price
+    discountedPrice: {
+      type: Number,
+      default: 0,
+    },
+
   },
   { timestamps: true }
 );
