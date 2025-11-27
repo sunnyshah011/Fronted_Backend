@@ -62,18 +62,14 @@ export const addProduct = async (req, res) => {
         const result = await cloudinary.uploader.upload(file.path, {
           resource_type: "image",
           format: "webp", // Convert to WebP
+          quality: "auto", // Compress image
           fetch_format: "auto",
-          quality: "30", // Lower quality to reduce size (~50-60KB)
-          width: 800, // Resize width to max 800px
-          height: 800, // Optional: maintain square ratio
-          crop: "limit",
+          flags: "lossy",
+          max_bytes: 200000   // <= 200 KB
         });
         return result.secure_url;
       })
     );
-    // const imagesUrl = await Promise.all(
-    //   imagesFiles.map(async (file) => await uploadCompressedImage(file.path))
-    // );
 
     const parsedVariants = variants ? JSON.parse(variants) : [];
     const totalStock = parsedVariants.reduce(
@@ -128,13 +124,39 @@ export const updateProduct = async (req, res) => {
         .json({ success: false, message: "Product not found" });
 
     // Handle images: preserve old, replace selectively
+    // const finalImages = [];
+    // for (let i = 0; i < 4; i++) {
+    //   const field = `image${i + 1}`;
+    //   if (req.files && req.files[field] && req.files[field][0]) {
+    //     const result = await cloudinary.uploader.upload(
+    //       req.files[field][0].path,
+    //       { resource_type: "image" }
+    //     );
+    //     finalImages.push(result.secure_url);
+    //   } else if (req.body[`existing_${field}`]) {
+    //     finalImages.push(req.body[`existing_${field}`]);
+    //   } else if (product.images[i]) {
+    //     finalImages.push(product.images[i]);
+    //   }
+    // }
+
+    // Handle images (compressed on update also)
     const finalImages = [];
     for (let i = 0; i < 4; i++) {
       const field = `image${i + 1}`;
+
       if (req.files && req.files[field] && req.files[field][0]) {
+        // 🔥 SAME compression as Add Product
         const result = await cloudinary.uploader.upload(
           req.files[field][0].path,
-          { resource_type: "image" }
+          {
+            resource_type: "image",
+            format: "webp",
+            quality: "auto",
+            fetch_format: "auto",
+            flags: "lossy",
+            max_bytes: 200000   // <= 200 KB
+          }
         );
         finalImages.push(result.secure_url);
       } else if (req.body[`existing_${field}`]) {
