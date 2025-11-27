@@ -310,7 +310,7 @@ const OrderDetails = () => {
           <p className="font-medium text-md md:text-base text-gray-700">
             + Shipping : Rs.150/-
           </p>
-          <p className="font-medium text-[20px] md:text-lg text-gray-800">
+          <p className="font-medium text-[17px] md:text-lg text-gray-800">
             Total: {currency}{order.amount.toFixed(2)}/-
           </p>
         </div>

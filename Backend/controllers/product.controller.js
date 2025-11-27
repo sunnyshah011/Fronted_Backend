@@ -2,6 +2,29 @@ import { v2 as cloudinary } from "cloudinary";
 import ProductModel from "../models/product.model.js";
 import slugify from "slugify";
 import SubCategoryModel from "../models/subcategory.model.js";
+// import sharp from "sharp";
+// import fs from "fs";
+
+// // Helper: compress and upload image
+// const uploadCompressedImage = async (filePath) => {
+//   const buffer = await sharp(filePath)
+//     .resize(600, 600, { fit: "inside" }) // max width/height
+//     .webp({ quality: 30 })               // aggressive compression
+//     .toBuffer();
+
+//   const uploadResult = await new Promise((resolve, reject) => {
+//     const stream = cloudinary.uploader.upload_stream(
+//       { resource_type: "image" },
+//       (err, result) => (err ? reject(err) : resolve(result))
+//     );
+//     stream.end(buffer);
+//   });
+
+//   // Remove temporary local file
+//   fs.unlink(filePath, () => {});
+
+//   return uploadResult.secure_url;
+// };
 
 // Add Product
 export const addProduct = async (req, res) => {
@@ -62,12 +85,18 @@ export const addProduct = async (req, res) => {
         const result = await cloudinary.uploader.upload(file.path, {
           resource_type: "image",
           format: "webp", // Convert to WebP
-          quality: "auto", // Compress image
           fetch_format: "auto",
+          quality: "30", // Lower quality to reduce size (~50-60KB)
+          width: 800, // Resize width to max 800px
+          height: 800, // Optional: maintain square ratio
+          crop: "limit",
         });
         return result.secure_url;
       })
     );
+    // const imagesUrl = await Promise.all(
+    //   imagesFiles.map(async (file) => await uploadCompressedImage(file.path))
+    // );
 
     const parsedVariants = variants ? JSON.parse(variants) : [];
     const totalStock = parsedVariants.reduce(
