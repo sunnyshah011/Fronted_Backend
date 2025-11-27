@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaFacebookF, FaYoutube, FaTiktok, FaInstagram} from "react-icons/fa";
+import { FaFacebookF, FaYoutube, FaTiktok, FaInstagram } from "react-icons/fa";
 import { MdCategory } from "react-icons/md";
 import { useContext } from "react";
 import { ShopContext } from "../Context/ShopContext";
@@ -29,21 +29,20 @@ const Footer = () => {
 
   return (
     <footer className="bg-white text-gray-300 py-10 mt-10">
-      <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
-
+      <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
         {/* Logo + About */}
         <div className="md:col-span-2">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex max-[600px]:flex-col items-center max-[600px]:gap-1 gap-4 mb-2">
             <img
               src="/favicon.png"
               alt="Fishing Tackle Store Logo"
-              className="w-12 sm:w-16 border rounded-full shadow-sm"
+              className="w-15 sm:w-16 border rounded-full"
             />
-            <h2 className="text-[27px] sm:text-[33px] font-semibold text-gray-800 tracking-wide">
+            <h2 className="text-[6vw] sm:text-[33px] font-medium text-gray-700 tracking-wide">
               Fishing Tackle Store
             </h2>
           </div>
-          <p className="text-[15px] leading-6 text-gray-600 tracking-[0.2px]">
+          <p className="max-[600px]:text-[14px] text-[17px] max-[600px]:leading-5 leading-6 text-gray-600 tracking-[0.2px] max-[600px]:text-center">
             Your one-stop destination for quality fishing products at the best
             prices. Shop with trust and enjoy fast, hassle-free delivery.
           </p>
@@ -51,18 +50,19 @@ const Footer = () => {
 
         {/* Product Categories */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 tracking-wide flex gap-1">
-             <MdCategory size={22} className="text-gray-700" /> Product Categories
+          <h3 className="text-[20px]  font-semibold text-gray-800 mb-4 tracking-wide flex gap-1 max-[600px]:justify-center">
+            <MdCategory size={22} className="text-gray-700" /> Product
+            Categories
           </h3>
 
-          <ul className="space-y-2 pl-1">
+          <ul className="max-[600px]:flex max-[600px]:flex-wrap max-[600px]:justify-center max-[600px]:gap-5 max-[600px]:text-center">
             {categories.map((cat) => (
               <li
                 key={cat._id}
-                className="cursor-pointer text-gray-800 hover:text-blue-900 font-medium transition-all duration-200 tracking-[0.3px] text-xl"
+                className="cursor-pointer text-gray-700 pl-4 hover:text-blue-900 font-medium transition-all duration-200 tracking-[0.3px] text-md sm:text-lg"
                 onClick={() => handleCategoryClick(cat.slug)}
               >
-                • {cat.name}
+              {cat.name}
               </li>
             ))}
           </ul>
@@ -70,7 +70,7 @@ const Footer = () => {
 
         {/* Social Media */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-6 tracking-wide flex justify-center">
+          <h3 className="text-lg font-semibold text-gray-800 mb-5 tracking-wide flex justify-center">
             Follow Us On:
           </h3>
           <div className="flex justify-center space-x-10">

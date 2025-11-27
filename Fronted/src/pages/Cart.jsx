@@ -130,7 +130,7 @@ const Cart = () => {
               {/* 🔹 Product Details */}
               <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 flex-wrap">
                 <div className="flex flex-col gap-1 sm:gap-2">
-                  <p className="text-sm sm:text-base text-gray-800 sm:truncate sm:w-150 line-clamp-1">
+                  <p className="text-sm sm:text-base text-gray-800 sm:truncate sm:w-110 md:w-150 lg:w-180 line-clamp-1">
                     {productData.name}
                   </p>
 

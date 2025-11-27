@@ -176,6 +176,7 @@ import { ShopContext } from "../Context/ShopContext";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import validator from "validator";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const { token, setToken, navigate, backendUrl } = useContext(ShopContext);
@@ -234,6 +235,14 @@ const Login = () => {
       if (response.data.success && response.data.token) {
         setToken(response.data.token);
         localStorage.setItem("token", response.data.token);
+        // ✅ Show success toast
+        toast.success("You Are Logged In", {
+          className: "custom-toast-center",
+          autoClose: 2000,
+          pauseOnHover: false,
+          closeOnClick: true,
+          hideProgressBar: true,
+        });
         navigate("/");
       } else {
         setErrors({ server: response.data.message || "Login failed" });
@@ -259,13 +268,16 @@ const Login = () => {
         </div>
       )}
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md z-10">
-        <h2 className="text-2xl font-medium text-gray-800 mb-2">Welcome Back</h2>
+        <h2 className="text-2xl font-medium text-gray-800 mb-2">
+          Welcome Back
+        </h2>
         <p className="text-gray-600 mb-6">Please log in to your account</p>
 
         {/* Server error */}
         {errors.server && (
           <p className="text-red-600 text-sm text-center mb-4 p-1 uppercase bg-red-50 border border-red-100 rounded">
-             <span className="pr-1">⚠️</span>{errors.server}
+            <span className="pr-1">⚠️</span>
+            {errors.server}
           </p>
         )}
 
@@ -280,11 +292,14 @@ const Login = () => {
               placeholder="Enter email"
               value={gmail}
               onChange={(e) => setGmail(e.target.value)}
-              className={`w-full px-4 py-2 border ${errors.gmail ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:ring-2 focus:ring-blue-600 outline-none`}
+              className={`w-full px-4 py-2 border ${
+                errors.gmail ? "border-red-500" : "border-gray-300"
+              } rounded-md focus:ring-2 focus:ring-blue-600 outline-none`}
             />
             {errors.gmail && (
-              <p className="text-red-500 text-[12px] ml-1 mt-1">*{errors.gmail}</p>
+              <p className="text-red-500 text-[12px] ml-1 mt-1">
+                *{errors.gmail}
+              </p>
             )}
           </div>
 
@@ -299,8 +314,9 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
-                className={`w-full px-4 py-2 pr-10 border ${errors.password ? "border-red-500" : "border-gray-300"
-                  } rounded-md focus:ring-2 focus:ring-blue-600 outline-none`}
+                className={`w-full px-4 py-2 pr-10 border ${
+                  errors.password ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:ring-2 focus:ring-blue-600 outline-none`}
               />
               <button
                 type="button"
@@ -311,7 +327,9 @@ const Login = () => {
               </button>
             </div>
             {errors.password && (
-              <p className="text-red-500 text-[12px] ml-1 mt-1">*{errors.password}</p>
+              <p className="text-red-500 text-[12px] ml-1 mt-1">
+                *{errors.password}
+              </p>
             )}
           </div>
 
@@ -329,8 +347,9 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 bg-blue-600 text-white rounded-md font-medium text-lg transition ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
-              }`}
+            className={`w-full py-3 bg-blue-600 text-white rounded-md font-medium text-lg transition ${
+              loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+            }`}
           >
             {loading ? "Logging In..." : "Sign In"}
           </button>

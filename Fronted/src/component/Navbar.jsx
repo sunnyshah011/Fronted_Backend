@@ -5,7 +5,7 @@ import { UserIcon } from "@heroicons/react/24/outline"; // or /outline
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline"; // or /outline
 import { toast } from "react-toastify";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
-
+import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
 
 const Navbar = () => {
   const {
@@ -256,7 +256,7 @@ const Navbar = () => {
                         onClick={logout}
                         className="cursor-pointer hover:text-black flex gap-3"
                       >
-                        <i className="ri-logout-box-r-line text-[20px] pl-0.5"></i>
+                        <ArrowRightStartOnRectangleIcon className="h-6 w-6 text-gray-700" />
                         <span className="text-[16px]">Logout</span>
                       </p>
                     </div>
@@ -270,7 +270,7 @@ const Navbar = () => {
                       </Link>
                       <Link onClick={() => setShow(false)} to="/register">
                         <p className="cursor-pointer hover:text-black flex gap-3 items-center">
-                           <UserPlusIcon className="h-6 w-6 text-black" />
+                          <UserPlusIcon className="h-6 w-6 text-black" />
                           <span className="text-[15px]">Register</span>
                         </p>
                       </Link>
