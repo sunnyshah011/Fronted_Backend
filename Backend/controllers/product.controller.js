@@ -14,7 +14,9 @@ export const addProduct = async (req, res) => {
       isTopProduct,
       isBestSelling,
       isFlashSale,
-      deliveryCharge, // ✅ added
+      deliveryCharge,
+      discountedPrice,
+      isActive
     } = req.body;
 
     if (!name || !subcategory) {
@@ -86,11 +88,15 @@ export const addProduct = async (req, res) => {
       images: imagesUrl,
       category, // ✅ now category is set
       subcategory,
-      isActive: true,
+      isActive:
+        typeof isActive !== "undefined"
+          ? isActive === "true" || isActive === true
+          : true,
       isTopProduct: isTopProduct === "true" || isTopProduct === true,
       isBestSelling: isBestSelling === "true" || isBestSelling === true,
       isFlashSale: isFlashSale === "true" || isFlashSale === true,
       deliveryCharge: deliveryCharge ? Number(deliveryCharge) : 150, // ✅ enforce default
+      discountedPrice: discountedPrice ? Number(discountedPrice) : 0,
     };
 
     const product = new ProductModel(productData);
@@ -115,6 +121,8 @@ export const updateProduct = async (req, res) => {
       isTopProduct,
       isBestSelling,
       isFlashSale,
+      discountedPrice,
+      isActive
     } = req.body;
 
     const product = await ProductModel.findById(id);
@@ -123,22 +131,17 @@ export const updateProduct = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Product not found" });
 
-    // Handle images: preserve old, replace selectively
-    // const finalImages = [];
-    // for (let i = 0; i < 4; i++) {
-    //   const field = `image${i + 1}`;
-    //   if (req.files && req.files[field] && req.files[field][0]) {
-    //     const result = await cloudinary.uploader.upload(
-    //       req.files[field][0].path,
-    //       { resource_type: "image" }
-    //     );
-    //     finalImages.push(result.secure_url);
-    //   } else if (req.body[`existing_${field}`]) {
-    //     finalImages.push(req.body[`existing_${field}`]);
-    //   } else if (product.images[i]) {
-    //     finalImages.push(product.images[i]);
-    //   }
-    // }
+    /* ------------------------------------------------------
+      🔥 IF SUBCATEGORY IS UPDATED → UPDATE CATEGORY ALSO
+   ------------------------------------------------------ */
+    if (subcategory) {
+      const newSubcat = await SubCategoryModel.findById(subcategory).populate("category");
+      if (!newSubcat)
+        return res.status(400).json({ success: false, message: "Invalid subcategory" });
+
+      product.subcategory = subcategory;
+      product.category = newSubcat.category._id; // 🔥 auto update category
+    }
 
     // Handle images (compressed on update also)
     const finalImages = [];
@@ -192,6 +195,14 @@ export const updateProduct = async (req, res) => {
       typeof isFlashSale !== "undefined"
         ? isFlashSale === "true" || isFlashSale === true
         : product.isFlashSale;
+    product.discountedPrice =
+      typeof discountedPrice !== "undefined"
+        ? Number(discountedPrice)
+        : product.discountedPrice;
+    product.isActive =
+      typeof isActive !== "undefined"
+        ? isActive === "true" || isActive === true
+        : product.isActive;
 
     await product.save();
     res.json({ success: true, message: "Product Updated", product });
@@ -203,6 +214,21 @@ export const updateProduct = async (req, res) => {
 
 // controllers/product.controller.js
 export const listProducts = async (req, res) => {
+  try {
+    const products = await ProductModel.find({isActive: true})
+      .populate("subcategory", "slug category")
+      .populate({
+        path: "subcategory",
+        populate: { path: "category", select: "slug" },
+      });
+
+    res.json({ success: true, products });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const listProductsAdmin = async (req, res) => {
   try {
     const products = await ProductModel.find()
       .populate("subcategory", "slug category")
@@ -298,7 +324,7 @@ export const getFlashSaleProducts = async (req, res) => {
 
 export const getTop30Products = async (req, res) => {
   try {
-    const products = await ProductModel.find()
+    const products = await ProductModel.find({ isActive: true })
       .sort({ isBestSelling: -1, createdAt: -1 }) // best-selling first, then newest
       .limit(30)
       .populate({ path: "subcategory", populate: { path: "category" } })
@@ -317,6 +343,39 @@ export const getTop30Products = async (req, res) => {
   }
 };
 
+// Toggle Product Active / Inactive (simple quick toggle)
+export const toggleActive = async (req, res) => {
+  try {
+    const { id, isActive } = req.body;
+
+    if (!id)
+      return res
+        .status(400)
+        .json({ success: false, message: "Product ID required" });
+
+    const product = await ProductModel.findById(id);
+    if (!product)
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
+
+    const newState =
+      isActive === "true" || isActive === true ? true : false;
+
+    product.isActive = newState;
+    await product.save();
+
+    res.json({
+      success: true,
+      message: `Product ${newState ? "Activated" : "Deactivated"
+        } successfully`,
+      product,
+    });
+  } catch (err) {
+    console.error("toggleActive Error:", err);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
 
 
 // import sharp from "sharp";

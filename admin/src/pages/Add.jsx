@@ -154,6 +154,7 @@ const AddProduct = ({ token }) => {
     formData.append("isBestSelling", isBestSelling);
     formData.append("isFlashSale", isFlashSale);
     formData.append("deliveryCharge", Number(deliveryCharge));
+    formData.append("discountedPrice", Number(discountedPrice));
 
 
     ["image1", "image2", "image3", "image4"].forEach(
@@ -180,6 +181,7 @@ const AddProduct = ({ token }) => {
       setIsBestSelling(false);
       setIsFlashSale(false);
       setDeliveryCharge(150);
+      setDiscountedPrice(0);
     } catch (err) {
       console.error(err);
       toast.error("Failed to add product");

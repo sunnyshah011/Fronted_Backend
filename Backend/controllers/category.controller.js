@@ -174,10 +174,13 @@ export const deleteSubcategory = async (req, res) => {
 export const getSubcategoriesByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
+
     if (!mongoose.Types.ObjectId.isValid(categoryId)) {
       return res.status(400).json({ error: "Invalid category ID" });
     }
+
     const subcategories = await SubCategoryModel.find({ category: categoryId });
+
     res.json({ subcategories });
   } catch (err) {
     res.status(500).json({ error: err.message });

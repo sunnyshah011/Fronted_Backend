@@ -7,6 +7,7 @@ import {
   getCategoryDetails,
   // getSubcategoryDetails,
   getProductDetails,
+  getSubcategoriesByCategory
 } from "../controllers/category.controller.js";
 import upload from "../middleware/multer.middleware.js";
 import adminAuth from "../middleware/adminAuth.middleware.js";
@@ -20,10 +21,14 @@ categoryRouter.delete("/:id", adminAuth, deleteCategory);
 //category routs
 categoryRouter.get("/", getCategories); // gives all category
 
+// Get subcategories by category ID  ✅ FIXED
+categoryRouter.get("/subcategories/:categoryId", getSubcategoriesByCategory);
+
 // Category details + subcategories
 categoryRouter.get("/:slug", getCategoryDetails); // subcategory with its product rod -> lucana -> lucana force 6ft
 
 // Product details inside subcategory
 categoryRouter.get("/:categorySlug/:productSlug", getProductDetails);
+
 
 export default categoryRouter;
