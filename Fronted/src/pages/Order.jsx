@@ -211,8 +211,13 @@ const Order = () => {
                   )}
                 </div>
 
-                {/* Fade overlay */}
-                <div className="absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-white to-transparent pointer-events-none"></div>
+                {/* Fade overlay with smooth gradient */}
+                <div className="absolute bottom-0 left-0 right-0 h-18 flex items-end justify-end pointer-events-none bg-linear-to-t from-white/80 via-white/20 to-transparent px-4 py-2  font-semibold text-sm rounded-b-lg">
+                  <span className="px-2 py-1 rounded-lg text-[10px] bg-white text-gray-600 font-medium border border-gray-300">
+                    View Order Detail
+                  </span>
+                </div>
+
               </Link>
             ))}
           </div>

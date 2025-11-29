@@ -304,12 +304,12 @@ const OrderDetails = () => {
 
         {/* Totals */}
         <div className="text-right mt-3 md:mt-4 space-y-1 text-gray-700">
-          <p className="font-medium text-md md:text-base">
+          {/* <p className="font-medium text-md md:text-base">
             Subtotal: {currency} {subtotal.toFixed(2)}/-
           </p>
           <p className="font-medium text-md md:text-base text-gray-700">
             + Shipping : Rs.150/-
-          </p>
+          </p> */}
           <p className="font-medium text-[17px] md:text-lg text-gray-800">
             Total: {currency}{order.amount.toFixed(2)}/-
           </p>

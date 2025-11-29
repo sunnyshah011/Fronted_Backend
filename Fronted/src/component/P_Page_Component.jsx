@@ -17,11 +17,11 @@ const Product_Page = ({ categorySlug, productSlug, name, price, images }) => {
         />
       </div>
 
-      <p className="pt-4 mb-1 pl-3 text-[15px] line-clamp-1 text-black">{name}</p>
+      <p className="pt-4 mb-1 pl-3 text-[14px] line-clamp-1 text-black">{name}</p>
 
       <div className="flex items-center pl-3 mt-1 pb-1 mb-3">
-        <div className="text-[19px] truncate font-medium text-gray-700 ">
-          <span className="text-[16px]">{currency}</span>{price} /-
+        <div className="text-[18px] truncate font-medium text-gray-700 ">
+          <span className="text-[15px]">{currency}</span>{price} /-
         </div>
         {/* <div className="text-[10px] ml-3 bg-red-50 w-fit p-0.5 px-1 rounded-md text-red-500">
           27% OFF

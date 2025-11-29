@@ -5,10 +5,6 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import { FiTruck } from "react-icons/fi";
-// import { FaMoneyBillWave } from "react-icons/fa";
-// import { FaMoneyBillWave } from "react-icons/fa"; // COD
-// import { SiEsewa } from "react-icons/si"; // eSewa
-// import { MdAccountBalance } from "react-icons/md"; // Bank Transfer
 
 
 const Placeorder = () => {
@@ -36,6 +32,65 @@ const Placeorder = () => {
     delivery_fee,
     products,
   } = useContext(ShopContext);
+
+  
+
+
+  // ──────────────── FETCH PRODUCTS FOR DELIVERY FEE LOGIC ────────────────
+const [fetchedProducts, setFetchedProducts] = useState([]);
+const [loadingDeliveryProducts, setLoadingDeliveryProducts] = useState(true);
+
+useEffect(() => {
+  const fetchProducts = async () => {
+    setLoadingDeliveryProducts(true);
+    try {
+      const productIds = Object.keys(cartitem);
+
+      if (productIds.length === 0) {
+        setFetchedProducts([]);
+        setLoadingDeliveryProducts(false);
+        return;
+      }
+
+      const results = await Promise.all(
+        productIds.map(async (id) => {
+          const res = await fetch(`${backendUrl}/api/product/single/${id}`);
+          if (!res.ok) throw new Error("Failed to fetch product");
+          const data = await res.json();
+          return data.product;
+        })
+      );
+
+      setFetchedProducts(results);
+    } catch (error) {
+      console.error("Product fetch error:", error);
+      setFetchedProducts([]);
+    } finally {
+      setLoadingDeliveryProducts(false);
+    }
+  };
+
+  fetchProducts();
+}, [cartitem, backendUrl]);
+
+// ──────────────── CALCULATE DELIVERY FEE ONLY ────────────────
+const calculateDeliveryFee = () => {
+  if (!fetchedProducts || fetchedProducts.length === 0) return 150;
+
+  const activeProducts = fetchedProducts.filter(
+    (p) => cartitem[p._id]
+  );
+
+  // FREE DELIVERY IF ANY PRODUCT IS COMBO SET
+  const deliveryApplicable = !activeProducts.some(
+    (p) => p.subcategory?.category?.name === "Combo Set"
+  );
+
+  return deliveryApplicable ? 150 : 0;
+};
+
+
+
 
   // ──────────────── RESPONSIVE STEP LOGIC ────────────────
   const [step, setStep] = useState(1);
@@ -359,7 +414,8 @@ const Placeorder = () => {
 
     const payload = {
       items,
-      amount: calculatetotalamount() + delivery_fee,
+      // amount: calculatetotalamount() + delivery_fee,
+      amount: calculatetotalamount() + calculateDeliveryFee(),
       address: {
         fullName: formData.fullName,
         phone: Number(formData.phone),

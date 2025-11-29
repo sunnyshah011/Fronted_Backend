@@ -511,7 +511,7 @@ const Product = () => {
                       <img
                         src={img}
                         alt={fproduct.name}
-                        className="w-full h-full object-contain rounded-xl cursor-zoom-in"
+                        className="w-full h-full object-contain rounded-xl cursor-zoom-in p-3"
                       />
                     </a>
                   </SwiperSlide>
@@ -534,7 +534,7 @@ const Product = () => {
                         <img
                           src={img}
                           alt="thumbnail"
-                          className="w-17 h-17 sm:w-20 sm:h-20 object-cover rounded border border-gray-200 transition-all"
+                          className="w-17 h-17 p-1 sm:w-20 sm:h-20 object-cover rounded-lg border border-gray-200 transition-all"
                         />
                       </SwiperSlide>
                     ))}
@@ -696,7 +696,7 @@ const Product = () => {
                   // !isVariantSelected ||
                   isAdding
                 }
-                className={`px-6 w-50 py-3 text-[20px] rounded-lg mb-4 transition ${
+                className={`px-6 w-50 py-3 text-[21px] rounded-lg mb-4 transition ${
                   !anyStockAvailable || isOutOfStock || isMaxInCart || isAdding
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-black text-white hover:bg-gray-800"

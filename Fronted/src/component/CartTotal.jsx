@@ -243,6 +243,9 @@ const CartTotal = () => {
     );
   }
 
+
+  console.log();
+  
   return (
     <div className="w-full">
       <div className="text-xl font-medium text-gray-800">
