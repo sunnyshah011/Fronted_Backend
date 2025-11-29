@@ -70,7 +70,7 @@ a.active hr {
 
 /* Add this to your global CSS file (index.css, App.css, etc.) */
 .swiper-slide-thumb-active img {
-  border: 1px solid darkblue !important;
+  border: 2px solid rgb(0, 142, 193) !important;
   /* blue border */
   opacity: 1 !important;
   transform: scale(1);
