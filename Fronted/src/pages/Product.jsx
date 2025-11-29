@@ -534,7 +534,7 @@ const Product = () => {
                         <img
                           src={img}
                           alt="thumbnail"
-                          className="w-17 h-17 p-1 sm:w-20 sm:h-20 object-cover rounded-lg border border-gray-200 transition-all"
+                          className="w-16 h-16 p-1 sm:w-20 sm:h-20 object-cover rounded-lg border border-gray-200 transition-all"
                         />
                       </SwiperSlide>
                     ))}

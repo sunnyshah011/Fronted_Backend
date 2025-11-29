@@ -81,8 +81,8 @@ const Order = ({ token }) => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Admin Orders</h1>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200">
+      <div className="overflow-x-auto border">
+        <table className="min-w-full border-b border-gray-200">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 border">Order ID</th>
@@ -132,11 +132,11 @@ const Order = ({ token }) => {
                 <td className="p-2 border">{order.amount}</td>
                 <td className="p-2 border">
                   {order.paymentMethod}{" "}
-                  {order.paymentMethodId && (
+                  {/* {order.paymentMethodId && (
                     <span className="text-xs text-gray-500">
                       (ID: {order.paymentMethodId})
                     </span>
-                  )}
+                  )} */}
                   {/* Show payment proof image if exists */}
                   {order.paymentProof && (
                     <div className="mt-1 flex items-center gap-2">
@@ -180,7 +180,7 @@ const Order = ({ token }) => {
                     {order.orderStatus}
                   </span>
                 </td>
-                <td className="p-2 border flex flex-col gap-2">
+                <td className="p-2 border-t flex flex-col gap-2">
                   <select
                     value={order.orderStatus}
                     onChange={(e) => updateStatus(order._id, e.target.value)}
@@ -199,7 +199,7 @@ const Order = ({ token }) => {
                   </select>
 
                   {order.returnRequest?.isRequested && (
-                    <div className="flex flex-col gap-1 border p-2 rounded bg-gray-50 text-xs">
+                    <div className="flex flex-col gap-1 p-2 rounded bg-gray-50 text-xs">
                       <p>
                         <strong>Return Reason:</strong>{" "}
                         {order.returnRequest.reason}
@@ -221,7 +221,7 @@ const Order = ({ token }) => {
                               alert("Failed to update return status")
                             )
                         }
-                        className="border px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        className=" px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={
                           order.orderStatus === "Cancelled" ||
                           order.orderStatus === "Returned" ||

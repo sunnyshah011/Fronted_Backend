@@ -28,66 +28,69 @@ const Placeorder = () => {
     address,
     cartitem,
     setCartitem,
-    calculatetotalamount,
-    delivery_fee,
+    // calculatetotalamount,
+    // delivery_fee,
+    // subtotal, 
+    // delivery_fee, 
+    total,
     products,
   } = useContext(ShopContext);
 
-  
+
 
 
   // ──────────────── FETCH PRODUCTS FOR DELIVERY FEE LOGIC ────────────────
-const [fetchedProducts, setFetchedProducts] = useState([]);
-const [loadingDeliveryProducts, setLoadingDeliveryProducts] = useState(true);
+  // const [fetchedProducts, setFetchedProducts] = useState([]);
+  // const [loadingDeliveryProducts, setLoadingDeliveryProducts] = useState(true);
 
-useEffect(() => {
-  const fetchProducts = async () => {
-    setLoadingDeliveryProducts(true);
-    try {
-      const productIds = Object.keys(cartitem);
+  // useEffect(() => {
+  //   const fetchProducts = async () => {
+  //     setLoadingDeliveryProducts(true);
+  //     try {
+  //       const productIds = Object.keys(cartitem);
 
-      if (productIds.length === 0) {
-        setFetchedProducts([]);
-        setLoadingDeliveryProducts(false);
-        return;
-      }
+  //       if (productIds.length === 0) {
+  //         setFetchedProducts([]);
+  //         setLoadingDeliveryProducts(false);
+  //         return;
+  //       }
 
-      const results = await Promise.all(
-        productIds.map(async (id) => {
-          const res = await fetch(`${backendUrl}/api/product/single/${id}`);
-          if (!res.ok) throw new Error("Failed to fetch product");
-          const data = await res.json();
-          return data.product;
-        })
-      );
+  //       const results = await Promise.all(
+  //         productIds.map(async (id) => {
+  //           const res = await fetch(`${backendUrl}/api/product/single/${id}`);
+  //           if (!res.ok) throw new Error("Failed to fetch product");
+  //           const data = await res.json();
+  //           return data.product;
+  //         })
+  //       );
 
-      setFetchedProducts(results);
-    } catch (error) {
-      console.error("Product fetch error:", error);
-      setFetchedProducts([]);
-    } finally {
-      setLoadingDeliveryProducts(false);
-    }
-  };
+  //       setFetchedProducts(results);
+  //     } catch (error) {
+  //       console.error("Product fetch error:", error);
+  //       setFetchedProducts([]);
+  //     } finally {
+  //       setLoadingDeliveryProducts(false);
+  //     }
+  //   };
 
-  fetchProducts();
-}, [cartitem, backendUrl]);
+  //   fetchProducts();
+  // }, [cartitem, backendUrl]);
 
-// ──────────────── CALCULATE DELIVERY FEE ONLY ────────────────
-const calculateDeliveryFee = () => {
-  if (!fetchedProducts || fetchedProducts.length === 0) return 150;
+  // // ──────────────── CALCULATE DELIVERY FEE ONLY ────────────────
+  // const calculateDeliveryFee = () => {
+  //   if (!fetchedProducts || fetchedProducts.length === 0) return 150;
 
-  const activeProducts = fetchedProducts.filter(
-    (p) => cartitem[p._id]
-  );
+  //   const activeProducts = fetchedProducts.filter(
+  //     (p) => cartitem[p._id]
+  //   );
 
-  // FREE DELIVERY IF ANY PRODUCT IS COMBO SET
-  const deliveryApplicable = !activeProducts.some(
-    (p) => p.subcategory?.category?.name === "Combo Set"
-  );
+  //   // FREE DELIVERY IF ANY PRODUCT IS COMBO SET
+  //   const deliveryApplicable = !activeProducts.some(
+  //     (p) => p.subcategory?.category?.name === "Combo Set"
+  //   );
 
-  return deliveryApplicable ? 150 : 0;
-};
+  //   return deliveryApplicable ? 150 : 0;
+  // };
 
 
 
@@ -415,7 +418,8 @@ const calculateDeliveryFee = () => {
     const payload = {
       items,
       // amount: calculatetotalamount() + delivery_fee,
-      amount: calculatetotalamount() + calculateDeliveryFee(),
+      // amount: calculatetotalamount() + calculateDeliveryFee(),
+      amount:total,
       address: {
         fullName: formData.fullName,
         phone: Number(formData.phone),

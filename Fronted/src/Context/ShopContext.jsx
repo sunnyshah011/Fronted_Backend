@@ -14,7 +14,7 @@ const ShopContext = createContext();
 
 const ShopContextProvider = (props) => {
   const currency = "Rs.";
-  const delivery_fee = 150;
+  // const delivery_fee = 150;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -23,6 +23,10 @@ const ShopContextProvider = (props) => {
   const [products, setProducts] = useState([]);
   const [token, setToken] = useState(null);
   const [address, setAddress] = useState(null);
+
+  // fetch cart item single products for calculation
+  const [cartProducts, setCartProducts] = useState([]);
+
 
   const handleApiError = (error) => {
     const message =
@@ -334,19 +338,151 @@ const ShopContextProvider = (props) => {
     else queryClient.clear();
   }, []);
 
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const ids = Object.keys(cartitem);
+        if (ids.length === 0) {
+          setCartProducts([]);
+          return;
+        }
+
+        // Fetch all products in parallel using async/await
+        const responses = await Promise.all(
+          ids.map(async (id) => {
+            const r = await fetch(`${backendUrl}/api/product/single/${id}`);
+            const data = await r.json();
+            return data.product;
+          })
+        );
+
+        setCartProducts(responses);
+      } catch (err) {
+        console.log("Cart product fetch error:", err);
+        setCartProducts([]);
+      }
+    };
+
+    fetchProducts();
+  }, [cartitem, backendUrl]);
+
+  // const calculateTotals = () => {
+  //   let subtotal = 0;
+
+  //   cartProducts.forEach(product => {
+  //     const pid = product._id;
+
+  //     for (const size in cartitem[pid]) {
+  //       for (const color in cartitem[pid][size]) {
+  //         const qty = cartitem[pid][size][color];
+  //         if (qty <= 0) continue;
+
+  //         const variant = product.variants?.find(
+  //           v => v.size === size && v.color === color
+  //         );
+
+  //         const price = variant?.price ?? product.price ?? 0;
+
+  //         subtotal += price * qty;
+  //       }
+  //     }
+  //   });
+
+  //   // DELIVERY FEE LOGIC
+  //   const deliveryApplicable = !cartProducts.some(
+  //     p => p.subcategory?.category?.name === "Combo Set"
+  //   );
+
+  //   const delivery_fee = deliveryApplicable ? 150 : 0;
+
+  //   return {
+  //     subtotal,
+  //     delivery_fee,
+  //     total: subtotal + delivery_fee,
+  //   };
+  // };
+
+  const calculateTotals = () => {
+    // If nothing fetched OR empty cart → return safe defaults
+    if (!cartProducts || cartProducts.length === 0) {
+      return {
+        subtotal: 0,
+        delivery_fee: 150,
+        total: 150,
+      };
+    }
+
+    let subtotal = 0;
+
+    // -------- SAFE SUBTOTAL CALCULATION --------
+    for (const product of cartProducts) {
+      if (!product?._id) continue;
+
+      const pid = product._id;
+      const sizes = cartitem[pid];
+      if (!sizes) continue;
+
+      for (const size in sizes) {
+        const colors = sizes[size];
+        if (!colors) continue;
+
+        for (const color in colors) {
+          const qty = colors[color];
+          if (!qty || qty <= 0) continue;
+
+          // Safe variant match
+          const variant = product?.variants?.find(
+            (v) => v.size === size && v.color === color
+          ) || null;
+
+          // Prevent NaN / missing price
+          const price =
+            Number(variant?.price) ||
+            Number(product?.price) ||
+            0;
+
+          subtotal += price * qty;
+        }
+      }
+    }
+
+    // -------- EXACT DELIVERY FEE LOGIC (NO LOWERCASE) --------
+    const deliveryApplicable = !cartProducts.some((p) => {
+      const cat = p?.subcategory?.category;
+
+      return (
+        cat?.name === "Combo Set" ||
+        cat?.slug === "combo-set"
+      );
+    });
+
+    const delivery_fee = deliveryApplicable ? 150 : 0;
+
+    return {
+      subtotal,
+      delivery_fee,
+      total: subtotal + delivery_fee,
+    };
+  };
+
+
+  const totals = useMemo(() => calculateTotals(), [cartProducts, cartitem]);
+
+
   const value = useMemo(
     () => ({
       isError,
       isLoading,
       categories,
       currency,
-      delivery_fee,
+      // delivery_fee,
       products,
       cartitem,
       addtocart,
       getcartcount,
       updateQuantity,
-      calculatetotalamount,
+      // calculatetotalamount,
       setCartitem,
       navigate,
       backendUrl,
@@ -358,6 +494,9 @@ const ShopContextProvider = (props) => {
       userDetails,
       isLoadingUser,
       queryClient,
+      subtotal: totals.subtotal,
+      delivery_fee: totals.delivery_fee,
+      total: totals.total,
     }),
     [
       isError,
@@ -369,6 +508,7 @@ const ShopContextProvider = (props) => {
       address,
       userDetails,
       isLoadingUser,
+      totals,     // <-- REQUIRED
     ]
   );
 
