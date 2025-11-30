@@ -2,6 +2,34 @@ import { v2 as cloudinary } from "cloudinary";
 import ProductModel from "../models/product.model.js";
 import slugify from "slugify";
 import SubCategoryModel from "../models/subcategory.model.js";
+import sharp from "sharp";
+import fs from "fs";
+
+// ------------------------------------------------------
+// 🟢 Helper: compress image with Sharp & upload to Cloudinary
+// ------------------------------------------------------
+const uploadCompressedImage = async (filePath) => {
+  // 1️⃣ Compress to WebP buffer
+  const buffer = await sharp(filePath)
+    .resize(1000, 1000, { fit: "inside" }) // safe max size
+    .webp({ quality: 90 }) // adjust if needed
+    .toBuffer();
+
+  // 2️⃣ Upload buffer to Cloudinary
+  const uploadResult = await new Promise((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
+        { format: "webp" }, // stored as webp
+        (err, result) => (err ? reject(err) : resolve(result))
+      )
+      .end(buffer);
+  });
+
+  // 3️⃣ Delete temporary file
+  fs.unlink(filePath, () => {});
+
+  return uploadResult.secure_url;
+};
 
 // Add Product
 export const addProduct = async (req, res) => {
@@ -16,7 +44,7 @@ export const addProduct = async (req, res) => {
       isFlashSale,
       deliveryCharge,
       discountedPrice,
-      isActive
+      isActive,
     } = req.body;
 
     if (!name || !subcategory) {
@@ -59,18 +87,23 @@ export const addProduct = async (req, res) => {
         imagesFiles.push(req.files[field][0]);
     });
 
+    // const imagesUrl = await Promise.all(
+    //   imagesFiles.map(async (file) => {
+    //     const result = await cloudinary.uploader.upload(file.path, {
+    //       resource_type: "image",
+    //       format: "webp", // Convert to WebP
+    //       quality: "auto", // Compress image
+    //       fetch_format: "auto",
+    //       flags: "lossy",
+    //       max_bytes: 200000   // <= 200 KB
+    //     });
+    //     return result.secure_url;
+    //   })
+    // );
+
+    // 🔹 Upload with compression
     const imagesUrl = await Promise.all(
-      imagesFiles.map(async (file) => {
-        const result = await cloudinary.uploader.upload(file.path, {
-          resource_type: "image",
-          format: "webp", // Convert to WebP
-          quality: "auto", // Compress image
-          fetch_format: "auto",
-          flags: "lossy",
-          max_bytes: 200000   // <= 200 KB
-        });
-        return result.secure_url;
-      })
+      imagesFiles.map(async (file) => await uploadCompressedImage(file.path))
     );
 
     const parsedVariants = variants ? JSON.parse(variants) : [];
@@ -122,7 +155,7 @@ export const updateProduct = async (req, res) => {
       isBestSelling,
       isFlashSale,
       discountedPrice,
-      isActive
+      isActive,
     } = req.body;
 
     const product = await ProductModel.findById(id);
@@ -135,36 +168,58 @@ export const updateProduct = async (req, res) => {
       🔥 IF SUBCATEGORY IS UPDATED → UPDATE CATEGORY ALSO
    ------------------------------------------------------ */
     if (subcategory) {
-      const newSubcat = await SubCategoryModel.findById(subcategory).populate("category");
+      const newSubcat = await SubCategoryModel.findById(subcategory).populate(
+        "category"
+      );
       if (!newSubcat)
-        return res.status(400).json({ success: false, message: "Invalid subcategory" });
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid subcategory" });
 
       product.subcategory = subcategory;
       product.category = newSubcat.category._id; // 🔥 auto update category
     }
 
-    // Handle images (compressed on update also)
+    // // Handle images (compressed on update also)
+    // const finalImages = [];
+    // for (let i = 0; i < 4; i++) {
+    //   const field = `image${i + 1}`;
+
+    //   if (req.files && req.files[field] && req.files[field][0]) {
+    //     // 🔥 SAME compression as Add Product
+    //     const result = await cloudinary.uploader.upload(
+    //       req.files[field][0].path,
+    //       {
+    //         resource_type: "image",
+    //         format: "webp",
+    //         quality: "auto",
+    //         fetch_format: "auto",
+    //         flags: "lossy",
+    //         max_bytes: 200000, // <= 200 KB
+    //       }
+    //     );
+    //     finalImages.push(result.secure_url);
+    //   } else if (req.body[`existing_${field}`]) {
+    //     finalImages.push(req.body[`existing_${field}`]);
+    //   } else if (product.images[i]) {
+    //     finalImages.push(product.images[i]);
+    //   }
+    // }
+
+    // 🔥 Handle image update (compress new ones)
     const finalImages = [];
     for (let i = 0; i < 4; i++) {
       const field = `image${i + 1}`;
 
       if (req.files && req.files[field] && req.files[field][0]) {
-        // 🔥 SAME compression as Add Product
-        const result = await cloudinary.uploader.upload(
-          req.files[field][0].path,
-          {
-            resource_type: "image",
-            format: "webp",
-            quality: "auto",
-            fetch_format: "auto",
-            flags: "lossy",
-            max_bytes: 200000   // <= 200 KB
-          }
-        );
-        finalImages.push(result.secure_url);
+        // New image → compress
+        const uploadUrl = await uploadCompressedImage(req.files[field][0].path);
+        finalImages.push(uploadUrl);
       } else if (req.body[`existing_${field}`]) {
+        // Keep old image (sent by frontend)
         finalImages.push(req.body[`existing_${field}`]);
       } else if (product.images[i]) {
+        // Keep existing in DB
         finalImages.push(product.images[i]);
       }
     }
@@ -215,7 +270,7 @@ export const updateProduct = async (req, res) => {
 // controllers/product.controller.js
 export const listProducts = async (req, res) => {
   try {
-    const products = await ProductModel.find({isActive: true})
+    const products = await ProductModel.find({ isActive: true })
       .populate("subcategory", "slug category")
       .populate({
         path: "subcategory",
@@ -287,7 +342,8 @@ export const getTopProducts = async (req, res) => {
         path: "subcategory",
         populate: { path: "category" },
       })
-      .limit(6).sort({ createdAt: -1 }); // sort newest → oldest
+      .limit(6)
+      .sort({ createdAt: -1 }); // sort newest → oldest
 
     res.json({ success: true, products });
   } catch (error) {
@@ -359,16 +415,14 @@ export const toggleActive = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Product not found" });
 
-    const newState =
-      isActive === "true" || isActive === true ? true : false;
+    const newState = isActive === "true" || isActive === true ? true : false;
 
     product.isActive = newState;
     await product.save();
 
     res.json({
       success: true,
-      message: `Product ${newState ? "Activated" : "Deactivated"
-        } successfully`,
+      message: `Product ${newState ? "Activated" : "Deactivated"} successfully`,
       product,
     });
   } catch (err) {
@@ -376,7 +430,6 @@ export const toggleActive = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
-
 
 // import sharp from "sharp";
 // import fs from "fs";
