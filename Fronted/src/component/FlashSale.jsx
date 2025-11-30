@@ -1,11 +1,11 @@
 import { useContext } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import Title from "./Title";
-import Product_Page from "./P_Page_Component";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import SkeletonCard from "./SkeletonCard"; // adjust the path if needed
+import SkeletonCard from "./SkeletonCard";
 import axios from "axios";
+import Product_Page_flashsale from "./P_Page_Flashsale";
 
 const fetchFlashSaleProducts = async (backendUrl) => {
   const res = await axios.get(`${backendUrl}/api/product/flash-sale`);
@@ -63,14 +63,14 @@ const FlashSale = () => {
     );
 
   return (
-    <div className="w-full px-2 py-1">
+    <div className="w-full mt-2 px-2 py-1 bg-white">
       <Link to="/all-flash-sale-products">
-        <Title Category="FlashSale" More="View" />
+        <Title Category="Flash-Sale" More="" />
       </Link>
 
-      <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-2 gap-x-2">
+      <div className=" grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-2 gap-x-2">
         {flashProducts.map((product) => (
-          <Product_Page
+          <Product_Page_flashsale
             key={product._id}
             categorySlug={product.subcategory?.category?.slug}
             productSlug={product.slug}

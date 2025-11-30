@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import Hero from "../component/Hero";
 import Main_Category from "../component/MainCategory";
 import AllProducts from "../component/AllProducts";
-// import FlashSale from "../component/FlashSale";
-import TopProducts from "../component/TopProducts";
+import FlashSale from "../component/FlashSale";
+// import TopProducts from "../component/TopProducts";
 
 const Home = () => {
   useEffect(() => {
@@ -14,8 +14,8 @@ const Home = () => {
     <div>
       <Hero />
       <Main_Category />
-      <TopProducts />
-      {/* <FlashSale /> */}
+      {/* <TopProducts /> */}
+      <FlashSale />
       <AllProducts />
     </div>
   );

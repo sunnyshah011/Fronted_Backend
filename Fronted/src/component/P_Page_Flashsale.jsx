@@ -2,11 +2,11 @@ import { useContext } from "react";
 import { ShopContext } from "../Context/ShopContext";
 import { Link } from "react-router-dom";
 
-const Product_Page = ({ categorySlug, productSlug, name, price, images }) => {
+const Product_Page_flashsale = ({ categorySlug, productSlug, name, price, images }) => {
   const { currency } = useContext(ShopContext);
   return (
     <Link
-      className="text-gray-700 cursor-pointer rounded-md bg-white block"
+      className="text-gray-700 cursor-pointer rounded-md bg-white block max-[600px]:border max-[600px]:border-gray-100"
       to={`/categories/${categorySlug}/${productSlug}`}
     >
       <div className="p-2 w-full aspect-square overflow-hidden rounded-md  bg-white flex items-center justify-center">
@@ -23,9 +23,9 @@ const Product_Page = ({ categorySlug, productSlug, name, price, images }) => {
         <div className="text-[18px] truncate font-medium text-gray-700 ">
           <span className="text-[15px]">{currency}</span>{price} /-
         </div>
-        {/* <div className="text-[10px] font-medium ml-3 bg-red-50 w-fit p-0.5 px-1.5 rounded-md text-red-500">
+        <div className="text-[10px] font-medium ml-3 bg-red-50 w-fit p-0.5 px-1.5 rounded-md text-red-500">
           10% OFF
-        </div> */}
+        </div>
       </div>
       {/* <div className="ml-3 mb-3 text-sm text-gray-500">
         7 sold
@@ -34,5 +34,5 @@ const Product_Page = ({ categorySlug, productSlug, name, price, images }) => {
   );
 };
 
-export default Product_Page;
+export default Product_Page_flashsale;
 

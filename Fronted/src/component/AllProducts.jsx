@@ -60,7 +60,7 @@ const AllProducts = () => {
     return <p className="text-center py-5 text-gray-500">No products found.</p>;
 
   return (
-    <div className="w-full px-2 pt-10">
+    <div className="w-full px-2 pt-3">
       <Title Category="All Products" More="" />
 
       <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-y-2 gap-x-2">

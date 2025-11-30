@@ -367,7 +367,8 @@ export const getFlashSaleProducts = async (req, res) => {
         path: "subcategory",
         populate: { path: "category" },
       })
-      .limit(6);
+      .limit(6)
+      .sort({ createdAt: -1 }); // sort newest → oldest
 
     res.json({ success: true, products });
   } catch (error) {
@@ -430,27 +431,3 @@ export const toggleActive = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
-
-// import sharp from "sharp";
-// import fs from "fs";
-
-// // Helper: compress and upload image
-// const uploadCompressedImage = async (filePath) => {
-//   const buffer = await sharp(filePath)
-//     .resize(600, 600, { fit: "inside" }) // max width/height
-//     .webp({ quality: 30 })               // aggressive compression
-//     .toBuffer();
-
-//   const uploadResult = await new Promise((resolve, reject) => {
-//     const stream = cloudinary.uploader.upload_stream(
-//       { resource_type: "image" },
-//       (err, result) => (err ? reject(err) : resolve(result))
-//     );
-//     stream.end(buffer);
-//   });
-
-//   // Remove temporary local file
-//   fs.unlink(filePath, () => {});
-
-//   return uploadResult.secure_url;
-// };
