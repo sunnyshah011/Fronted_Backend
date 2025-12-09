@@ -12,7 +12,7 @@ const uploadCompressedImage = async (filePath) => {
   // 1️⃣ Compress to WebP buffer
   const buffer = await sharp(filePath)
     .resize(1000, 1000, { fit: "inside" }) // safe max size
-    .webp({ quality: 90 }) // adjust if needed
+    .webp({ quality: 80 }) // adjust if needed
     .toBuffer();
 
   // 2️⃣ Upload buffer to Cloudinary

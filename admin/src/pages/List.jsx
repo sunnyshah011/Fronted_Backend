@@ -323,12 +323,12 @@ const List = ({ token }) => {
               >
                 View / Edit
               </button>
-              <button
+              {/* <button
                 className="px-2 py-1 text-xs bg-red-500 text-white rounded"
                 onClick={() => removeProduct(item._id)}
               >
                 Delete
-              </button>
+              </button> */}
             </div>
           </div>
         ))}

@@ -192,12 +192,12 @@ const Location = ({ token }) => {
                   >
                     Edit
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => deleteItem("province", prov.name)}
                     className="text-red-600"
                   >
                     Delete
-                  </button>
+                  </button> */}
                 </div>
               </li>
             ))}

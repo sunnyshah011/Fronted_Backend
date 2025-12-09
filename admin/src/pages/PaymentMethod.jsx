@@ -238,12 +238,12 @@ const PaymentMethod = ({ token }) => {
                 >
                   Edit
                 </button>
-                <button
+                {/* <button
                   onClick={() => handleDelete(m._id)}
                   className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                 >
                   Delete
-                </button>
+                </button> */}
               </div>
             </div>
           ))}
