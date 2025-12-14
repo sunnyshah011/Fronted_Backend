@@ -8,10 +8,10 @@ import { AiOutlineAppstore } from "react-icons/ai";
 
 const Sidebar = () => {
   return (
-    <div className="w-[18%] min-h-screen border-r-2">
-      <div className="flex flex-col gap-4 pt-6 pl-[20%] text-[15px]">
+    <div className="w-[18%] h-screen sticky top-0 border-r-2 p-2">
+      <div className="flex flex-col gap-4 pt-6 pl-[18%] text-[15px]">
         <NavLink
-          className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-lg"
+          className="flex items-center gap-3 border border-gray-300 px-3 py-2 rounded-lg"
           to="/add"
         >
           <AiOutlinePlus size={20} />
@@ -19,7 +19,7 @@ const Sidebar = () => {
         </NavLink>
 
         <NavLink
-          className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-lg"
+          className="flex items-center gap-3 border border-gray-300 px-3 py-2 rounded-lg"
           to="/list"
         >
           <FiBox size={20} />
@@ -27,7 +27,7 @@ const Sidebar = () => {
         </NavLink>
 
         <NavLink
-          className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-lg"
+          className="flex items-center gap-3 border border-gray-300 px-3 py-2 rounded-lg"
           to="/order"
         >
           <HiOutlineReceiptRefund size={20} />
@@ -35,7 +35,7 @@ const Sidebar = () => {
         </NavLink>
 
         <NavLink
-          className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-lg"
+          className="flex items-center gap-3 border border-gray-300 px-3 py-2 rounded-lg"
           to="/location"
         >
           <HiOutlineLocationMarker  size={20} />
@@ -43,7 +43,7 @@ const Sidebar = () => {
         </NavLink>
 
         <NavLink
-          className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-lg"
+          className="flex items-center gap-3 border border-gray-300 px-3 py-2 rounded-lg"
           to="/category-manager"
         >
           <AiOutlineAppstore  size={20} />
@@ -51,7 +51,7 @@ const Sidebar = () => {
         </NavLink>
 
         <NavLink
-          className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-lg"
+          className="flex items-center gap-3 border border-gray-300 px-3 py-2 rounded-lg"
           to="/payment-methods"
         >
           <AiOutlineQrcode size={20} />

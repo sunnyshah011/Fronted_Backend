@@ -33,7 +33,7 @@ const App = () => {
           <hr />
           <div className="flex w-full">
             <Sidebar />
-            <div className="w-[70%] mx-auto ml-[max(5vw,25px)] my-8 text-gray-600 text-base">
+            <div className="w-[75%] mx-auto ml-[max(3vw,25px)] my-8 text-gray-600 text-base">
               <Routes>
                 <Route />
                 <Route path="/add" element={<Add token={token} />} />

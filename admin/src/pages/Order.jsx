@@ -13,6 +13,9 @@ const Order = ({ token }) => {
     "Returned",
   ];
 
+  const [selectedStatus, setSelectedStatus] = useState("All");
+
+
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -78,68 +81,99 @@ const Order = ({ token }) => {
 
   if (loading) return <p>Loading orders...</p>;
 
+  const filteredOrders =
+    selectedStatus === "All"
+      ? orders
+      : orders.filter(
+        (order) => order.orderStatus === selectedStatus
+      );
+
+
   return (
-    <div className="p-6">
+    <div className="p-1">
       <h1 className="text-2xl font-bold mb-4">Admin Orders</h1>
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {["All", ...statuses].map((status) => (
+          <button
+            key={status}
+            onClick={() => setSelectedStatus(status)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium border border-gray-400 transition
+        ${selectedStatus === status
+                ? "bg-blue-900 text-white border-blue-900"
+                : "bg-white text-gray-700 hover:bg-gray-100"
+              }`}
+          >
+            {status}
+          </button>
+        ))}
+      </div>
+
       <div className="overflow-x-auto border">
         <table className="min-w-full border-b border-gray-200">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 border">Order ID</th>
-              {/* <th className="p-2 border">User</th> */}
               <th className="p-2 border">Products</th>
               <th className="p-2 border">Total</th>
               <th className="p-2 border">Payment</th>
-              <th className="p-2 border">Payment Status</th>
               <th className="p-2 border">Address</th>
               <th className="p-2 border">Order Status</th>
               <th className="p-2 border">Action</th>
             </tr>
           </thead>
           <tbody>
-            {orders.map((order) => (
+
+            {filteredOrders.length === 0 && (
+              <tr>
+                <td colSpan="7" className="text-center py-6 text-gray-500">
+                  No orders found for <strong>{selectedStatus}</strong>
+                </td>
+              </tr>
+            )}
+
+            {filteredOrders.map((order) => (
               <tr key={order._id} className="text-sm">
                 <td className="p-2 border">{order.orderId}</td>
-                {/* <td className="p-2 border">
-                  {order.user?.name} <br />
-                  {order.user?.gmail}
-                </td> */}
-                <td className="p-2 border">
-                  {order.items.map((item, i) => (
-                    <div key={i} className="mb-2 flex items-center gap-2">
-                      {item.productId?.images?.length > 0 && (
-                        <img
-                          src={item.productId.images[0]} // Base64 image
-                          alt={item.productId?.name}
-                          className="w-12 h-12 object-cover rounded border"
-                        />
-                      )}
-                      <div>
-                        <p className="font-medium pb-1">
-                          {item.productId?.name}
-                        </p>
-                        <p className=" text-gray-600 border border-gray-400 w-fit px-1 rounded font-medium">
-                          Price: {item.price} × Qty: {item.quantity}
-                        </p>
-                        <div className="text-xs pt-1">
-                          {item.size && `  Size: ${item.size}`}
-                          {item.color && `  Color: ${item.color}`}
+                <td className="p-3 border  align-top max-w-[320px]">
+                  <div className="space-y-3">
+                    {order.items.map((item, i) => (
+                      <div
+                        key={i}
+                        className="flex gap-3 p-2 border border-gray-400 rounded-md bg-gray-50"
+                      >
+                        {item.productId?.images?.length > 0 && (
+                          <img
+                            src={item.productId.images[0]}
+                            alt={item.productId?.name}
+                            className="w-14 h-14 object-cover rounded border shrink-0"
+                          />
+                        )}
+
+                        <div className="flex-1 break-words">
+                          <p className="font-semibold leading-snug">
+                            {item.productId?.name}
+                          </p>
+
+                          <p className="text-xs text-gray-600 mt-1 border border-gray-400 w-fit px-1 rounded font-medium">
+                            Rs.{item.price} × {item.quantity}
+                          </p>
+
+                          <div className="text-xs text-gray-500 mt-1 space-x-2">
+                            {item.size && <span>Size: {item.size}</span>}
+                            {item.color && <span>Color: {item.color}</span>}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </td>
-                <td className="p-2 border">{order.amount}</td>
-                <td className="p-2 border">
-                  {order.paymentMethod}{" "}
-                  {/* {order.paymentMethodId && (
-                    <span className="text-xs text-gray-500">
-                      (ID: {order.paymentMethodId})
-                    </span>
-                  )} */}
+
+                <td className="p-2 border">Rs.{order.amount}/-</td>
+                <td className="p-2 border text-center font-medium">
+                  {order.paymentMethod}
                   {/* Show payment proof image if exists */}
                   {order.paymentProof && (
-                    <div className="mt-1 flex items-center gap-2">
+                    <div className="mt-2 flex flex-col items-center gap-1">
                       <a
                         href={order.paymentProof}
                         target="_blank"
@@ -149,33 +183,39 @@ const Order = ({ token }) => {
                         View Proof
                       </a>
                       <img
-                        src={order.paymentProof} // Assuming this is a full URL or Base64
+                        src={order.paymentProof}
                         alt="Payment Proof"
                         className="w-12 h-12 object-cover rounded border"
                       />
                     </div>
                   )}
                 </td>
-                <td className="p-2 border">{order.paymentStatus || "N/A"}</td>
-                <td className="p-2 border ">
-                  {order.address.fullName} <br />
-                  {order.address.phone} <br />
-                  {order.address.streetAddress}, {order.address.city},{" "}
-                  {order.address.district}, {order.address.province}
+
+                <td className="p-3 border align-center max-w-[260px] break-words whitespace-normal">
+                  <div className="space-y-1 text-sm">
+                    <p className="font-medium">{order.address.fullName}</p>
+                    <p className="text-gray-600">{order.address.phone}</p>
+                    <p className="text-gray-700">
+                      {order.address.streetAddress}, {order.address.city}
+                    </p>
+                    <p className="text-gray-500">
+                      {order.address.district}, {order.address.province}
+                    </p>
+                  </div>
                 </td>
-                <td className="p-2 border">
+
+                <td className="p-2 border text-center">
                   <span
-                    className={`px-2 py-1 rounded text-white ${
-                      order.orderStatus === "Delivered"
-                        ? "bg-green-500"
-                        : order.orderStatus === "Pending"
+                    className={`px-2 py-1 text-center rounded text-white ${order.orderStatus === "Delivered"
+                      ? "bg-green-500"
+                      : order.orderStatus === "Pending"
                         ? "bg-yellow-500"
                         : order.orderStatus === "Ready To Ship"
-                        ? "bg-blue-500"
-                        : order.orderStatus === "Returned"
-                        ? "bg-pink-500"
-                        : "bg-red-500"
-                    }`}
+                          ? "bg-blue-500"
+                          : order.orderStatus === "Returned"
+                            ? "bg-pink-500"
+                            : "bg-red-500"
+                      }`}
                   >
                     {order.orderStatus}
                   </span>
@@ -188,6 +228,7 @@ const Order = ({ token }) => {
                     disabled={
                       order.orderStatus === "Cancelled" ||
                       order.orderStatus === "Returned" ||
+                      order.orderStatus === "Delivered" ||
                       order.returnRequest?.status === "Approved"
                     }
                   >
